@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": 1381178189000,
+    "resource": "localhost",
+    "metric": {"name": "eth0", "type": "COUNTER"},
+    "value": 100.0
+  },
+  {
+    "timestamp": 1381178272000,
+    "resource": "localhost",
+    "metric": {"name": "eth0", "type": "COUNTER"},
+    "value": 150.0
+  }
+]
