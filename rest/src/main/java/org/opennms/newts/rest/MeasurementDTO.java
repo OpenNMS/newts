@@ -1,11 +1,14 @@
 package org.opennms.newts.rest;
 
+import org.opennms.newts.api.MetricType;
 
-public class Measurement {
+
+public class MeasurementDTO {
 
     private long m_timestamp;
     private String m_resource;
-    private Metric m_metric;
+    private String m_name;
+    private MetricType m_type;
     private double m_value;
 
     public long getTimestamp() {
@@ -24,12 +27,20 @@ public class Measurement {
         m_resource = resource;
     }
 
-    public Metric getMetric() {
-        return m_metric;
+    public String getName() {
+        return m_name;
     }
 
-    public void setMetric(Metric metric) {
-        m_metric = metric;
+    public void setName(String name) {
+        m_name = name;
+    }
+
+    public MetricType getType() {
+        return m_type;
+    }
+
+    public void setType(MetricType type) {
+        m_type = type;
     }
 
     public double getValue() {
