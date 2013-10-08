@@ -73,8 +73,15 @@ public class Server {
         }
     };
 
+    private final MeasurementRepository m_repository;
+
     @Inject
     public Server(final MeasurementRepository repository) {
+        m_repository = repository;
+        initialize();
+    }
+
+    private void initialize() {
 
         post(new Route("/") {
 
@@ -92,7 +99,7 @@ public class Server {
                     halt(400, String.format("Unable to parse request body as JSON (reason: %s) ", e.getMessage()));
                 }
 
-                repository.insert(Collections2.transform(measurements, m_fromMeasurementDTO));
+                m_repository.insert(Collections2.transform(measurements, m_fromMeasurementDTO));
 
                 return "";
             }
@@ -127,7 +134,7 @@ public class Server {
                     }
                 }
 
-                Results select = repository.select(resource, start, end);
+                Results select = m_repository.select(resource, start, end);
                 
                 return Collections2.transform(select.getRows(), m_rowFunc);
             }
