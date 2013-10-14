@@ -39,6 +39,24 @@ public class Timestamp implements Comparable<Timestamp> {
         return m_unit;
     }
 
+    public Timestamp add(Timestamp other) {
+        return new Timestamp(convert(TimeUnit.MILLISECONDS) + other.asMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    public boolean lessThan(Timestamp other) {
+        return compareTo(other) < 0;
+    }
+
+    public boolean greaterThan(Timestamp other) {
+        return compareTo(other) > 0;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Timestamp)) return false;
+        return compareTo((Timestamp)other) == 0;
+    }
+    
     @Override
     public int compareTo(Timestamp o) {
         return asMillis() < o.asMillis() ? -1 : asMillis() > o.asMillis() ? 1 : 0;

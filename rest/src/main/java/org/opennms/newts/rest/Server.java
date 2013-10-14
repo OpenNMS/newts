@@ -14,9 +14,8 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
-import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.Metric;
+import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
@@ -49,8 +48,8 @@ public class Server {
             output.setResource(input.getResource());
             output.setTimestamp(input.getTimestamp().asMillis());
             output.setValue(input.getValue());
-            output.setName(input.getMetric().getName());
-            output.setType(input.getMetric().getType());
+            output.setName(input.getName());
+            output.setType(input.getType());
             return output;
         }
     };
@@ -59,8 +58,12 @@ public class Server {
 
         @Override
         public Measurement apply(MeasurementDTO m) {
-            Metric metric = new Metric(m.getName(), m.getType());
-            return new Measurement(new Timestamp(m.getTimestamp()), m.getResource(), metric, m.getValue());
+            return new Measurement(
+                    new Timestamp(m.getTimestamp()),
+                    m.getResource(),
+                    m.getName(),
+                    m.getType(),
+                    m.getValue());
         }
     };
 
@@ -80,7 +83,8 @@ public class Server {
             public Object handle(Request request, Response response) {
 
                 ObjectMapper mapper = new ObjectMapper();
-                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {});
+                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {
+                });
                 Collection<MeasurementDTO> measurementDTOs = null;
 
                 try {
@@ -126,7 +130,7 @@ public class Server {
                 }
 
                 Results select = m_repository.select(resource, start, end);
-                
+
                 return Collections2.transform(select.getRows(), m_rowFunc);
             }
         });

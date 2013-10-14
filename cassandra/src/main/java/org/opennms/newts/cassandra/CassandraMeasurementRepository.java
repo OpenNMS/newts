@@ -15,7 +15,6 @@ import javax.inject.Named;
 
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
-import org.opennms.newts.api.Metric;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
@@ -70,7 +69,8 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
             Measurement measurement = new Measurement(
                     new Timestamp(timestamp.getTime(), TimeUnit.MILLISECONDS),
                     resource,
-                    new Metric(metricName, MetricType.valueOf(metricType)),
+                    metricName,
+                    MetricType.valueOf(metricType),
                     value);
             results.addMeasurement(measurement);
 
@@ -89,8 +89,8 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
                     insertInto(T_MEASUREMENTS)
                         .value(F_RESOURCE, m.getResource())
                         .value(F_COLLECTED, m.getTimestamp().asMillis())
-                        .value(F_METRIC_NAME, m.getMetric().getName())
-                        .value(F_METRIC_TYPE, m.getMetric().getType().toString())
+                        .value(F_METRIC_NAME, m.getName())
+                        .value(F_METRIC_TYPE, m.getType().toString())
                         .value(F_VALUE, m.getValue())
             );
         }

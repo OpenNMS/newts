@@ -14,7 +14,7 @@ public class Results implements Iterable<Results.Row> {
 
         private Timestamp m_timestamp;
         private String m_resource;
-        private Map<Metric, Measurement> m_cells = Maps.newHashMap();
+        private Map<String, Measurement> m_cells = Maps.newHashMap();
 
         public Row(Timestamp timestamp, String resource) {
             m_timestamp = timestamp;
@@ -22,11 +22,11 @@ public class Results implements Iterable<Results.Row> {
         }
 
         public void addMeasurement(Measurement measurement) {
-            m_cells.put(measurement.getMetric(), measurement);
+            m_cells.put(measurement.getName(), measurement);
         }
 
-        public Measurement getMeasurement(Metric metric) {
-            return m_cells.get(metric);
+        public Measurement getMeasurement(String name) {
+            return m_cells.get(name);
         }
 
         public Timestamp getTimestamp() {
