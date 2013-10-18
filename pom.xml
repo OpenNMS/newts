@@ -26,6 +26,7 @@
     <guiceVersion>4.0-beta</guiceVersion>
     <logbackVersion>1.0.13</logbackVersion>
     <slf4jVersion>1.7.3</slf4jVersion>
+    <metricsVersion>3.0.1</metricsVersion>
   </properties>
 
   <dependencyManagement>
@@ -49,6 +50,11 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logbackVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>${metricsVersion}</version>
       </dependency>
             
       <dependency>
