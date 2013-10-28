@@ -26,6 +26,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
 
@@ -51,13 +52,13 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     }
 
     @Override
-    public Results select(String resource, Timestamp start, Timestamp end) {
+    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
         Select select = QueryBuilder.select().from(T_MEASUREMENTS);
         select.where(eq(F_RESOURCE, resource));
  
-        if (start != null) select.where(gte(F_COLLECTED, start.asDate()));
-        if (end != null) select.where(lt(F_COLLECTED, end.asDate()));
+        if (start.isPresent()) select.where(gte(F_COLLECTED, start.get().asDate()));
+        if (end.isPresent()) select.where(lt(F_COLLECTED, end.get().asDate()));
 
         Results results = new Results();
 

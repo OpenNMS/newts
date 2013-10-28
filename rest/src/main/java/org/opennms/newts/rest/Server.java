@@ -25,6 +25,7 @@ import spark.Response;
 import spark.Route;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -129,7 +130,7 @@ public class Server {
                     }
                 }
 
-                Results select = m_repository.select(resource, start, end);
+                Results select = m_repository.select(resource, Optional.of(start), Optional.of(end));
 
                 return Collections2.transform(select.getRows(), m_rowFunc);
             }

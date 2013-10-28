@@ -13,6 +13,7 @@ import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
 
+import com.google.common.base.Optional;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -73,14 +74,16 @@ public class ExportRunner {
 
         System.out.printf("timestamp,%s%n", m_metric);
 
-        Timestamp s = (m_start != null) ? new Timestamp(m_start, TimeUnit.MILLISECONDS) : null;
-        Timestamp e = (m_end != null) ? new Timestamp(m_end, TimeUnit.MILLISECONDS) : null;
-
-        for (Results.Row row : m_repository.select(m_resource, s, e)) {
+        for (Results.Row row : m_repository.select(m_resource, timestamp(m_start), timestamp(m_end))) {
             System.out.printf("%d,%.2f%n", row.getTimestamp().asMillis(), row.getMeasurement(m_metric).getValue());
         }
 
         return 0;
+    }
+
+    private static Optional<Timestamp> timestamp(Long arg) {
+        if (arg == null) return Optional.<Timestamp> absent();
+        return Optional.of(new Timestamp(arg, TimeUnit.MILLISECONDS));
     }
 
     public static void main(String... args) {
