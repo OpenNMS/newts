@@ -7,6 +7,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -44,9 +48,23 @@ public class ImportRunner {
 
         try {
 
-            Injector injector = Guice.createInjector(new Config());
-            MetricRegistry metrics = injector.getInstance(MetricRegistry.class);
+            // Setup the injector
+            Injector injector = Guice.createInjector(new Config(), new AbstractModule() {
 
+                @Override
+                protected void configure() {
+
+                    BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
+                    RejectedExecutionHandler handler = new ThreadPoolExecutor.CallerRunsPolicy();
+                    ThreadPoolExecutor executor = new ThreadPoolExecutor(20, 20, 30L, SECONDS, queue, handler);
+
+                    bind(ThreadPoolExecutor.class).toInstance(executor);
+
+                }
+            });
+
+            // Setup the slf4j metrics reporter
+            MetricRegistry metrics = injector.getInstance(MetricRegistry.class);
             reporter = Slf4jReporter.forRegistry(metrics)
                                     .outputTo(LOG)
                                     .convertRatesTo(SECONDS)
@@ -54,6 +72,7 @@ public class ImportRunner {
                                     .build();
             reporter.start(1, SECONDS);
 
+            // Add a gauge to measure elapsed time in seconds
             final long start = System.currentTimeMillis();
             metrics.register("elapsed-seconds", new Gauge<Double>() {
 
@@ -63,8 +82,10 @@ public class ImportRunner {
                 }
             });
             
+            // Kick-off the import
             Files.walkFileTree(root.toPath(), injector.getInstance(FileVisitor.class));
 
+            // Shutdown the executor, and wait for queued jobs to finish
             ThreadPoolExecutor executor = injector.getInstance(ThreadPoolExecutor.class);
             executor.shutdown();
             executor.awaitTermination(15, SECONDS);
