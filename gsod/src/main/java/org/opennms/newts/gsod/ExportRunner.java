@@ -75,7 +75,7 @@ public class ExportRunner {
         System.out.printf("timestamp,%s%n", m_metric);
 
         for (Results.Row row : m_repository.select(m_resource, timestamp(m_start), timestamp(m_end))) {
-            System.out.printf("%d,%.2f%n", row.getTimestamp().asMillis(), row.getMeasurement(m_metric).getValue());
+            System.out.printf("%s,%.2f%n", row.getTimestamp().asDate(), row.getMeasurement(m_metric).getValue());
         }
 
         return 0;

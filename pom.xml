@@ -16,7 +16,8 @@
     <module>api</module>
     <module>cassandra</module>
     <module>rest</module>
-    <module>stress</module>
+    <module>gsod</module>
+    <module>snmp</module>
   </modules>
 
   <properties>

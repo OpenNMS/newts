@@ -33,6 +33,8 @@ import com.google.inject.Injector;
 
 public class Server {
 
+    private static final String ALLOW_CORS = "*";
+
     private Function<Row, Collection<MeasurementDTO>> m_rowFunc = new Function<Row, Collection<MeasurementDTO>>() {
 
         @Override
@@ -114,23 +116,26 @@ public class Server {
 
                 if (startParam != null) {
                     try {
-                        start = new Timestamp(Integer.parseInt(startParam), TimeUnit.MILLISECONDS);
+                        start = new Timestamp(Long.parseLong(startParam), TimeUnit.MILLISECONDS);
                     }
                     catch (NumberFormatException e) {
-                        halt(400, "Invalid start parameter");
+                        halt(400, String.format("Invalid start parameter: %s", startParam));
                     }
                 }
 
                 if (endParam != null) {
                     try {
-                        end = new Timestamp(Integer.parseInt(endParam), TimeUnit.MILLISECONDS);
+                        end = new Timestamp(Long.parseLong(endParam), TimeUnit.MILLISECONDS);
                     }
                     catch (NumberFormatException e) {
-                        halt(400, "Invalid end parameter");
+                        halt(400, String.format("Invalid end parameter: %s", endParam));
                     }
                 }
 
                 Results select = m_repository.select(resource, Optional.of(start), Optional.of(end));
+
+                response.header("Access-Control-Allow-Origin", ALLOW_CORS);    // Allow CORS
+                response.type("application/json");
 
                 return Collections2.transform(select.getRows(), m_rowFunc);
             }
