@@ -10,5 +10,6 @@ CREATE TABLE newts.measurements (
     metric_name text,
     metric_type text,
     value double,
+    attributes map<text, text>,
     PRIMARY KEY(resource, collected_at, metric_name)
 );
