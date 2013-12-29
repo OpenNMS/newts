@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
 import com.google.common.collect.Lists;
 
 
@@ -40,6 +42,7 @@ public class FileImport implements Runnable {
     private final BufferedReader m_reader;
     private final Counter m_numRows;
     private final Counter m_numMeasurements;
+    private final Timer m_writeTimer;
 
     public FileImport(MeasurementRepository repository, MetricRegistry metrics, Path path)
             throws FileNotFoundException, IOException {
@@ -47,6 +50,7 @@ public class FileImport implements Runnable {
         m_repository = repository;
         m_numRows = metrics.counter("num-rows");
         m_numMeasurements = metrics.counter("num-measurements");
+        m_writeTimer = metrics.timer("writes");
 
         InputStream gzipStream = new GZIPInputStream(new FileInputStream(path.toString()));
         m_reader = new BufferedReader(new InputStreamReader(gzipStream, "US-ASCII"));
@@ -134,7 +138,14 @@ public class FileImport implements Runnable {
 
                 scanner.close();
 
-                m_repository.insert(measurements);
+                Context timerCtx = m_writeTimer.time();
+
+                try {
+                    m_repository.insert(measurements);
+                }
+                finally {
+                    timerCtx.stop();
+                }
 
                 m_numRows.inc();
                 m_numMeasurements.inc(10);
