@@ -4,7 +4,7 @@
     "resource": "localhost",
     "name": "eth0",
     "type": "COUNTER",
-    "value": 100.0
+    "value": 10000
   },
   {
     "timestamp": 1381178272000,
@@ -12,5 +12,12 @@
     "name": "eth0",
     "type": "COUNTER",
     "value": 150.0
+  },
+  {
+    "timestamp": 1381178272000,
+    "resource": "localhost",
+    "name": "temperature",
+    "type": "GAUGE",
+    "value": 90.0
   }
 ]

@@ -20,6 +20,7 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
+import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Timestamp;
@@ -102,36 +103,36 @@ public class FileImport implements Runnable {
 
                 int dewpointCount = scanner.nextInt();
 
-                double seaLevelPressure = valueFor(scanner.nextDouble(), 9999.9);
+                Gauge seaLevelPressure = valueFor(scanner.nextDouble(), 9999.9);
                 measurements.add(new Measurement(ts, station, "seaLevelPressure", GAUGE, seaLevelPressure));
 
                 int seaLevelPressureCount = scanner.nextInt();
 
-                double stationPressure = valueFor(scanner.nextDouble(), 9999.9);
+                Gauge stationPressure = valueFor(scanner.nextDouble(), 9999.9);
                 measurements.add(new Measurement(ts, station, "stationPressure", GAUGE, stationPressure));
 
                 int stationPressureCount = scanner.nextInt();
 
-                double visibility = valueFor(scanner.nextDouble(), 999.9);
+                Gauge visibility = valueFor(scanner.nextDouble(), 999.9);
                 measurements.add(new Measurement(ts, station, "visibility", GAUGE, visibility));
 
                 int visibilityCount = scanner.nextInt();
 
-                double meanWindSpeed = scanner.nextDouble();
+                Gauge meanWindSpeed = new Gauge(scanner.nextDouble());
                 measurements.add(new Measurement(ts, station, "meanWindSpeed", GAUGE, meanWindSpeed));
 
                 int meanWindSpeedCount = scanner.nextInt();
 
-                double maxWindSpeed = valueFor(scanner.nextDouble(), 999.9);
+                Gauge maxWindSpeed = valueFor(scanner.nextDouble(), 999.9);
                 measurements.add(new Measurement(ts, station, "maxWindSpeed", GAUGE, maxWindSpeed));
 
-                double maxWindGust = valueFor(scanner.nextDouble(), 999.9);
+                Gauge maxWindGust = valueFor(scanner.nextDouble(), 999.9);
                 measurements.add(new Measurement(ts, station, "maxWindGust", GAUGE, maxWindGust));
 
-                double maxTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
+                Gauge maxTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
                 measurements.add(new Measurement(ts, station, "maxTemperature", GAUGE, maxTemperature));
 
-                double minTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
+                Gauge minTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
                 measurements.add(new Measurement(ts, station, "minTemperature", GAUGE, minTemperature));
 
                 LOG.trace("Station number {}, WBAN {}, date {}, Max Temp {}...", station, wban, dateYMD, maxTemperature);
@@ -158,8 +159,8 @@ public class FileImport implements Runnable {
         }
     }
 
-    private static double valueFor(double value, double nan) {
-        return (value == nan) ? Double.NaN : value;
+    private static Gauge valueFor(double value, double nan) {
+        return new Gauge((value == nan ? Double.NaN : value));
     }
 
 }

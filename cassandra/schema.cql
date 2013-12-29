@@ -9,7 +9,7 @@ CREATE TABLE newts.measurements (
     collected_at timestamp,
     metric_name text,
     metric_type text,
-    value double,
+    value blob,
     attributes map<text, text>,
     PRIMARY KEY(resource, collected_at, metric_name)
 );

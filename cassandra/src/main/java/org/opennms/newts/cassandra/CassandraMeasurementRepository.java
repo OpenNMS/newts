@@ -7,7 +7,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +18,7 @@ import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.ValueType;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Row;
@@ -33,13 +33,13 @@ import com.google.inject.Inject;
 public class CassandraMeasurementRepository implements MeasurementRepository {
 
     private static final String T_MEASUREMENTS = "measurements";
-    private static final Object DOUBLE_NAN = QueryBuilder.fcall("blobAsDouble", ByteBuffer.allocate(8).putDouble(Double.NaN));
 
     private static final String F_RESOURCE = "resource";
     private static final String F_COLLECTED = "collected_at";
     private static final String F_METRIC_NAME = "metric_name";
     private static final String F_METRIC_TYPE = "metric_type";
     private static final String F_VALUE = "value";
+    private static final String F_ATTRIBUTES = "attributes";
 
     private Session m_session;
 
@@ -66,17 +66,16 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
 
             Date timestamp = row.getDate(F_COLLECTED);
             String metricName = row.getString(F_METRIC_NAME);
-            String metricType = row.getString(F_METRIC_TYPE);
-            double value = row.getDouble(F_VALUE);
+            MetricType type = MetricType.valueOf(row.getString(F_METRIC_TYPE));
+            ValueType<?> value = ValueType.compose(row.getBytes(F_VALUE), type);
 
             Measurement measurement = new Measurement(
                     new Timestamp(timestamp.getTime(), TimeUnit.MILLISECONDS),
                     resource,
                     metricName,
-                    MetricType.valueOf(metricType),
+                    type,
                     value);
             results.addMeasurement(measurement);
-
         }
 
         return results;
@@ -94,8 +93,9 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
                         .value(F_COLLECTED, m.getTimestamp().asMillis())
                         .value(F_METRIC_NAME, m.getName())
                         .value(F_METRIC_TYPE, m.getType().toString())
-                        .value(F_VALUE, Double.isNaN(m.getValue()) ? DOUBLE_NAN : m.getValue())
-            );
+                        .value(F_VALUE, ValueType.decompose(m.getValue()))
+                        .value(F_ATTRIBUTES, m.getAttributes())
+           );
         }
 
         m_session.execute(batch);

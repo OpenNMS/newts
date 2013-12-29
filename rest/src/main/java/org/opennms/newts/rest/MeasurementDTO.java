@@ -9,7 +9,7 @@ public class MeasurementDTO {
     private String m_resource;
     private String m_name;
     private MetricType m_type;
-    private double m_value;
+    private Number m_value;
 
     public long getTimestamp() {
         return m_timestamp;
@@ -43,11 +43,11 @@ public class MeasurementDTO {
         m_type = type;
     }
 
-    public double getValue() {
+    public Number getValue() {
         return m_value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Number value) {
         m_value = value;
     }
 

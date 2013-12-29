@@ -11,14 +11,14 @@ public class Measurement {
     private final String m_resource;
     private final String m_name;
     private final MetricType m_type;
-    private final double m_value;
+    private final ValueType<?> m_value;
     private final Map<String, String> m_attributes;
 
-    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, double value) {
+    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value) {
         this(timestamp, resource, name, type, value, null);
     }
 
-    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, double value, Map<String, String> attributes) {
+    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "timestamp");
         m_resource = checkNotNull(resource, "resource");
         m_name = checkNotNull(name, "name");
@@ -43,7 +43,7 @@ public class Measurement {
         return m_type;
     }
 
-    public double getValue() {
+    public ValueType<?> getValue() {
         return m_value;
     }
 

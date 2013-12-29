@@ -19,6 +19,7 @@ import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.ValueType;
 
 import spark.Request;
 import spark.Response;
@@ -66,7 +67,7 @@ public class Server {
                     m.getResource(),
                     m.getName(),
                     m.getType(),
-                    m.getValue());
+                    ValueType.compose(m.getValue(), m.getType()));
         }
     };
 
@@ -132,7 +133,7 @@ public class Server {
                     }
                 }
 
-                Results select = m_repository.select(resource, Optional.of(start), Optional.of(end));
+                Results select = m_repository.select(resource, Optional.fromNullable(start), Optional.fromNullable(end));
 
                 response.header("Access-Control-Allow-Origin", ALLOW_CORS);    // Allow CORS
                 response.type("application/json");
