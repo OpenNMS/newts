@@ -47,7 +47,7 @@ public class Measurement {
         return m_value;
     }
 
-    Map<String, String> getAttributes() {
+    public Map<String, String> getAttributes() {
         return m_attributes;
     }
 
