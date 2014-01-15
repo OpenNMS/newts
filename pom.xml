@@ -16,7 +16,7 @@
     <module>api</module>
     <module>cassandra</module>
     <module>rest</module>
-    <module>gsod</module>
+    <module>examples</module>
   </modules>
 
   <properties>
