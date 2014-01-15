@@ -17,7 +17,6 @@
     <module>cassandra</module>
     <module>rest</module>
     <module>gsod</module>
-    <module>snmp</module>
   </modules>
 
   <properties>
