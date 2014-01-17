@@ -63,7 +63,7 @@ public class Server {
         @Override
         public Measurement apply(MeasurementDTO m) {
             return new Measurement(
-                    new Timestamp(m.getTimestamp()),
+                    new Timestamp(m.getTimestamp(), TimeUnit.MILLISECONDS),
                     m.getResource(),
                     m.getName(),
                     m.getType(),

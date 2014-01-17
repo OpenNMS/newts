@@ -10,10 +10,6 @@ public class Timestamp implements Comparable<Timestamp> {
     public final long m_time;
     public final TimeUnit m_unit;
 
-    public Timestamp(long time) {
-        this(time, TimeUnit.MILLISECONDS);
-    }
-
     public Timestamp(long time, TimeUnit unit) {
         m_time = time;
         m_unit = unit;
@@ -60,6 +56,10 @@ public class Timestamp implements Comparable<Timestamp> {
     @Override
     public int compareTo(Timestamp o) {
         return asMillis() < o.asMillis() ? -1 : asMillis() > o.asMillis() ? 1 : 0;
+    }
+
+    public static Timestamp now() {
+        return new Timestamp(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
 }
