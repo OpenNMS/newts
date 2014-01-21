@@ -1,4 +1,4 @@
-package org.opennms.newts.cassandra;
+package org.opennms.newts.persistence.cassandra;
 
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;

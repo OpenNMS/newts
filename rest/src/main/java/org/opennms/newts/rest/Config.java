@@ -2,7 +2,7 @@ package org.opennms.newts.rest;
 
 
 import org.opennms.newts.api.MeasurementRepository;
-import org.opennms.newts.cassandra.CassandraMeasurementRepository;
+import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;

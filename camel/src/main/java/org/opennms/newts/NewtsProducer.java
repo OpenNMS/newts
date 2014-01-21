@@ -10,7 +10,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
-import org.opennms.newts.cassandra.CassandraMeasurementRepository;
+import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
