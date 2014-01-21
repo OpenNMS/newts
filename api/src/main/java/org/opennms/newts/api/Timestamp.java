@@ -39,12 +39,20 @@ public class Timestamp implements Comparable<Timestamp> {
         return new Timestamp(convert(TimeUnit.MILLISECONDS) + other.asMillis(), TimeUnit.MILLISECONDS);
     }
 
-    public boolean lessThan(Timestamp other) {
+    public boolean lt(Timestamp other) {
         return compareTo(other) < 0;
     }
 
-    public boolean greaterThan(Timestamp other) {
+    public boolean lte(Timestamp other) {
+        return (lt(other) || equals(other));
+    }
+
+    public boolean gt(Timestamp other) {
         return compareTo(other) > 0;
+    }
+
+    public boolean gte(Timestamp other) {
+        return (gt(other) || equals(other));
     }
 
     @Override
