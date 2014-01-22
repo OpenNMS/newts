@@ -24,6 +24,11 @@ public class Gauge extends ValueType<Double> {
     }
 
     @Override
+    public ValueType<Double> delta(Number value) {
+        return minus(value);
+    }
+
+    @Override
     public Gauge times(Number value) {
         return new Gauge(doubleValue() * value.doubleValue());
     }

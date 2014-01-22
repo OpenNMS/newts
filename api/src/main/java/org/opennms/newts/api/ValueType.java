@@ -13,6 +13,8 @@ public abstract class ValueType<T extends Number> extends Number {
 
     public abstract ValueType<T> minus(Number value);
 
+    public abstract ValueType<T> delta(Number value);
+
     public abstract ValueType<T> times(Number value);
 
     public abstract ValueType<T> divideBy(Number value);
