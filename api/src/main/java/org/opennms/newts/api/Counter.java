@@ -63,7 +63,7 @@ public class Counter extends ValueType<UnsignedLong> {
     }
 
     @Override
-    public UnsignedLong getValue() {
+    UnsignedLong getValue() {
         return m_value;
     }
 

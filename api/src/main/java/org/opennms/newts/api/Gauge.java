@@ -39,7 +39,7 @@ public class Gauge extends ValueType<Double> {
     }
 
     @Override
-    public Double getValue() {
+    Double getValue() {
         return m_value;
     }
 
