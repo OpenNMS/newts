@@ -125,32 +125,24 @@ public class Aggregates {
     public static final long HEARTBEAT = 300000;
     public static final double XFF = 0.5d;
 
-    public static Collection<Point> rollup(Timestamp start, Timestamp end, long stepSize, TimeUnit stepUnits, Collection<Point> points) {
+    public static Collection<Point> rollup(Timestamp start, Timestamp end, long stepSize, TimeUnit stepUnits,
+            Collection<Point> points) {
 
         List<Point> results = Lists.newArrayList();
         Iterator<Point> pointsIter = points.iterator();
 
+        Point prevPoint = pointsIter.next();
+        Point currPoint = pointsIter.next();
+        ValueType<?> average = prevPoint.y, prevAverage = null;
+
         for (Timestamp step : new Timestamps(start, end, stepSize, stepUnits)) {
 
             int numIntervals = 0;
-            ValueType<?> average = null, prevAverage = null;
             int valid = 0, invalid = 0;
-            Timestamp prevTimestamp = null, currTimestamp = null;
 
-            while (pointsIter.hasNext()) {
-                Point point = pointsIter.next();System.out.println(point);
+            while (true) {
 
-                // First iteration
-                if (currTimestamp == null) {
-                    currTimestamp = point.x;
-                    average = point.y;
-                    continue;
-                }
-
-                prevTimestamp = currTimestamp;
-                currTimestamp = point.x;
-
-                long elapsed = currTimestamp.asMillis() - prevTimestamp.asMillis();
+                long elapsed = currPoint.x.asMillis() - prevPoint.x.asMillis();
 
                 // If more than HEARTBEAT milliseconds have elapsed between this sample and the
                 // last, disregard.
@@ -160,14 +152,18 @@ public class Aggregates {
                 else {
                     numIntervals += 1;
                     prevAverage = average;
-                    average = average.times(numIntervals - 1).plus(point.y).divideBy(numIntervals);
+                    average = average.times(numIntervals - 1).plus(currPoint.y).divideBy(numIntervals);
                     valid += elapsed;
                 }
 
                 // As soon as we encounter a sample that is equal-to or greater-than the our working
                 // step, it's time to exit the loop.
-                if (currTimestamp.gte(step)) {
+                if (currPoint.x.gte(step) || !pointsIter.hasNext()) {
                     break;
+                }
+                else {
+                    prevPoint = currPoint;
+                    currPoint = pointsIter.next();
                 }
 
             }
@@ -178,7 +174,7 @@ public class Aggregates {
                 continue;
             }
 
-            ValueType<?> value = interpolate(step, prevTimestamp, currTimestamp, prevAverage, average);System.out.println();System.out.printf("%s -> %s%n", step, value);System.out.println();
+            ValueType<?> value = interpolate(step, prevPoint.x, currPoint.x, prevAverage, average);
             results.add(new Point(step, value));
 
         }
