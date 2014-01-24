@@ -46,7 +46,7 @@ public class Aggregates {
         }
 
         public Timestamps(Timestamp start, Timestamp finish, final long stepSize, final TimeUnit stepUnits) {
-            m_current = start.stepCeiling(stepSize, stepUnits);
+            m_current = start.stepFloor(stepSize, stepUnits);
             m_final = finish.stepCeiling(stepSize, stepUnits);
 
             m_stepSize = stepSize;
@@ -122,72 +122,68 @@ public class Aggregates {
         return Collections2.transform(points, new RateFunction());
     }
 
-    public static final long HEARTBEAT = 300000;
+    public static final long HEARTBEAT = 600000;
     public static final double XFF = 0.5d;
 
-    public static Collection<Point> rollup(Timestamp start, Timestamp end, long stepSize, TimeUnit stepUnits,
+    public static Collection<Point> average(Timestamp start, Timestamp end, long stepSize, TimeUnit stepUnits,
             Collection<Point> points) {
 
         List<Point> results = Lists.newArrayList();
-        Iterator<Point> pointsIter = points.iterator();
+        Iterator<Timestamp> steps = new Timestamps(start, end, stepSize, stepUnits);
 
-        Point prevPoint = pointsIter.next();
-        Point currPoint = pointsIter.next();
-        ValueType<?> average = prevPoint.y, prevAverage = null;
+        Timestamp nextStep = steps.next();
+        Timestamp lastUpdate = start;
+        ValueType<?> accumulated = new Gauge(0.0d);
+        long unknown = lastUpdate.asMillis() % TimeUnit.MILLISECONDS.convert(stepSize, stepUnits), known = 0;
 
-        for (Timestamp step : new Timestamps(start, end, stepSize, stepUnits)) {
-
-            int numIntervals = 0;
-            int valid = 0, invalid = 0;
-
-            while (true) {
-
-                long elapsed = currPoint.x.asMillis() - prevPoint.x.asMillis();
-
-                // If more than HEARTBEAT milliseconds have elapsed between this sample and the
-                // last, disregard.
-                if (elapsed > HEARTBEAT) {
-                    invalid += elapsed;
-                }
-                else {
-                    numIntervals += 1;
-                    prevAverage = average;
-                    average = average.times(numIntervals - 1).plus(currPoint.y).divideBy(numIntervals);
-                    valid += elapsed;
-                }
-
-                // As soon as we encounter a sample that is equal-to or greater-than the our working
-                // step, it's time to exit the loop.
-                if (currPoint.x.gte(step) || !pointsIter.hasNext()) {
-                    break;
-                }
-                else {
-                    prevPoint = currPoint;
-                    currPoint = pointsIter.next();
-                }
-
-            }
-
-            // XFF (xfiles factor) determines how much of an interval can consist of unknown data.
-            if ((invalid / (invalid + valid)) > XFF) {
-                results.add(new Point(step, null));
+        for (Point point : points) {
+            if (point.x.lt(lastUpdate)) {
                 continue;
             }
 
-            ValueType<?> value = interpolate(step, prevPoint.x, currPoint.x, prevAverage, average);
-            results.add(new Point(step, value));
+            long interval;
+
+            if (point.x.gte(nextStep)) {
+                interval = nextStep.asMillis() - lastUpdate.asMillis();
+            }
+            else {
+                interval = point.x.asMillis() - lastUpdate.asMillis();
+            }
+
+            if (point.y != null && interval < HEARTBEAT) {
+                known += interval;
+                accumulated = accumulated.plus(point.y.times(interval));
+            }
+            else {
+                unknown += interval;
+            }
+
+            if (point.x.gte(nextStep)) {
+                ValueType<?> value = null;
+                long elapsed = known + unknown;
+                if (elapsed > 0 && (unknown / elapsed) < XFF) {
+                    value = accumulated.divideBy(known);
+                }
+                results.add(new Point(nextStep, value));
+
+                // Accumulate the remainder
+                interval = point.x.asMillis() - nextStep.asMillis();
+                known = interval;
+                accumulated = new Gauge(0.0d).plus(point.y.times(interval));
+
+                if (!steps.hasNext()) {
+                    break;
+                }
+
+                nextStep = steps.next();
+                unknown = 0;
+            }
+
+            lastUpdate = point.x;
 
         }
 
         return results;
-    }
-
-    private static ValueType<?> interpolate(Timestamp x, Timestamp x0, Timestamp x1, ValueType<?> y0, ValueType<?> y1) {
-        return interpolate(x.asMillis(), x0.asMillis(), x1.asMillis(), y0, y1);
-    }
-
-    private static ValueType<?> interpolate(long x, long x0, long x1, ValueType<?> y0, ValueType<?> y1) {
-        return y1.minus(y0).times(x - x0).divideBy(x1 - x0).plus(y0);
     }
 
 }

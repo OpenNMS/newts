@@ -1,14 +1,26 @@
 package org.opennms.newts.api;
 
 
+import static java.lang.Double.NaN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.jrobin.core.ArcDef;
+import org.jrobin.core.DsDef;
+import org.jrobin.core.FetchData;
+import org.jrobin.core.RrdDb;
+import org.jrobin.core.RrdDef;
+import org.jrobin.core.RrdException;
+import org.jrobin.core.Sample;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opennms.newts.api.Aggregates.Point;
 
@@ -18,21 +30,89 @@ import com.google.common.primitives.UnsignedLong;
 
 public class AggregatesTest {
 
+    private static final long DEFAULT_STEP_SECONDS = 300;
+    private static final long DEFAULT_HEARTBEAT_SECONDS = 600;
+    private static final double DEFAULT_XFF = 0.5d;
+
+    private RrdDb m_gaugeRRD;
+
+    private String rrdName() {
+        return String.format("target/%s", UUID.randomUUID());
+    }
+
+    @Before
+    public void setUp() throws RrdException, IOException {
+
+        RrdDef def = new RrdDef(rrdName());
+
+        def.setStep(DEFAULT_STEP_SECONDS);
+        def.setStartTime((System.currentTimeMillis() / 1000) - 60);
+        def.addDatasource(new DsDef("name", "GAUGE", DEFAULT_HEARTBEAT_SECONDS, NaN, NaN));
+        def.addArchive(new ArcDef("AVERAGE", DEFAULT_XFF, 1, 2016));
+
+        m_gaugeRRD = new RrdDb(def);
+
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        m_gaugeRRD.close();
+    }
+
     @Test
-    public void testRollup() {
+    public void testRollup() throws RrdException, IOException {
 
-        List<Point> pointsIn = Lists.newArrayList();
+//        Timestamp base = Timestamp.now();
+        Timestamp base = new Timestamp(1422397610, TimeUnit.SECONDS);
+        Timestamp start = new Timestamp(base.asSeconds() - 1, TimeUnit.SECONDS);
 
-        pointsIn.add(new Point(fromSeconds(99), new Gauge(2.0d)));
-        pointsIn.add(new Point(fromSeconds(199), new Gauge(3.0d)));
-        pointsIn.add(new Point(fromSeconds(299), new Gauge(4.0d)));
-        pointsIn.add(new Point(fromSeconds(399), new Gauge(3.0d)));
-        pointsIn.add(new Point(fromSeconds(499), new Gauge(4.0d)));
-        pointsIn.add(new Point(fromSeconds(599), new Gauge(5.0d)));
+        Point[] points = new Point[] {
+                new Point(base, new Gauge(2.0d)),
+                new Point(base.add(100, TimeUnit.SECONDS), new Gauge(3.0d)),
+                new Point(base.add(200, TimeUnit.SECONDS), new Gauge(4.0d)),
+                new Point(base.add(300, TimeUnit.SECONDS), new Gauge(5.0d)),
+                new Point(base.add(400, TimeUnit.SECONDS), new Gauge(6.0d)),
+                new Point(base.add(500, TimeUnit.SECONDS), new Gauge(7.0d)),
+                new Point(base.add(600, TimeUnit.SECONDS), new Gauge(8.0d)),
+                new Point(base.add(700, TimeUnit.SECONDS), new Gauge(9.0d)),
+                new Point(base.add(800, TimeUnit.SECONDS), new Gauge(10.0d)),
+                new Point(base.add(900, TimeUnit.SECONDS), new Gauge(11.0d)),
+                new Point(base.add(1000, TimeUnit.SECONDS), new Gauge(12.0d))
+        };
 
-        Collection<Point> pointsOut = Aggregates.rollup(fromSeconds(0), fromSeconds(305), 300, TimeUnit.SECONDS, pointsIn);
+        for (Point point : points)
+            System.err.println(point.x.asSeconds() + ":  " + point.y.doubleValue());
 
-        System.err.println(pointsOut);
+        // RRD ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Sample sample = m_gaugeRRD.createSample();
+
+        for (Point point : points)
+            sample.setAndUpdate(String.format("%d:%f", point.x.asSeconds(), point.y.doubleValue()));
+
+        // long fromSecs = start.asSeconds() + 305;
+        long fromSecs = start.asSeconds() + 0;
+        FetchData data = m_gaugeRRD.createFetchRequest("AVERAGE", fromSecs, fromSecs + 600).fetchData();
+
+        System.err.println();
+        System.err.println(data.dump());
+        System.err.println();
+
+        // Newts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Timestamp fromTimestamp = new Timestamp(fromSecs, TimeUnit.SECONDS);
+        List<Point> pointsIn = Lists.newArrayList(points);
+        Collection<Point> pointsOut = Aggregates.average(
+                fromTimestamp,
+                fromTimestamp.add(600, TimeUnit.SECONDS),
+                300,
+                TimeUnit.SECONDS,
+                pointsIn);
+
+        for (Point point : pointsOut)
+            System.err.println(point.x.asSeconds() + ":  " + ((point.y == null) ? "NaN" : point.y.doubleValue()));
+        System.err.println();
+
+        System.err.println("start=" + start.asSeconds() + ", end=" + start.add(600, TimeUnit.SECONDS).asSeconds());
+        System.err.println("start=" + start.asMillis()  + ", end=" + start.add(600, TimeUnit.SECONDS).asMillis());
 
     }
 
@@ -64,15 +144,17 @@ public class AggregatesTest {
 
         List<Timestamp> timestamps = Lists.newArrayList(getTimestamps(150, 3500));
 
-        assertEquals(12, timestamps.size());
-        assertEquals(new Timestamp(300, TimeUnit.SECONDS), timestamps.get(0));
-        assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(11));
+        assertEquals(13, timestamps.size());
+        assertEquals(new Timestamp(0, TimeUnit.SECONDS), timestamps.get(0));
+        assertEquals(new Timestamp(3300, TimeUnit.SECONDS), timestamps.get(11));
+        assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(12));
 
         timestamps = Lists.newArrayList(getTimestamps(0, 3600));
 
-        assertEquals(13, timestamps.size());
-        assertEquals(new Timestamp(300, TimeUnit.SECONDS), timestamps.get(0));
-        assertEquals(new Timestamp(3900, TimeUnit.SECONDS), timestamps.get(12));
+        assertEquals(14, timestamps.size());
+        assertEquals(new Timestamp(0, TimeUnit.SECONDS), timestamps.get(0));
+        assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(12));
+        assertEquals(new Timestamp(3900, TimeUnit.SECONDS), timestamps.get(13));
 
     }
 

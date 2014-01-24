@@ -39,6 +39,10 @@ public class Timestamp implements Comparable<Timestamp> {
         return new Timestamp(convert(units) + value, units);
     }
 
+    public Timestamp subtract(long value, TimeUnit units) {
+        return new Timestamp(convert(units) - value, units);
+    }
+
     public boolean lt(Timestamp other) {
         return compareTo(other) < 0;
     }
