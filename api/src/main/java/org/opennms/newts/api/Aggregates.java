@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.newts.api.Aggregates.Point;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -184,6 +186,110 @@ public class Aggregates {
         }
 
         return results;
+    }
+
+    static class Bucketizer {
+        private final Timestamp m_start;
+        private final Timestamp m_end;
+        private final Duration m_step;
+        private final Duration m_heartbeat;
+        private final Collection<Point> m_points;
+        
+        private Timestamp m_lastUpdateTime;
+        private double m_accum;
+        private double m_lastValue;
+        private long m_nanMillis;
+        
+        Bucketizer(Timestamp start, Timestamp end, Duration step, Duration heartbeat, Collection<Point> points) {
+            m_start = start;
+            m_end = end;
+            m_step = step;
+            m_heartbeat = heartbeat;
+            m_points = points;
+            
+            m_lastUpdateTime = m_start;
+            m_nanMillis = m_start.minus(m_start.stepFloor(m_step)).asMillis();
+            m_lastValue = Double.NaN;
+            m_accum = 0.0;
+        }
+        
+        Collection<Point> rollup() {
+            List<Point> results = Lists.newArrayList();
+            
+            for(Point p : m_points) {
+                final Timestamp oldTime = m_lastUpdateTime;
+                final Timestamp startTime = oldTime.stepFloor(m_step);
+                final Timestamp endTime = startTime.plus(m_step);
+                final double newValue = p.y.doubleValue();
+                final Timestamp newTime = p.x;
+                final double oldValue = m_lastValue;
+                final double updateValue = calculateUpdate(oldValue, newValue, oldTime, newTime);
+                // end 
+                m_lastValue = updateValue;
+                if (newTime.lt(endTime)) {
+                    // the newTime is within the current interval
+                    accumulate(oldTime, newTime, updateValue);
+                } else {
+                    // the newTime is after the end of the current interval
+                    final Timestamp boundaryTime = newTime.stepFloor(m_step);
+
+                    // update the accumulators with a value up the boundary
+                    accumulate(oldTime, boundaryTime, updateValue);
+
+                    // compute the next value from the accumulator
+                    double totalValue = Double.NaN;
+                    final long validMillis = boundaryTime.minus(startTime).asMillis() - m_nanMillis;
+                    if (m_nanMillis < m_heartbeat.asMillis() && validMillis > 0) {
+                        totalValue = m_accum / validMillis;
+                    }
+
+                    final long numSteps = boundaryTime.minus(endTime).asMillis() / m_step.asMillis() + 1L;
+
+                    Timestamp nextTime = endTime;
+                    for(int i = 0; i < numSteps; i++) {
+                        Point n = new Point(nextTime, new Gauge(totalValue));
+                        nextTime = nextTime.plus(m_step);
+                        results.add(n);
+                    }
+                    m_nanMillis = 0;
+                    m_accum = 0.0;
+                    
+                    accumulate(boundaryTime, newTime, updateValue);;
+                    
+                }
+                
+                m_lastUpdateTime = newTime;
+                
+                
+            }
+            
+            
+            
+            
+            
+            
+            
+            return results;
+        }
+
+        private void accumulate(final Timestamp oldTime, final Timestamp newTime, final double updateValue) {
+            Duration elapsed = newTime.minus(oldTime);
+            if (Double.isNaN(updateValue)) {
+                m_nanMillis = m_nanMillis + elapsed.asMillis();
+            }
+            else {
+                m_accum = m_accum + updateValue * elapsed.asMillis();
+            }
+        }
+
+        // code here to account for different types - for gauge the update value is the same as the newValue
+        private double calculateUpdate(final double oldValue, double newValue, Timestamp oldTime, Timestamp newTime) {
+            return newValue;
+        }
+    }
+
+    public static Collection<Point> rollup2(Timestamp start, Timestamp end, Duration step, Duration heartbeat, Collection<Point> points) {
+        return new Bucketizer(start, end, step, heartbeat, points).rollup();
     }
 
 }
