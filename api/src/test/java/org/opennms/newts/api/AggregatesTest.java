@@ -4,8 +4,10 @@ package org.opennms.newts.api;
 import static java.lang.Double.NaN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.opennms.newts.api.Duration.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +48,7 @@ public class AggregatesTest {
         RrdDef def = new RrdDef(rrdName());
 
         def.setStep(DEFAULT_STEP_SECONDS);
-        def.setStartTime((System.currentTimeMillis() / 1000) - 60);
+        def.setStartTime(1422397609);
         def.addDatasource(new DsDef("name", "GAUGE", DEFAULT_HEARTBEAT_SECONDS, NaN, NaN));
         def.addArchive(new ArcDef("AVERAGE", DEFAULT_XFF, 1, 2016));
 
@@ -64,20 +66,20 @@ public class AggregatesTest {
 
 //        Timestamp base = Timestamp.now();
         Timestamp base = new Timestamp(1422397610, TimeUnit.SECONDS);
-        Timestamp start = new Timestamp(base.asSeconds() - 1, TimeUnit.SECONDS);
+        Timestamp start = base.minus(1, TimeUnit.SECONDS);
 
         Point[] points = new Point[] {
                 new Point(base, new Gauge(2.0d)),
-                new Point(base.add(100, TimeUnit.SECONDS), new Gauge(3.0d)),
-                new Point(base.add(200, TimeUnit.SECONDS), new Gauge(4.0d)),
-                new Point(base.add(300, TimeUnit.SECONDS), new Gauge(5.0d)),
-                new Point(base.add(400, TimeUnit.SECONDS), new Gauge(6.0d)),
-                new Point(base.add(500, TimeUnit.SECONDS), new Gauge(7.0d)),
-                new Point(base.add(600, TimeUnit.SECONDS), new Gauge(8.0d)),
-                new Point(base.add(700, TimeUnit.SECONDS), new Gauge(9.0d)),
-                new Point(base.add(800, TimeUnit.SECONDS), new Gauge(10.0d)),
-                new Point(base.add(900, TimeUnit.SECONDS), new Gauge(11.0d)),
-                new Point(base.add(1000, TimeUnit.SECONDS), new Gauge(12.0d))
+                new Point(base.plus(100, TimeUnit.SECONDS), new Gauge(3.0d)),
+                new Point(base.plus(200, TimeUnit.SECONDS), new Gauge(4.0d)),
+                new Point(base.plus(300, TimeUnit.SECONDS), new Gauge(5.0d)),
+                new Point(base.plus(400, TimeUnit.SECONDS), new Gauge(6.0d)),
+                new Point(base.plus(500, TimeUnit.SECONDS), new Gauge(7.0d)),
+                new Point(base.plus(600, TimeUnit.SECONDS), new Gauge(8.0d)),
+                new Point(base.plus(700, TimeUnit.SECONDS), new Gauge(9.0d)),
+                new Point(base.plus(800, TimeUnit.SECONDS), new Gauge(10.0d)),
+                new Point(base.plus(900, TimeUnit.SECONDS), new Gauge(11.0d)),
+                new Point(base.plus(1000, TimeUnit.SECONDS), new Gauge(12.0d))
         };
 
         for (Point point : points)
@@ -94,6 +96,7 @@ public class AggregatesTest {
         FetchData data = m_gaugeRRD.createFetchRequest("AVERAGE", fromSecs, fromSecs + 600).fetchData();
 
         System.err.println();
+        System.err.println(" --- JROBIN");
         System.err.println(data.dump());
         System.err.println();
 
@@ -107,9 +110,19 @@ public class AggregatesTest {
                 TimeUnit.SECONDS,
                 pointsIn);
 
+        System.err.println(" --- Newts");
         for (Point point : pointsOut)
             System.err.println(point.x.asSeconds() + ":  " + ((point.y == null) ? "NaN" : point.y.doubleValue()));
         System.err.println();
+        
+        
+        Collection<Point> mbPointsOut = Aggregates.rollup2(fromTimestamp, fromTimestamp.plus(seconds(600)), seconds(300), seconds(600), Arrays.asList(points));
+
+        System.err.println(" --- MB");
+        for (Point point : mbPointsOut)
+            System.err.println(point.x.asSeconds() + ":  " + ((point.y == null) ? "NaN" : point.y.doubleValue()));
+        System.err.println();
+        
 
         System.err.println("start=" + start.asSeconds() + ", end=" + start.add(600, TimeUnit.SECONDS).asSeconds());
         System.err.println("start=" + start.asMillis()  + ", end=" + start.add(600, TimeUnit.SECONDS).asMillis());

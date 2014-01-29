@@ -48,7 +48,7 @@ public class Aggregates {
         }
 
         public Timestamps(Timestamp start, Timestamp finish, final long stepSize, final TimeUnit stepUnits) {
-            m_current = start.stepFloor(stepSize, stepUnits);
+            m_current = start.stepCeiling(stepSize, stepUnits);
             m_final = finish.stepCeiling(stepSize, stepUnits);
 
             m_stepSize = stepSize;
@@ -139,6 +139,8 @@ public class Aggregates {
         long unknown = lastUpdate.asMillis() % TimeUnit.MILLISECONDS.convert(stepSize, stepUnits), known = 0;
 
         for (Point point : points) {
+            // it would probably be better to use 'before the start data if you have it to provide a value for the
+            // initial unknown region
             if (point.x.lt(lastUpdate)) {
                 continue;
             }
