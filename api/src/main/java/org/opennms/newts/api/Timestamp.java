@@ -35,41 +35,21 @@ public class Timestamp implements Comparable<Timestamp> {
         return m_unit;
     }
 
-    /**
-     * Use plus instead
-     * @param value
-     * @param units
-     * @return
-     */
-    @Deprecated
-    public Timestamp add(long value, TimeUnit units) {
-        return plus(value, units);
-    }
-
     public Timestamp plus(long value, TimeUnit units) {
         TimeUnit finest = finest(m_unit, units);
         return new Timestamp(convert(finest) + finest.convert(value, units), finest);
-    }
-    
-    public Timestamp minus(long value, TimeUnit units) {
-        TimeUnit finest = finest(m_unit, units);
-        return new Timestamp(convert(finest) - finest.convert(value, units), finest);
-    }
-    
-    /**
-     * Use plus instead
-     * @param d
-     * @return
-     */
-    public Timestamp add(Duration d) {
-        return plus(d);
     }
 
     public Timestamp plus(Duration d) {
         TimeUnit finest = finest(m_unit, d.getUnit());
         return new Timestamp(convert(finest) + d.convert(finest), finest);
     }
-    
+
+    public Timestamp minus(long value, TimeUnit units) {
+        TimeUnit finest = finest(m_unit, units);
+        return new Timestamp(convert(finest) - finest.convert(value, units), finest);
+    }
+
     public Timestamp minus(Duration d) {
         TimeUnit finest = finest(m_unit, d.getUnit());
         return new Timestamp(convert(finest) - d.convert(finest), finest);
@@ -80,10 +60,6 @@ public class Timestamp implements Comparable<Timestamp> {
         TimeUnit finest = finest(m_unit, t.getUnit());
         return new Duration(convert(finest) - t.convert(finest), finest);
         
-    }
-
-    public Timestamp subtract(long value, TimeUnit units) {
-        return new Timestamp(convert(units) - value, units);
     }
 
     public boolean lt(Timestamp other) {

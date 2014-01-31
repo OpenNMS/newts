@@ -5,9 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.TimeUnit;
-
-import org.opennms.newts.api.Aggregates.Point;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -34,26 +31,21 @@ public class Aggregates {
 
     static class Timestamps implements Iterable<Timestamp>, Iterator<Timestamp> {
 
-        public static final long DEFAULT_STEP_SIZE = 300;
-        public static final TimeUnit DEFAULT_STEP_UNITS = TimeUnit.SECONDS;
+        public static final Duration DEFAULT_STEP_SIZE = Duration.seconds(300);
 
-        private final long m_stepSize;
-        private final TimeUnit m_stepUnits;
+        private final Duration m_stepSize;
 
         private Timestamp m_current;
         private Timestamp m_final;
 
         public Timestamps(Timestamp start, Timestamp end) {
-            this(start, end, DEFAULT_STEP_SIZE, DEFAULT_STEP_UNITS);
+            this(start, end, DEFAULT_STEP_SIZE);
         }
 
-        public Timestamps(Timestamp start, Timestamp finish, final long stepSize, final TimeUnit stepUnits) {
-            m_current = start.stepCeiling(stepSize, stepUnits);
-            m_final = finish.stepCeiling(stepSize, stepUnits);
-
+        public Timestamps(Timestamp start, Timestamp finish, final Duration stepSize) {
+            m_current = start.stepCeiling(stepSize);
+            m_final = finish.stepCeiling(stepSize);
             m_stepSize = stepSize;
-            m_stepUnits = stepUnits;
-
         }
 
         @Override
@@ -72,7 +64,7 @@ public class Aggregates {
                 return m_current;
             }
             finally {
-                m_current = m_current.add(m_stepSize, m_stepUnits);
+                m_current = m_current.plus(m_stepSize);
             }
         }
 
@@ -127,16 +119,15 @@ public class Aggregates {
     public static final long HEARTBEAT = 600000;
     public static final double XFF = 0.5d;
 
-    public static Collection<Point> average(Timestamp start, Timestamp end, long stepSize, TimeUnit stepUnits,
-            Collection<Point> points) {
+    public static Collection<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
 
         List<Point> results = Lists.newArrayList();
-        Iterator<Timestamp> steps = new Timestamps(start, end, stepSize, stepUnits);
+        Iterator<Timestamp> steps = new Timestamps(start, end, stepSize);
 
         Timestamp nextStep = steps.next();
         Timestamp lastUpdate = start;
         ValueType<?> accumulated = new Gauge(0.0d);
-        long unknown = lastUpdate.asMillis() % TimeUnit.MILLISECONDS.convert(stepSize, stepUnits), known = 0;
+        long unknown = lastUpdate.asMillis() % stepSize.asMillis(), known = 0;
 
         for (Point point : points) {
             // it would probably be better to use 'before the start data if you have it to provide a value for the

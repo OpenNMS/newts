@@ -24,22 +24,22 @@ public class TimestampDurationTest {
         
         Timestamp beforeMillis = new Timestamp(1000, TimeUnit.MILLISECONDS);
         
-        Timestamp afterASec = before.add(sec);
+        Timestamp afterASec = before.plus(sec);
         
         assertEquals(afterASec.m_time, 2);
         assertEquals(afterASec.m_unit, TimeUnit.SECONDS);
         
-        Timestamp after1kMillis = before.add(kMillis);
+        Timestamp after1kMillis = before.plus(kMillis);
         
         assertEquals(after1kMillis.m_time, 2000);
         assertEquals(after1kMillis.m_unit, TimeUnit.MILLISECONDS);
         
-        Timestamp twoKMillis = beforeMillis.add(sec);
+        Timestamp twoKMillis = beforeMillis.plus(sec);
         
         assertEquals(twoKMillis.m_time, 2000);
         assertEquals(twoKMillis.m_unit, TimeUnit.MILLISECONDS);
         
-        Timestamp after1Milli = before.add(milli);
+        Timestamp after1Milli = before.plus(milli);
         
         assertEquals(after1Milli.m_time, 1001);
         assertEquals(after1Milli.m_unit, TimeUnit.MILLISECONDS);
