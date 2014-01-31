@@ -1,23 +1,44 @@
 [
   {
-    "timestamp": 1381178189000,
+    "timestamp": 0,
     "resource": "localhost",
     "name": "eth0",
     "type": "COUNTER",
     "value": 10000
   },
   {
-    "timestamp": 1381178272000,
+    "timestamp": 300000,
     "resource": "localhost",
     "name": "eth0",
     "type": "COUNTER",
-    "value": 150.0
+    "value": 20000
   },
   {
-    "timestamp": 1381178272000,
+    "timestamp": 600000,
     "resource": "localhost",
-    "name": "temperature",
-    "type": "GAUGE",
-    "value": 90.0
+    "name": "eth0",
+    "type": "COUNTER",
+    "value": 30000
+  },
+  {
+    "timestamp": 900000,
+    "resource": "localhost",
+    "name": "eth0",
+    "type": "COUNTER",
+    "value": 40000
+  },
+  {
+    "timestamp": 1200000,
+    "resource": "localhost",
+    "name": "eth0",
+    "type": "COUNTER",
+    "value": 50000
+  },
+  {
+    "timestamp": 1500000,
+    "resource": "localhost",
+    "name": "eth0",
+    "type": "COUNTER",
+    "value": 60000
   }
 ]

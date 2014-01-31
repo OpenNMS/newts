@@ -54,7 +54,7 @@ public class Counter extends ValueType<UnsignedLong> {
 
     @Override
     public Counter times(Number value) {
-        return new Counter(getValue()).times(toUnsignedLong(value));
+        return new Counter(getValue().times(toUnsignedLong(value)));
     }
 
     @Override

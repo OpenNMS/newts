@@ -139,7 +139,7 @@ public class Aggregates {
         for (Point point : points) {
             // it would probably be better to use 'before the start data if you have it to provide a value for the
             // initial unknown region
-            if (point.x.lt(lastUpdate)) {
+            if (point == null || point.x.lt(lastUpdate)) {
                 continue;
             }
 
