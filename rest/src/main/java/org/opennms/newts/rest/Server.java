@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
@@ -26,7 +27,6 @@ import spark.Response;
 import spark.Route;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -35,6 +35,7 @@ import com.google.inject.Injector;
 public class Server {
 
     private static final String ALLOW_CORS = "*";
+    private static final int DEFAULT_STEP_SIZE_SECONDS = 300;
 
     private Function<Row, Collection<MeasurementDTO>> m_rowFunc = new Function<Row, Collection<MeasurementDTO>>() {
 
@@ -87,8 +88,7 @@ public class Server {
             public Object handle(Request request, Response response) {
 
                 ObjectMapper mapper = new ObjectMapper();
-                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {
-                });
+                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {});
                 Collection<MeasurementDTO> measurementDTOs = null;
 
                 try {
@@ -110,30 +110,8 @@ public class Server {
             public Object handle(Request request, Response response) {
 
                 String resource = request.params(":resource");
-                String startParam = request.queryParams("start");
-                String endParam = request.queryParams("end");
 
-                Timestamp start = null, end = null;
-
-                if (startParam != null) {
-                    try {
-                        start = new Timestamp(Long.parseLong(startParam), TimeUnit.MILLISECONDS);
-                    }
-                    catch (NumberFormatException e) {
-                        halt(400, String.format("Invalid start parameter: %s", startParam));
-                    }
-                }
-
-                if (endParam != null) {
-                    try {
-                        end = new Timestamp(Long.parseLong(endParam), TimeUnit.MILLISECONDS);
-                    }
-                    catch (NumberFormatException e) {
-                        halt(400, String.format("Invalid end parameter: %s", endParam));
-                    }
-                }
-
-                Results select = m_repository.select(resource, Optional.fromNullable(start), Optional.fromNullable(end));
+                Results select = m_repository.select(resource, getStart(request), getEnd(request), getStepSize(request));
 
                 response.header("Access-Control-Allow-Origin", ALLOW_CORS);    // Allow CORS
                 response.type("application/json");
@@ -142,6 +120,25 @@ public class Server {
             }
         });
 
+    }
+
+    // FIXME: These methods can raise NumberFormatExceptions if query params aren't numbers
+    private Timestamp getStart(Request request) {
+        String param = request.queryParams("start");
+        if (param == null) return Timestamp.now().minus(Duration.seconds(86400));
+        return new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS);
+    }
+
+    private Timestamp getEnd(Request request) {
+        String param = request.queryParams("end");
+        if (param == null) return Timestamp.now();
+        return new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS);
+    }
+
+    private Duration getStepSize(Request request) {
+        String param = request.queryParams("step_size");
+        int startSecs = (param == null) ? DEFAULT_STEP_SIZE_SECONDS : Integer.parseInt(param);
+        return Duration.seconds(startSecs);
     }
 
     public static void main(String... args) {

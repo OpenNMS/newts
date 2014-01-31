@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.google.common.base.Optional;
 
 public interface MeasurementRepository {
+    public Results select(String resource, Timestamp start, Timestamp end, Duration stepSize);
     public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end);
     public void insert(Collection<Measurement> measurements);
 }

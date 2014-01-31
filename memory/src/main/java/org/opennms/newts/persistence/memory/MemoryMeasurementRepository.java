@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
@@ -19,6 +20,12 @@ import com.google.common.collect.HashMultimap;
 public class MemoryMeasurementRepository implements MeasurementRepository {
 
     private Map<String, HashMultimap<Timestamp, Measurement>> m_storage = new HashMap<String, HashMultimap<Timestamp, Measurement>>();
+
+
+    @Override
+    public Results select(String resource, Timestamp start, Timestamp end, Duration stepSize) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {

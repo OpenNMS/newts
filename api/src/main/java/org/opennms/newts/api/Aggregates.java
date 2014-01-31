@@ -1,6 +1,8 @@
 package org.opennms.newts.api;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -120,6 +122,11 @@ public class Aggregates {
     public static final double XFF = 0.5d;
 
     public static Collection<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
+
+        checkNotNull(start, "start argument");
+        checkNotNull(end, "end argument");
+        checkNotNull(stepSize, "stepSize argument");
+        checkNotNull(points, "points argument");
 
         List<Point> results = Lists.newArrayList();
         Iterator<Timestamp> steps = new Timestamps(start, end, stepSize);
