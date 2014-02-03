@@ -190,7 +190,7 @@ public class Aggregates {
 
     static class Bucketizer {
         private final Timestamp m_start;
-        private final Timestamp m_end;
+        @SuppressWarnings("unused") private final Timestamp m_end;
         private final Duration m_step;
         private final Duration m_heartbeat;
         private final Collection<Point> m_points;
