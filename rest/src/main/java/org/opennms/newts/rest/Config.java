@@ -4,6 +4,7 @@ package org.opennms.newts.rest;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
@@ -18,6 +19,8 @@ public class Config extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("cassandraHost")).toInstance("localhost");
         bind(Integer.class).annotatedWith(Names.named("cassandraPort")).toInstance(9042);
         bind(String.class).annotatedWith(Names.named("cassandraKeyspace")).toInstance("newts");
+
+        bind(MetricRegistry.class).toInstance(new MetricRegistry());
 
     }
 

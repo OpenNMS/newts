@@ -14,6 +14,8 @@ import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
 
 /**
  * The Newts producer.
@@ -28,7 +30,11 @@ public class NewtsProducer extends DefaultProducer {
 
         LOG.debug("Creating Newts producer");
 
-        m_repository = new CassandraMeasurementRepository(endpoint.getKeyspace(), endpoint.getHostname(), endpoint.getPort());
+        m_repository = new CassandraMeasurementRepository(
+                endpoint.getKeyspace(),
+                endpoint.getHostname(),
+                endpoint.getPort(),
+                new MetricRegistry());
 
     }
 

@@ -1,6 +1,7 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
@@ -22,6 +23,9 @@ import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -48,12 +52,24 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     private static final String F_ATTRIBUTES = "attributes";
 
     private Session m_session;
+    private MetricRegistry m_registry;
+    private Timer m_timerCassandraSelectr;
+    private Timer m_timerAvgCalc;
+    private Timer m_timerRateCalc;
+    private Timer m_timerCassandraCollate;
 
     @Inject
-    public CassandraMeasurementRepository(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port) {
+    public CassandraMeasurementRepository(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port, MetricRegistry registry) {
 
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);
+
+        m_registry = registry;
+
+        m_timerCassandraSelectr = m_registry.timer(name(CassandraMeasurementRepository.class, "cassandra", "select"));
+        m_timerCassandraCollate = m_registry.timer(name(CassandraMeasurementRepository.class, "cassandra", "collate"));
+        m_timerAvgCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "average"));
+        m_timerRateCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "rate"));
 
     }
 
@@ -63,20 +79,27 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         Multimap<String, Point> points = ArrayListMultimap.create();
         Map<String, MetricType> metricTypes = Maps.newHashMap();
 
-        for (Row row : cassandraSelect(resource, Optional.of(start), Optional.of(end))) {
+        Context ctxCollate = m_timerCassandraCollate.time();
 
-            String name = getMetricName(row);
-            MetricType type = getMetricType(row);
+        try {
+            for (Row row : cassandraSelect(resource, Optional.of(start), Optional.of(end))) {
 
-            if (!metricTypes.containsKey(name)) {
-                metricTypes.put(name, type);
+                String name = getMetricName(row);
+                MetricType type = getMetricType(row);
+
+                if (!metricTypes.containsKey(name)) {
+                    metricTypes.put(name, type);
+                }
+                else if (!type.equals(metricTypes.get(name))) {
+                    String msg = String.format("encountered %s metric while processing type %s", type, metricTypes.get(name));
+                    throw new RuntimeException(msg);
+                }
+
+                points.put(name, new Point(getTimestamp(row), getValue(row, type)));
             }
-            else if (!type.equals(metricTypes.get(name))) {
-                String msg = String.format("encountered %s metric while processing type %s", type, metricTypes.get(name));
-                throw new RuntimeException(msg);
-            }
-
-            points.put(name, new Point(getTimestamp(row), getValue(row, type)));
+        }
+        finally {
+            ctxCollate.stop();
         }
 
         Results measurements = new Results();
@@ -87,10 +110,22 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
             Collection<Point> aggregates = points.get(name);
 
             if (metricTypes.get(name).equals(MetricType.COUNTER)) {
-                aggregates = Aggregates.rate(aggregates);
+                Context ctx = m_timerRateCalc.time();
+                try {
+                    aggregates = Aggregates.rate(aggregates);
+                }
+                finally {
+                    ctx.stop();
+                }
             }
 
-            aggregates = Aggregates.average(start, end, stepSize, aggregates);
+            Context ctx = m_timerAvgCalc.time();
+            try {
+                aggregates = Aggregates.average(start, end, stepSize, aggregates);
+            }
+            finally {
+                ctx.stop();
+            }
 
             for (Point point : aggregates) {
                 Measurement measurement = new Measurement(point.x, resource, name, metricTypes.get(name), point.y);
@@ -159,12 +194,19 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     }
 
     private ResultSet cassandraSelect(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+
         Select select = QueryBuilder.select().from(T_MEASUREMENTS);
         select.where(eq(F_RESOURCE, resource));
         if (start.isPresent()) select.where(gte(F_COLLECTED, start.get().asDate()));
         if (end.isPresent()) select.where(lt(F_COLLECTED, end.get().asDate()));
 
-        return m_session.execute(select);
-    }
+        Context timerCtx = m_timerCassandraSelectr.time();
 
+        try {
+            return m_session.execute(select);
+        }
+        finally {
+            timerCtx.stop();
+        }
+    }
 }
