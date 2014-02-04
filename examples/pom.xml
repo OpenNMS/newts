@@ -17,6 +17,7 @@
 
   <modules>
     <module>gsod</module>
+    <module>bench</module>
   </modules>
 
 </project>
