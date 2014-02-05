@@ -255,20 +255,13 @@ public class AggregateFunctions {
                     m_accum = 0.0;
                     
                     accumulate(boundaryTime, newTime, updateValue);;
-                    
+
                 }
-                
+
                 m_lastUpdateTime = newTime;
-                
-                
+
             }
-            
-            
-            
-            
-            
-            
-            
+
             return results;
         }
 

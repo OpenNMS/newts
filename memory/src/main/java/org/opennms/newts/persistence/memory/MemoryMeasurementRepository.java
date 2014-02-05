@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 
+import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
@@ -21,17 +21,16 @@ public class MemoryMeasurementRepository implements MeasurementRepository {
 
     private Map<String, HashMultimap<Timestamp, Measurement>> m_storage = new HashMap<String, HashMultimap<Timestamp, Measurement>>();
 
-
     @Override
-    public Results select(String resource, Timestamp start, Timestamp end, Duration stepSize) {
+    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, Aggregates aggregates) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
-        Timestamp lower = start.isPresent() ? start.get() : new Timestamp(Long.MIN_VALUE, TimeUnit.MILLISECONDS);
-        Timestamp upper = end.isPresent() ? end.get() : new Timestamp(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
+        Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
         Results r = new Results();
 

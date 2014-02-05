@@ -4,6 +4,7 @@ package org.opennms.newts.bench;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
@@ -13,6 +14,7 @@ import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
+import com.google.common.base.Optional;
 
 
 public class Pull extends Base {
@@ -108,7 +110,11 @@ public class Pull extends Base {
         Context ctx = m_selectTimer.time();
         
         try {
-            r = m_repository.select(getResource(), start, end, Duration.seconds(getStepSeconds()));
+            r = m_repository.select(
+                    getResource(),
+                    Optional.of(start),
+                    Optional.of(end),
+                    new Aggregates().average().step(getStepSeconds()));
         }
         finally {
             ctx.stop();

@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
+import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
@@ -27,6 +28,7 @@ import spark.Response;
 import spark.Route;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -111,7 +113,7 @@ public class Server {
 
                 String resource = request.params(":resource");
 
-                Results select = m_repository.select(resource, getStart(request), getEnd(request), getStepSize(request));
+                Results select = m_repository.select(resource, getStart(request), getEnd(request), getAggregates(request));
 
                 response.header("Access-Control-Allow-Origin", ALLOW_CORS);    // Allow CORS
                 response.type("application/json");
@@ -123,22 +125,22 @@ public class Server {
     }
 
     // FIXME: These methods can raise NumberFormatExceptions if query params aren't numbers
-    private Timestamp getStart(Request request) {
+    private Optional<Timestamp> getStart(Request request) {
         String param = request.queryParams("start");
-        if (param == null) return Timestamp.now().minus(Duration.seconds(86400));
-        return new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS);
+        if (param == null) return Optional.of(Timestamp.now().minus(Duration.seconds(86400)));
+        return Optional.of(new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS));
     }
 
-    private Timestamp getEnd(Request request) {
+    private Optional<Timestamp> getEnd(Request request) {
         String param = request.queryParams("end");
-        if (param == null) return Timestamp.now();
-        return new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS);
+        if (param == null) return Optional.of(Timestamp.now());
+        return Optional.of(new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS));
     }
 
-    private Duration getStepSize(Request request) {
+    private Aggregates getAggregates(Request request) {
         String param = request.queryParams("step_size");
         int startSecs = (param == null) ? DEFAULT_STEP_SIZE_SECONDS : Integer.parseInt(param);
-        return Duration.seconds(startSecs);
+        return new Aggregates().average().step(startSecs);
     }
 
     public static void main(String... args) {
