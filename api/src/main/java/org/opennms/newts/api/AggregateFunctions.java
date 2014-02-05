@@ -13,7 +13,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 
-public class Aggregates {
+public class AggregateFunctions {
 
     public static class Point {
         public Timestamp x;

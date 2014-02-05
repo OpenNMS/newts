@@ -13,8 +13,8 @@ import java.util.Map;
 
 import javax.inject.Named;
 
-import org.opennms.newts.api.Aggregates;
-import org.opennms.newts.api.Aggregates.Point;
+import org.opennms.newts.api.AggregateFunctions;
+import org.opennms.newts.api.AggregateFunctions.Point;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
@@ -56,7 +56,6 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     private Timer m_timerCassandraSelectr;
     private Timer m_timerAvgCalc;
     private Timer m_timerRateCalc;
-    private Timer m_timerCassandraCollate;
 
     @Inject
     public CassandraMeasurementRepository(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port, MetricRegistry registry) {
@@ -67,7 +66,6 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         m_registry = registry;
 
         m_timerCassandraSelectr = m_registry.timer(name(CassandraMeasurementRepository.class, "cassandra", "select"));
-        m_timerCassandraCollate = m_registry.timer(name(CassandraMeasurementRepository.class, "cassandra", "collate"));
         m_timerAvgCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "average"));
         m_timerRateCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "rate"));
 
@@ -79,8 +77,9 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         Multimap<String, Point> points = ArrayListMultimap.create();
         Map<String, MetricType> metricTypes = Maps.newHashMap();
 
-        Context ctxCollate = m_timerCassandraCollate.time();
+        Context ctxSelectr = m_timerCassandraSelectr.time();
 
+        // Collate results
         try {
             for (Row row : cassandraSelect(resource, Optional.of(start), Optional.of(end))) {
 
@@ -99,37 +98,24 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
             }
         }
         finally {
-            ctxCollate.stop();
+            ctxSelectr.stop();
         }
 
         Results measurements = new Results();
 
-        // Perform aggregations (rate, average, ...)
+        // Perform aggregations (rate, average, etc), and construct results.
         for (String name : points.keySet()) {
 
             Collection<Point> aggregates = points.get(name);
 
             if (metricTypes.get(name).equals(MetricType.COUNTER)) {
-                Context ctx = m_timerRateCalc.time();
-                try {
-                    aggregates = Aggregates.rate(aggregates);
-                }
-                finally {
-                    ctx.stop();
-                }
+                aggregates = rate(aggregates);
             }
 
-            Context ctx = m_timerAvgCalc.time();
-            try {
-                aggregates = Aggregates.average(start, end, stepSize, aggregates);
-            }
-            finally {
-                ctx.stop();
-            }
+            average(start, end, stepSize, aggregates);
 
             for (Point point : aggregates) {
-                Measurement measurement = new Measurement(point.x, resource, name, metricTypes.get(name), point.y);
-                measurements.addMeasurement(measurement);
+                measurements.addMeasurement(new Measurement(point.x, resource, name, metricTypes.get(name), point.y));
             }
         }
 
@@ -166,6 +152,28 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
 
         m_session.execute(batch);
 
+    }
+
+    private Collection<Point> rate(Collection<Point> points) {
+        Context ctx = m_timerRateCalc.time();
+
+        try {
+            return AggregateFunctions.rate(points);
+        }
+        finally {
+            ctx.stop();
+        }
+    }
+
+    private Collection<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
+        Context ctx = m_timerAvgCalc.time();
+
+        try {
+            return AggregateFunctions.average(start, end, stepSize, points);
+        }
+        finally {
+            ctx.stop();
+        }
     }
 
     private Measurement getMeasurement(Row row) {

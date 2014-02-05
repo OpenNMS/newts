@@ -25,13 +25,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opennms.newts.api.Aggregates.Point;
+import org.opennms.newts.api.AggregateFunctions.Point;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.UnsignedLong;
 
 
-public class AggregatesTest {
+public class AggregateFunctionsTest {
 
     private static final long DEFAULT_STEP_SECONDS = 300;
     private static final long DEFAULT_HEARTBEAT_SECONDS = 600;
@@ -104,7 +104,7 @@ public class AggregatesTest {
         // Newts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         Timestamp fromTimestamp = new Timestamp(fromSecs, TimeUnit.SECONDS);
         List<Point> pointsIn = Lists.newArrayList(points);
-        Collection<Point> pointsOut = Aggregates.average(
+        Collection<Point> pointsOut = AggregateFunctions.average(
                 fromTimestamp,
                 fromTimestamp.plus(Duration.seconds(600)),
                 Duration.seconds(300),
@@ -116,7 +116,7 @@ public class AggregatesTest {
         System.err.println();
         
         
-        Collection<Point> mbPointsOut = Aggregates.rollup2(fromTimestamp, fromTimestamp.plus(seconds(600)), seconds(300), seconds(600), Arrays.asList(points));
+        Collection<Point> mbPointsOut = AggregateFunctions.rollup2(fromTimestamp, fromTimestamp.plus(seconds(600)), seconds(300), seconds(600), Arrays.asList(points));
 
         System.err.println(" --- MB");
         for (Point point : mbPointsOut)
@@ -137,7 +137,7 @@ public class AggregatesTest {
             pointsIn.add(new Point(fromSeconds(i * 10), new Counter(UnsignedLong.fromLongBits(i * 100))));
         }
 
-        Collection<Point> pointsOut = Aggregates.rate(pointsIn);
+        Collection<Point> pointsOut = AggregateFunctions.rate(pointsIn);
 
         assertEquals(pointsIn.size(), pointsOut.size());
 
@@ -172,7 +172,7 @@ public class AggregatesTest {
     }
 
     private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs) {
-        return new Aggregates.Timestamps(fromSeconds(startSecs), fromSeconds(endSecs));
+        return new AggregateFunctions.Timestamps(fromSeconds(startSecs), fromSeconds(endSecs));
     }
 
     private Timestamp fromSeconds(long value) {
