@@ -4,10 +4,8 @@ package org.opennms.newts.api;
 import static java.lang.Double.NaN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.opennms.newts.api.Duration.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -114,17 +112,6 @@ public class AggregateFunctionsTest {
         for (Point point : pointsOut)
             System.err.println(point.x.asSeconds() + ":  " + ((point.y == null) ? "NaN" : point.y.doubleValue()));
         System.err.println();
-        
-        
-        Collection<Point> mbPointsOut = AggregateFunctions.rollup2(fromTimestamp, fromTimestamp.plus(seconds(600)), seconds(300), seconds(600), Arrays.asList(points));
-
-        System.err.println(" --- MB");
-        for (Point point : mbPointsOut)
-            System.err.println(point.x.asSeconds() + ":  " + ((point.y == null) ? "NaN" : point.y.doubleValue()));
-        System.err.println();
-
-        System.err.println("start=" + start.asSeconds() + ", end=" + start.plus(Duration.seconds(600)).asSeconds());
-        System.err.println("start=" + start.asMillis()  + ", end=" + start.plus(Duration.seconds(600)).asMillis());
 
     }
 

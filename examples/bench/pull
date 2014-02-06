@@ -1,4 +1,0 @@
-#!/bin/sh
-
-java -cp `dirname $0`/target/newts-bench-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
-     org.opennms.newts.bench.Pull $@

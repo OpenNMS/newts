@@ -107,8 +107,7 @@ public class Timestamp implements Comparable<Timestamp> {
 
     @Override
     public String toString() {
-        //return String.format("%s[%s]", getClass().getSimpleName(), asDate());
-        return String.format("%3d", asSeconds());
+        return String.format("%s[%s]", getClass().getSimpleName(), asDate());
     }
 
     public static Timestamp now() {
@@ -126,12 +125,12 @@ public class Timestamp implements Comparable<Timestamp> {
     public static Timestamp fromDate(Date d) {
         return fromEpochMillis(d.getTime());
     }
-    
+
     static boolean isFiner(TimeUnit unit1, TimeUnit unit2) {
         long c = unit2.convert(1, unit1);
         return c == 0;
     }
-    
+
     static TimeUnit finest(TimeUnit unit1, TimeUnit unit2) {
         return isFiner(unit1, unit2) ? unit1 : unit2;
     }

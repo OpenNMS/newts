@@ -42,4 +42,5 @@ public interface MeasurementRepository {
      * @param measurements
      */
     public void insert(Collection<Measurement> measurements);
+
 }

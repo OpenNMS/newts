@@ -1,19 +1,19 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
+import static org.opennms.newts.api.AggregateFunctions.average;
+import static org.opennms.newts.api.AggregateFunctions.rate;
 
 import java.util.Collection;
 import java.util.Map;
 
 import javax.inject.Named;
 
-import org.opennms.newts.api.AggregateFunctions;
 import org.opennms.newts.api.AggregateFunctions.Point;
 import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
@@ -25,8 +25,6 @@ import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.Timer.Context;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -53,9 +51,7 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     private static final String F_ATTRIBUTES = "attributes";
 
     private Session m_session;
-    private MetricRegistry m_registry;
-    private Timer m_timerAvgCalc;
-    private Timer m_timerRateCalc;
+    @SuppressWarnings("unused") private MetricRegistry m_registry;
 
     @Inject
     public CassandraMeasurementRepository(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port, MetricRegistry registry) {
@@ -64,9 +60,6 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         m_session = cluster.connect(keyspace);
 
         m_registry = registry;
-
-        m_timerAvgCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "average"));
-        m_timerRateCalc = m_registry.timer(name(CassandraMeasurementRepository.class, "aggregate", "rate"));
 
     }
 
@@ -150,28 +143,6 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
 
         m_session.execute(batch);
 
-    }
-
-    private Collection<Point> rate(Collection<Point> points) {
-        Context ctx = m_timerRateCalc.time();
-
-        try {
-            return AggregateFunctions.rate(points);
-        }
-        finally {
-            ctx.stop();
-        }
-    }
-
-    private Iterable<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
-        Context ctx = m_timerAvgCalc.time();
-
-        try {
-            return AggregateFunctions.average(start, end, stepSize, points);
-        }
-        finally {
-            ctx.stop();
-        }
     }
 
     private Measurement getMeasurement(Row row) {
