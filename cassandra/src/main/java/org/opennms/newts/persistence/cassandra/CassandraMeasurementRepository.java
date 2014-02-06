@@ -108,9 +108,7 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
                 aggregated = rate(aggregated);
             }
 
-            average(lower, upper, aggregates.getStep(), aggregated);
-
-            for (Point point : aggregated) {
+            for (Point point : average(lower, upper, aggregates.getStep(), aggregated)) {
                 measurements.addMeasurement(new Measurement(point.x, resource, name, metricTypes.get(name), point.y));
             }
         }
@@ -165,7 +163,7 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         }
     }
 
-    private Collection<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
+    private Iterable<Point> average(Timestamp start, Timestamp end, Duration stepSize, Collection<Point> points) {
         Context ctx = m_timerAvgCalc.time();
 
         try {

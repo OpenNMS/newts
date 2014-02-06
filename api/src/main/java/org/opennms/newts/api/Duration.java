@@ -40,5 +40,13 @@ public class Duration {
         return m_unit;
     }
 
+    public Duration times(long value) {
+        return new Duration(getDuration() * value, getUnit());
+    }
+
+    public String toString() {
+        return String.format("%s[%d, %s]", getClass().getSimpleName(), m_duration, getUnit());
+    }
+
 }
 

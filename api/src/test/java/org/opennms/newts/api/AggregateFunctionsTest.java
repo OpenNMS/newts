@@ -104,7 +104,7 @@ public class AggregateFunctionsTest {
         // Newts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         Timestamp fromTimestamp = new Timestamp(fromSecs, TimeUnit.SECONDS);
         List<Point> pointsIn = Lists.newArrayList(points);
-        Collection<Point> pointsOut = AggregateFunctions.average(
+        Iterable<Point> pointsOut = AggregateFunctions.average(
                 fromTimestamp,
                 fromTimestamp.plus(Duration.seconds(600)),
                 Duration.seconds(300),
