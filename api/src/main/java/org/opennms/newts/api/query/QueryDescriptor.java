@@ -1,7 +1,17 @@
 package org.opennms.newts.api.query;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+
 import org.opennms.newts.api.Duration;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 
 public class QueryDescriptor {
@@ -17,6 +27,10 @@ public class QueryDescriptor {
     public static final int DEFAULT_HEARTBEAT_MULTIPLIER = 2;
 
     private Duration m_step;
+    private final Map<String, Datasource> m_datasources = Maps.newHashMap();
+    private final Map<String, Aggregate> m_aggregates = Maps.newHashMap();
+    private final Set<String> m_sources = Sets.newHashSet();
+    private final Set<String> m_exports = Sets.newHashSet();
 
     /**
      * Constructs a new {@link QueryDescriptor} with the default step size.
@@ -47,6 +61,22 @@ public class QueryDescriptor {
 
     public Duration getStep() {
         return m_step;
+    }
+
+    public Map<String, Datasource> getDatasources() {
+        return m_datasources;
+    }
+
+    public Map<String, Aggregate> getAggregates() {
+        return m_aggregates;
+    }
+
+    public Set<String> getSources() {
+        return m_sources;
+    }
+
+    public Set<String> getExports() {
+        return m_exports;
     }
 
     /**
@@ -82,11 +112,17 @@ public class QueryDescriptor {
     }
 
     public QueryDescriptor datasource(Datasource ds) {
-        throw new UnsupportedOperationException();
+        checkNotNull(ds, "data source argument");
+        checkArgument(!getSources().contains(ds.getName()), "source \"%s\" already exists", ds.getName());
+
+        getDatasources().put(ds.getName(), ds);
+        getSources().add(ds.getName());
+
+        return this;
     }
 
     public QueryDescriptor average(String name, String source) {
-        return aggregate(new Aggregate(Function.AVERGE, name, source));
+        return aggregate(new Aggregate(Function.AVERAGE, name, source));
     }
 
     public QueryDescriptor min(String name, String source) {
@@ -98,7 +134,30 @@ public class QueryDescriptor {
     }
 
     public QueryDescriptor aggregate(Aggregate aggregate) {
-        throw new UnsupportedOperationException();
+        checkNotNull(aggregate, "aggregate argument");
+        checkArgument(!getSources().contains(aggregate.getName()), "source \"%s\" already exists", aggregate.getName());
+        checkSources(aggregate.getSources());
+
+        getAggregates().put(aggregate.getName(), aggregate);
+        getSources().add(aggregate.getName());
+
+        return this;
+    }
+
+    public QueryDescriptor export(String... names) {
+        checkSources(names);
+        getExports().addAll(Arrays.asList(names));
+        return this;
+    }
+
+    /** Throw exception if any argument is not a source. */
+    private void checkSources(String[] names) {
+        Set<String> missing = Sets.newHashSet(names);
+        missing.removeAll(getSources());
+
+        if (missing.size() > 0) {
+            throw new IllegalArgumentException(String.format("No such source(s): %s", missing));
+        }
     }
 
 }
