@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.query.ResultDescriptor;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
@@ -22,7 +22,7 @@ public class MemoryMeasurementRepository implements MeasurementRepository {
     private Map<String, HashMultimap<Timestamp, Measurement>> m_storage = new HashMap<String, HashMultimap<Timestamp, Measurement>>();
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, Aggregates aggregates) {
+    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
         throw new UnsupportedOperationException();
     }
 

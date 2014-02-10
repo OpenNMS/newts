@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
-import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MeasurementRepository;
@@ -37,7 +36,6 @@ import com.google.inject.Injector;
 public class Server {
 
     private static final String ALLOW_CORS = "*";
-    private static final int DEFAULT_STEP_SIZE_SECONDS = 300;
 
     private Function<Row, Collection<MeasurementDTO>> m_rowFunc = new Function<Row, Collection<MeasurementDTO>>() {
 
@@ -90,7 +88,8 @@ public class Server {
             public Object handle(Request request, Response response) {
 
                 ObjectMapper mapper = new ObjectMapper();
-                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {});
+                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {
+                });
                 Collection<MeasurementDTO> measurementDTOs = null;
 
                 try {
@@ -113,9 +112,9 @@ public class Server {
 
                 String resource = request.params(":resource");
 
-                Results select = m_repository.select(resource, getStart(request), getEnd(request), getAggregates(request));
+                Results select = m_repository.select(resource, getStart(request), getEnd(request));
 
-                response.header("Access-Control-Allow-Origin", ALLOW_CORS);    // Allow CORS
+                response.header("Access-Control-Allow-Origin", ALLOW_CORS); // Allow CORS
                 response.type("application/json");
 
                 return Collections2.transform(select.getRows(), m_rowFunc);
@@ -135,12 +134,6 @@ public class Server {
         String param = request.queryParams("end");
         if (param == null) return Optional.of(Timestamp.now());
         return Optional.of(new Timestamp(Integer.parseInt(param), TimeUnit.SECONDS));
-    }
-
-    private Aggregates getAggregates(Request request) {
-        String param = request.queryParams("step_size");
-        int startSecs = (param == null) ? DEFAULT_STEP_SIZE_SECONDS : Integer.parseInt(param);
-        return new Aggregates().average().step(startSecs);
     }
 
     public static void main(String... args) {

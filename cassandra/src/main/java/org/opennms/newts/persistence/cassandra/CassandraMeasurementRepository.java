@@ -15,6 +15,9 @@ import java.util.Map;
 import javax.inject.Named;
 
 import org.opennms.newts.api.AggregateFunctions.Point;
+import org.opennms.newts.api.query.Datasource;
+import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.api.AggregateFunctions;
 import org.opennms.newts.api.Aggregates;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
@@ -64,7 +67,7 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
     }
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, Aggregates aggregates) {
+    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
@@ -89,21 +92,10 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
             points.put(name, new Point(getTimestamp(row), getValue(row, type)));
         }
 
-
         Results measurements = new Results();
 
-        // Perform aggregations (rate, average, etc), and construct results.
-        for (String name : points.keySet()) {
+        for (Map.Entry<String, Datasource> ds : descriptor.getDatasources().entrySet()) {
 
-            Collection<Point> aggregated = points.get(name);
-
-            if (metricTypes.get(name).equals(MetricType.COUNTER)) {
-                aggregated = rate(aggregated);
-            }
-
-            for (Point point : average(lower, upper, aggregates.getStep(), aggregated)) {
-                measurements.addMeasurement(new Measurement(point.x, resource, name, metricTypes.get(name), point.y));
-            }
         }
 
         return measurements;

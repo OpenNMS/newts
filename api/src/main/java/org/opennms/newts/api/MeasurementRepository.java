@@ -3,6 +3,8 @@ package org.opennms.newts.api;
 
 import java.util.Collection;
 
+import org.opennms.newts.api.query.ResultDescriptor;
+
 import com.google.common.base.Optional;
 
 
@@ -17,11 +19,13 @@ public interface MeasurementRepository {
      *            query start time (defaults to 24 hours less than {@code end}, if absent)
      * @param end
      *            query end time (defaults to current time if absent)
-     * @param aggregates
-     *            consolidation descriptor
+     * @param descriptor
+     *            aggregation descriptor
+     * @param resolultion
+     *            temporal resolution of results
      * @return query results
      */
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, Aggregates aggregates);
+    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution);
 
     /**
      * Read stored measurements.
