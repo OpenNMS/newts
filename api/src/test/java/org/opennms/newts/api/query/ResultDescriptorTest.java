@@ -8,29 +8,29 @@ import org.junit.Test;
 import org.opennms.newts.api.Duration;
 
 
-public class QueryDescriptorTest {
+public class ResultDescriptorTest {
 
     @Test
     public void testStep() {
-        assertEquals(400000, new QueryDescriptor(400000).getStep().asMillis());
-        assertEquals(400000, new QueryDescriptor(Duration.millis(400000)).getStep().asMillis());
-        assertEquals(QueryDescriptor.DEFAULT_STEP, new QueryDescriptor().getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor(400000).getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor(Duration.millis(400000)).getStep().asMillis());
+        assertEquals(ResultDescriptor.DEFAULT_STEP, new ResultDescriptor().getStep().asMillis());
 
-        assertEquals(400000, new QueryDescriptor().step(400000).getStep().asMillis());
-        assertEquals(400000, new QueryDescriptor().step(Duration.millis(400000)).getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor().step(400000).getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor().step(Duration.millis(400000)).getStep().asMillis());
 
-        assertTrue(new QueryDescriptor().step(1000) instanceof QueryDescriptor);
-        assertTrue(new QueryDescriptor().step(Duration.millis(1000)) instanceof QueryDescriptor);
+        assertTrue(new ResultDescriptor().step(1000) instanceof ResultDescriptor);
+        assertTrue(new ResultDescriptor().step(Duration.millis(1000)) instanceof ResultDescriptor);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBadExport() {
-        new QueryDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export("bogus");
+        new ResultDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export("bogus");
     }
 
     @Test
     public void testExports() {
-        QueryDescriptor descriptor = new QueryDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export("in");
+        ResultDescriptor descriptor = new ResultDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export("in");
 
         assertEquals(1, descriptor.getExports().size());
         assertEquals("in", descriptor.getExports().iterator().next());
@@ -39,9 +39,9 @@ public class QueryDescriptorTest {
     @Test
     public void testAverage() {
 
-        QueryDescriptor descriptor;
+        ResultDescriptor descriptor;
 
-        descriptor = new QueryDescriptor().datasource("temperature");
+        descriptor = new ResultDescriptor().datasource("temperature");
         descriptor.average("avgTemp", "temperature");
 
         Aggregate aggregate = descriptor.getAggregates().get("avgTemp");
@@ -56,9 +56,9 @@ public class QueryDescriptorTest {
     @Test
     public void testMin() {
 
-        QueryDescriptor descriptor;
+        ResultDescriptor descriptor;
 
-        descriptor = new QueryDescriptor().datasource("temperature");
+        descriptor = new ResultDescriptor().datasource("temperature");
         descriptor.min("minTemp", "temperature");
 
         Aggregate aggregate = descriptor.getAggregates().get("minTemp");
@@ -73,9 +73,9 @@ public class QueryDescriptorTest {
     @Test
     public void testMax() {
 
-        QueryDescriptor descriptor;
+        ResultDescriptor descriptor;
 
-        descriptor = new QueryDescriptor().datasource("temperature");
+        descriptor = new ResultDescriptor().datasource("temperature");
         descriptor.max("maxTemp", "temperature");
 
         Aggregate aggregate = descriptor.getAggregates().get("maxTemp");
@@ -90,25 +90,25 @@ public class QueryDescriptorTest {
     @Test
     public void testDatasource() {
 
-        QueryDescriptor descriptor;
+        ResultDescriptor descriptor;
         Datasource dataSource;
 
-        descriptor = new QueryDescriptor().datasource("ifInOctets");
+        descriptor = new ResultDescriptor().datasource("ifInOctets");
 
         dataSource = descriptor.getDatasources().get("ifInOctets");
         assertEquals("ifInOctets", dataSource.getName());
         assertEquals("ifInOctets", dataSource.getSource());
 
-        int heatbeat = QueryDescriptor.DEFAULT_HEARTBEAT_MULTIPLIER * QueryDescriptor.DEFAULT_STEP;
+        int heatbeat = ResultDescriptor.DEFAULT_HEARTBEAT_MULTIPLIER * ResultDescriptor.DEFAULT_STEP;
         assertEquals(heatbeat, dataSource.getHeartbeat().asMillis());
 
-        descriptor = new QueryDescriptor();
+        descriptor = new ResultDescriptor();
 
         dataSource = descriptor.datasource("in", "ifInOctets").getDatasources().get("in");
         assertEquals("in", dataSource.getName());
         assertEquals("ifInOctets", dataSource.getSource());
 
-        descriptor = new QueryDescriptor();
+        descriptor = new ResultDescriptor();
 
         dataSource = descriptor.datasource("in", "ifInOctets", 900000).getDatasources().get("in");
         assertEquals("in", dataSource.getName());
@@ -123,9 +123,9 @@ public class QueryDescriptorTest {
     @Test
     public void testAggregate() {
 
-        QueryDescriptor descriptor;
+        ResultDescriptor descriptor;
 
-        descriptor = new QueryDescriptor().datasource("inBytes", "ifInOctets");
+        descriptor = new ResultDescriptor().datasource("inBytes", "ifInOctets");
         descriptor.aggregate(new Aggregate(Function.MAXIMUM, "inMax", "inBytes"));
 
         assertEquals(1, descriptor.getAggregates().size());
@@ -138,12 +138,12 @@ public class QueryDescriptorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAverageWithBadSource() {
-        new QueryDescriptor().average("avg", "notreal");
+        new ResultDescriptor().average("avg", "notreal");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAggregateWithBadSource() {
-        new QueryDescriptor().aggregate(new Aggregate(Function.AVERAGE, "average", "bogus", "alsobogus"));
+        new ResultDescriptor().aggregate(new Aggregate(Function.AVERAGE, "average", "bogus", "alsobogus"));
     }
 
 }
