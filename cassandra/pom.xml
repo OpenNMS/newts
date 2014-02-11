@@ -17,6 +17,10 @@
 
   <name>New Timeseries Datastore :: Cassandra</name>
 
+  <properties>
+    <skipITs>true</skipITs>
+  </properties>
+
   <dependencies>
 
     <dependency>
@@ -58,6 +62,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.16</version>
+        <configuration>
+          <skipITs>${skipITs}</skipITs>
+        </configuration>
         <executions>
           <execution>
             <goals>
