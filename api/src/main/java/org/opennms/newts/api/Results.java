@@ -56,11 +56,15 @@ public class Results implements Iterable<Results.Row> {
 
         if (row == null) {
             row = new Row(measurement.getTimestamp(), measurement.getResource());
-            m_rows.put(measurement.getTimestamp(), row);
+            addRow(row);
         }
 
         row.addMeasurement(measurement);
 
+    }
+
+    public void addRow(Row row) {
+        m_rows.put(row.getTimestamp(), row);
     }
 
     public Collection<Row> getRows() {
