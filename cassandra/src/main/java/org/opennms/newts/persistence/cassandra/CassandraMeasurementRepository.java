@@ -5,7 +5,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.lte;
 
 import java.util.Collection;
 
@@ -101,7 +101,7 @@ public class CassandraMeasurementRepository implements MeasurementRepository {
         select.where(eq(SchemaConstants.F_RESOURCE, resource));
 
         select.where(gte(SchemaConstants.F_COLLECTED, start.asDate()));
-        select.where(lt(SchemaConstants.F_COLLECTED, end.asDate()));
+        select.where(lte(SchemaConstants.F_COLLECTED, end.asDate()));
 
         return m_session.execute(select);
     }

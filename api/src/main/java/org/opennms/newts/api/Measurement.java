@@ -1,5 +1,6 @@
 package org.opennms.newts.api;
 
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
@@ -49,6 +50,18 @@ public class Measurement {
 
     public Map<String, String> getAttributes() {
         return m_attributes;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[timestamp=%s, resource=%s, name=%s, type=%s, value=%s]",
+                getClass().getSimpleName(),
+                getTimestamp(),
+                getResource(),
+                getName(),
+                getType(),
+                getValue());
     }
 
 }

@@ -1,5 +1,5 @@
 
-DROP KEYSPACE newts;
+DROP KEYSPACE IF EXISTS newts;
 
 CREATE KEYSPACE newts
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
