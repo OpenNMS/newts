@@ -19,7 +19,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 
-public class InsertITCase extends AbstractCassandraTestCase {
+public class InsertSelectITCase extends AbstractCassandraTestCase {
 
     @Test
     public void test() {

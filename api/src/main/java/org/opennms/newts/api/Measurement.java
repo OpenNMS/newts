@@ -24,7 +24,7 @@ public class Measurement {
         m_resource = checkNotNull(resource, "resource");
         m_name = checkNotNull(name, "name");
         m_type = checkNotNull(type, "type");
-        m_value = checkNotNull(value, "value");
+        m_value = value;
         m_attributes = attributes;
     }
 

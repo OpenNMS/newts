@@ -14,6 +14,10 @@ public class Counter extends ValueType<UnsignedLong> {
 
     private final UnsignedLong m_value;
 
+    public Counter(long value) {
+        this(UnsignedLong.fromLongBits(value));
+    }
+
     public Counter(UnsignedLong value) {
         m_value = checkNotNull(value, "value");
     }
