@@ -7,22 +7,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Datasource {
 
-    private final String m_name;
+    private final String m_label;
     private final String m_source;
     private final Duration m_heartbeat;
 
-    public Datasource(String name, String sourceName, Duration heartbeat) {
-        checkNotNull(name, "name argument");
+    public Datasource(String label, String sourceName, Duration heartbeat) {
+        checkNotNull(label, "label argument");
         checkNotNull(sourceName, "source name argument");
         checkNotNull(heartbeat, "heartbeat argument");
 
-        m_name = name;
+        m_label = label;
         m_source = sourceName;
         m_heartbeat = heartbeat;
     }
 
-    public String getName() {
-        return m_name;
+    public String getLabel() {
+        return m_label;
     }
 
     public String getSource() {
