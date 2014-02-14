@@ -4,6 +4,7 @@ package org.opennms.newts.persistence.cassandra;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.opennms.newts.api.Measurement;
@@ -29,7 +30,7 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
 
     /**
      * Construct a new {@link DriverAdapter}.
-     *
+     * 
      * @param input
      *            cassandra driver {@link ResultSet}
      * @param metrics
@@ -58,6 +59,9 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
 
     @Override
     public Results.Row next() {
+
+        if (!hasNext()) throw new NoSuchElementException();
+
         Results.Row nextNext = null;
 
         while (m_results.hasNext()) {

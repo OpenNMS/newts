@@ -6,6 +6,7 @@ import static org.opennms.newts.api.MetricType.GAUGE;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
@@ -37,6 +38,8 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
 
     @Override
     public Row next() {
+
+        if (!hasNext()) throw new NoSuchElementException();
 
         Row working = m_input.next();
         Row result = new Row(working.getTimestamp(), working.getResource());
