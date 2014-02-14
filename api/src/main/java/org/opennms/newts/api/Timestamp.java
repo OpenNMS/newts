@@ -119,7 +119,7 @@ public class Timestamp implements Comparable<Timestamp> {
     }
     
     public static Timestamp fromEpochSeconds(long seconds) {
-        return new Timestamp(seconds, TimeUnit.MILLISECONDS);
+        return new Timestamp(seconds, TimeUnit.SECONDS);
     }
     
     public static Timestamp fromDate(Date d) {
