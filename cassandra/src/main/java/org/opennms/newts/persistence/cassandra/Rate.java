@@ -1,6 +1,7 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opennms.newts.api.MetricType.GAUGE;
 
 import java.util.Iterator;
@@ -25,8 +26,8 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
     private final Map<String, Measurement> m_prevMeasurements = Maps.newHashMap();
 
     public Rate(Iterator<Row> input, String[] metrics) {
-        m_input = input;
-        m_metrics = metrics;
+        m_input = checkNotNull(input, "input argument");
+        m_metrics = checkNotNull(metrics, "metrics argument");
     }
 
     @Override
