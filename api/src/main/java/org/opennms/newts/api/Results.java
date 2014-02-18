@@ -46,6 +46,11 @@ public class Results implements Iterable<Results.Row> {
             return getMeasurements().iterator();
         }
 
+        @Override
+        public String toString() {
+            return String.format("%s[timestamp=%s, resource=%s", getClass().getSimpleName(), getTimestamp(), getResource());
+        }
+
     }
 
     Map<Timestamp, Row> m_rows = Maps.newTreeMap();
