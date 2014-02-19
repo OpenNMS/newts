@@ -23,22 +23,28 @@ public class PrimaryDataTest {
                 testCase.getMeasurements().iterator());
     }
 
+    private void execute(XMLTestCase testCase) {
+        assertRowsEqual(testCase.getExpectedResults(), getIterator(testCase));
+    }
+
     @Test
     public void testShortSamples() throws JAXBException {
+        execute(getTestCase("primaryData/shortSamples.xml"));
+    }
 
-        XMLTestCase testCase = getTestCase("primaryData/shortSamples.xml");
-
-        assertRowsEqual(testCase.getExpectedResults(), getIterator(testCase));
-
+    @Test
+    public void testSkippedSample() throws JAXBException {
+        execute(getTestCase("primaryData/skippedSample.xml"));
     }
 
     @Test
     public void testOneToOneSamples() {
+        execute(getTestCase("primaryData/oneToOne.xml"));
+    }
 
-        XMLTestCase testCase = getTestCase("primaryData/oneToOne.xml");
-
-        assertRowsEqual(testCase.getExpectedResults(), getIterator(testCase));
-
+    @Test
+    public void testLongSamples() {
+        execute(getTestCase("primaryData/longSamples.xml"));
     }
 
 }

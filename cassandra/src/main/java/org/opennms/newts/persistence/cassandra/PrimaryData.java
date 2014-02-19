@@ -93,12 +93,14 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                 break;
             }
 
-            if (m_input.hasNext())
+            if (m_input.hasNext()) {
                 m_current = m_input.next();
+            }
             else m_current = null;
 
         }
 
+        // Add results to output row
         for (String name : m_metrics) {
             Accumulation accumulation = m_accumulation.get(name);
             output.addMeasurement(new Measurement(
@@ -112,22 +114,25 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
         // If input is greater than row, accumulate remainder for next row
         if (m_current != null) {
             for (String name : m_metrics) {
+                Measurement measurement = m_current.getMeasurement(name);
+
                 Accumulation accumulation = m_accumulation.get(name);
+                accumulation.reset();
+
+                if (measurement == null) {
+                    continue;
+                }
 
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
                     if (elapsed.lt(getHeartbeat(name))) {
                         accumulation.known = elapsed.asMillis();
                         accumulation.unknown = 0;
-                        accumulation.value = m_current.getMeasurement(name).getValue().times(elapsed.asMillis());
+                        accumulation.value = measurement.getValue().times(elapsed.asMillis());
                     }
                     else {
-                        accumulation.reset();
                         accumulation.unknown = elapsed.asMillis();
                     }
-                }
-                else {
-                    accumulation.reset();
                 }
             }
         }

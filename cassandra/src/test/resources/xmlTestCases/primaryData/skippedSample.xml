@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Samples occur prior to the nearest step interval boundary. -->
+<!-- A skipped sample (though sample interval does not exceed heartbeat) -->
 
 <TestCase>
 
@@ -37,12 +37,13 @@
       <Value>2</Value>
     </Measurement>
 
-    <Measurement>
-      <Timestamp>550</Timestamp>
-      <Name>m0</Name>
-      <Type>GAUGE</Type>
-      <Value>2</Value>
-    </Measurement>
+<!-- Whoops! -->
+<!--     <Measurement> -->
+<!--       <Timestamp>550</Timestamp> -->
+<!--       <Name>m0</Name> -->
+<!--       <Type>GAUGE</Type> -->
+<!--       <Value>2</Value> -->
+<!--     </Measurement> -->
     <Measurement>
       <Timestamp>550</Timestamp>
       <Name>m1</Name>
@@ -51,13 +52,13 @@
     </Measurement>
 
     <Measurement>
-      <Timestamp>850</Timestamp>
+      <Timestamp>840</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
       <Value>3</Value>
     </Measurement>
     <Measurement>
-      <Timestamp>850</Timestamp>
+      <Timestamp>840</Timestamp>
       <Name>m1</Name>
       <Type>GAUGE</Type>
       <Value>4</Value>
@@ -69,7 +70,7 @@
       <Timestamp>300</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
-      <Value>1.167</Value>
+      <Value>1</Value>
     </Measurement>
     <Measurement>
       <Timestamp>300</Timestamp>
@@ -82,7 +83,7 @@
       <Timestamp>600</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
-      <Value>2.167</Value>
+      <Value>3</Value>
     </Measurement>
     <Measurement>
       <Timestamp>600</Timestamp>
