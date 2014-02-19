@@ -29,10 +29,9 @@ public class IntervalGeneratorTest {
 
         timestamps = Lists.newArrayList(getTimestamps(0, 3600));
 
-        assertEquals(14, timestamps.size());
+        assertEquals(13, timestamps.size());
         assertEquals(new Timestamp(0, TimeUnit.SECONDS), timestamps.get(0));
         assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(12));
-        assertEquals(new Timestamp(3900, TimeUnit.SECONDS), timestamps.get(13));
 
     }
 
