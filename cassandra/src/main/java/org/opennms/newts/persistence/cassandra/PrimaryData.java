@@ -127,7 +127,6 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
                     if (elapsed.lt(getHeartbeat(name))) {
                         accumulation.known = elapsed.asMillis();
-                        accumulation.unknown = 0;
                         accumulation.value = measurement.getValue().times(elapsed.asMillis());
                     }
                     else {
@@ -167,12 +166,7 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
-            Accumulation accumulation = m_accumulation.get(current.getName());
-
-            if (accumulation == null) { // Create
-                accumulation = new Accumulation(current.getType());
-                m_accumulation.put(current.getName(), accumulation);
-            }
+            Accumulation accumulation = getOrCreateAccumulation(current.getName(), current.getType());
 
             // FIXME: what happens if metric type changes mid-stream?
 
@@ -186,6 +180,17 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
 
             m_lastUpdates.put(current.getName(), current);
         }
+    }
+
+    public Accumulation getOrCreateAccumulation(String name, MetricType type) {
+        Accumulation result = m_accumulation.get(name);
+
+        if (result == null) {
+            result = new Accumulation(type);
+            m_accumulation.put(name, result);
+        }
+
+        return result;
     }
 
     /*
