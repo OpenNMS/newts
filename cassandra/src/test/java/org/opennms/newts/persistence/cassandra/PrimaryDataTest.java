@@ -38,6 +38,11 @@ public class PrimaryDataTest {
     }
 
     @Test
+    public void testManyToOneSamples() {
+        execute(getTestCase("primaryData/manyToOne.xml"));
+    }
+
+    @Test
     public void testOneToOneSamples() {
         execute(getTestCase("primaryData/oneToOne.xml"));
     }
