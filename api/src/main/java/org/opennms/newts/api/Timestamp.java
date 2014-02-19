@@ -54,12 +54,12 @@ public class Timestamp implements Comparable<Timestamp> {
         TimeUnit finest = finest(m_unit, d.getUnit());
         return new Timestamp(convert(finest) - d.convert(finest), finest);
     }
-    
+
     public Duration minus(Timestamp t) {
         if (t.gt(this)) throw new IllegalArgumentException("you can only subtract an earlier date from a later one... negative durations don't make sense");
         TimeUnit finest = finest(m_unit, t.getUnit());
         return new Duration(convert(finest) - t.convert(finest), finest);
-        
+
     }
 
     public boolean lt(Timestamp other) {
@@ -87,7 +87,8 @@ public class Timestamp implements Comparable<Timestamp> {
     }
 
     public Timestamp stepCeiling(long stepSize, TimeUnit units) {
-        return new Timestamp(((convert(units) / stepSize) + 1) * stepSize, units);
+        long v = convert(units);
+        return ((v % stepSize) == 0) ? new Timestamp(v, units) : new Timestamp(((v / stepSize) + 1) * stepSize, units);
     }
 
     public Timestamp stepCeiling(Duration d) {
@@ -113,15 +114,15 @@ public class Timestamp implements Comparable<Timestamp> {
     public static Timestamp now() {
         return new Timestamp(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
-    
+
     public static Timestamp fromEpochMillis(long millis) {
         return new Timestamp(millis, TimeUnit.MILLISECONDS);
     }
-    
+
     public static Timestamp fromEpochSeconds(long seconds) {
         return new Timestamp(seconds, TimeUnit.SECONDS);
     }
-    
+
     public static Timestamp fromDate(Date d) {
         return fromEpochMillis(d.getTime());
     }

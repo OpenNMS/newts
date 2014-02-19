@@ -21,7 +21,7 @@ public class IntervalGenerator implements Iterator<Timestamp>, Iterable<Timestam
     private final Timestamp m_final;
     private Timestamp m_current;
 
-    public IntervalGenerator(Timestamp start, Timestamp finish, final Duration interval) {
+    public IntervalGenerator(Timestamp start, Timestamp finish, Duration interval) {
         m_interval = checkNotNull(interval, "interval argument");
         m_current = checkNotNull(start, "start argument").stepFloor(m_interval);
         m_final = checkNotNull(finish, "finish argument").stepCeiling(m_interval);

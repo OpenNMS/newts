@@ -2,6 +2,7 @@ package org.opennms.newts.api;
 
 
 import static org.junit.Assert.*;
+import static org.opennms.newts.api.Timestamp.fromEpochSeconds;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +10,12 @@ import org.junit.Test;
 
 
 public class TimestampDurationTest {
+
+    @Test
+    public void testCeiling() {
+        assertEquals(fromEpochSeconds(900), fromEpochSeconds(601).stepCeiling(Duration.seconds(300)));
+        assertEquals(fromEpochSeconds(900), fromEpochSeconds(900).stepCeiling(Duration.seconds(300)));
+    }
 
     @Test
     public void test() {
