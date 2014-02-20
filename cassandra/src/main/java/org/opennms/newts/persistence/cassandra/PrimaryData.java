@@ -100,24 +100,24 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
 
         }
 
-        // Add results to output row
+        // Go time; We've accumulated enough to produce the output row
         for (String name : m_metrics) {
+
             Accumulation accumulation = m_accumulation.get(name);
+
+            // Add measurement with accumulated value to output row
             output.addMeasurement(new Measurement(
                     output.getTimestamp(),
                     output.getResource(),
                     name,
                     accumulation.type,
                     accumulation.average()));
-        }
 
-        // If input is greater than row, accumulate remainder for next row
-        if (m_current != null) {
-            for (String name : m_metrics) {
-                Measurement measurement = m_current.getMeasurement(name);
-
-                Accumulation accumulation = m_accumulation.get(name);
+            // If input is greater than row, accumulate remainder for next row
+            if (m_current != null) {
                 accumulation.reset();
+
+                Measurement measurement = m_current.getMeasurement(name);
 
                 if (measurement == null) {
                     continue;
@@ -133,6 +133,7 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                         accumulation.unknown = elapsed.asMillis();
                     }
                 }
+
             }
         }
 
@@ -178,9 +179,10 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                 accumulation.unknown += elapsed.asMillis();
             }
 
-            // Postpone storing, we'll need this sample again...
-            if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval)))
+            // Postpone storing as lastUpdate, we'll need this sample again...
+            if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval))) {
                 m_lastUpdates.put(current.getName(), current);
+            }
         }
     }
 
