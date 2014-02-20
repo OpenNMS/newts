@@ -178,7 +178,9 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                 accumulation.unknown += elapsed.asMillis();
             }
 
-            m_lastUpdates.put(current.getName(), current);
+            // Postpone storing, we'll need this sample again...
+            if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval)))
+                m_lastUpdates.put(current.getName(), current);
         }
     }
 

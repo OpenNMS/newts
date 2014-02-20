@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Samples are perfectly aligned to the step interval boundaries. -->
+
+<TestCase>
+
+  <Resource>localhost</Resource>
+  <Start>300</Start>
+  <End>1800</End>
+  <Interval>300</Interval>
+  <Heartbeat>1000</Heartbeat>
+
+  <Measurements>
+    <Measurement>
+      <Timestamp>0</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>0</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>0</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>1</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>900</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>1</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>900</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>1800</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>1800</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>3</Value>
+    </Measurement>
+  </Measurements>
+
+  <Results>
+    <Measurement>
+      <Timestamp>300</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>1</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>300</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>600</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>1</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>600</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>900</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>1</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>900</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>1200</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>1200</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>3</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>1500</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>1500</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>3</Value>
+    </Measurement>
+
+    <Measurement>
+      <Timestamp>1800</Timestamp>
+      <Name>m0</Name>
+      <Type>GAUGE</Type>
+      <Value>2</Value>
+    </Measurement>
+    <Measurement>
+      <Timestamp>1800</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>3</Value>
+    </Measurement>
+  </Results>
+
+</TestCase>

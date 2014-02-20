@@ -48,6 +48,11 @@ public class PrimaryDataTest {
     }
 
     @Test
+    public void testOneToManySamples() {
+        execute(getTestCase("primaryData/oneToMany.xml"));
+    }
+
+    @Test
     public void testLongSamples() {
         execute(getTestCase("primaryData/longSamples.xml"));
     }
