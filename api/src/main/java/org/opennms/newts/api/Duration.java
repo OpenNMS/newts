@@ -33,6 +33,10 @@ public class Duration implements Comparable<Duration> {
     public static Duration millis(long millis) {
         return new Duration(millis, TimeUnit.MILLISECONDS);
     }
+    
+    public static Duration minutes(long minutes) {
+        return new Duration(minutes, TimeUnit.MINUTES);
+    }
 
     public long getDuration() {
         return m_duration;

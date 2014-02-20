@@ -4,16 +4,55 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.opennms.newts.api.Duration;
-
+import org.opennms.newts.api.query.Datasource.AggregationFunction;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
 public class ResultDescriptor {
+    
+    public static interface Calculation {
+        double apply(double...ds);
+    }
+    
+    public static interface UnaryFunction {
+        double apply(double a);
+    }
+    
+    public static interface BinaryFunction {
+        double apply(double a, double b);
+    }
+    
+    public static class CalculationDescriptor {
+        private String m_label;
+        private Calculation m_calculation;
+        private String[] m_args;
+        
+        public CalculationDescriptor(String label, Calculation calculation, String... args) {
+            m_label = label;
+            m_calculation = calculation;
+            m_args = args;
+        }
+
+        public String getLabel() {
+            return m_label;
+        }
+
+        public Calculation getCalculation() {
+            return m_calculation;
+        }
+
+        public String[] getArgs() {
+            return m_args;
+        }
+        
+        
+    }
 
     /**
      * The default step size in milliseconds.
@@ -24,12 +63,17 @@ public class ResultDescriptor {
      * Multiple of the step size to use as default heartbeat.
      */
     public static final int DEFAULT_HEARTBEAT_MULTIPLIER = 2;
-
+    
+    /**
+     * Default X Files Factor (percentage of NaN pdps that are allowed when aggregating)
+     */
+    public static final double DEFAULT_XFF = 0.5;
+    
     private Duration m_step;
     private final Map<String, Datasource> m_datasources = Maps.newHashMap();
-    private final Map<String, Aggregate> m_aggregates = Maps.newHashMap();
-    private final Map<String, Class<?>> m_sources = Maps.newHashMap();
+    private final Map<String, CalculationDescriptor> m_calculations = Maps.newHashMap();
 
+    
     private final Set<String> m_exports = Sets.newHashSet();
 
     /**
@@ -67,16 +111,8 @@ public class ResultDescriptor {
         return m_datasources;
     }
 
-    public Map<String, Aggregate> getAggregates() {
-        return m_aggregates;
-    }
-
-    public Map<String, Class<?>> getSources() {
-        return m_sources;
-    }
-
     public Set<String> getLabels() {
-        return m_sources.keySet();
+        return Sets.union(m_datasources.keySet(), m_calculations.keySet());
     }
 
     public Set<String> getExports() {
@@ -99,20 +135,20 @@ public class ResultDescriptor {
         return this;
     }
 
-    public ResultDescriptor datasource(String metricName) {
-        return datasource(metricName, metricName);
+    public ResultDescriptor datasource(String metricName, AggregationFunction aggregationFunction) {
+        return datasource(metricName, metricName, aggregationFunction);
     }
 
-    public ResultDescriptor datasource(String name, String metricName) {
-        return datasource(name, metricName, getStep().times(DEFAULT_HEARTBEAT_MULTIPLIER));
+    public ResultDescriptor datasource(String name, String metricName, AggregationFunction aggregationFunction) {
+        return datasource(name, metricName, getStep().times(DEFAULT_HEARTBEAT_MULTIPLIER), aggregationFunction);
     }
 
-    public ResultDescriptor datasource(String name, String metricName, long heartbeat) {
-        return datasource(name, metricName, Duration.millis(heartbeat));
+    public ResultDescriptor datasource(String name, String metricName, long heartbeat, AggregationFunction aggregationFunction) {
+        return datasource(name, metricName, Duration.millis(heartbeat), aggregationFunction);
     }
 
-    public ResultDescriptor datasource(String name, String metricName, Duration heartbeat) {
-        return datasource(new Datasource(name, metricName, heartbeat));
+    public ResultDescriptor datasource(String name, String metricName, Duration heartbeat, AggregationFunction aggregationFunction) {
+        return datasource(new Datasource(name, metricName, heartbeat, DEFAULT_XFF, aggregationFunction));
     }
 
     ResultDescriptor datasource(Datasource ds) {
@@ -120,49 +156,57 @@ public class ResultDescriptor {
         checkArgument(!getLabels().contains(ds.getLabel()), "label \"%s\" already in use", ds.getLabel());
 
         getDatasources().put(ds.getLabel(), ds);
-        getSources().put(ds.getLabel(), ds.getClass());
-
-        return this;
-    }
-
-    public ResultDescriptor average(String name, String source) {
-        return aggregate(new Aggregate(Aggregate.Function.AVERAGE, name, source));
-    }
-
-    public ResultDescriptor min(String name, String source) {
-        return aggregate(new Aggregate(Aggregate.Function.MINIMUM, name, source));
-    }
-
-    public ResultDescriptor max(String name, String source) {
-        return aggregate(new Aggregate(Aggregate.Function.MAXIMUM, name, source));
-    }
-
-    // FIXME: Arguments can have computation or datasources source, but not another aggregation.
-    ResultDescriptor aggregate(Aggregate aggregate) {
-        checkNotNull(aggregate, "aggregate argument");
-        checkArgument(!getLabels().contains(aggregate.getLabel()), "label \"%s\" already in use", aggregate.getLabel());
-        checkSources(aggregate.getSource());
-
-        getAggregates().put(aggregate.getLabel(), aggregate);
-        getSources().put(aggregate.getLabel(), aggregate.getClass());
 
         return this;
     }
 
     public ResultDescriptor export(String... names) {
-        checkSources(names);
+        checkLabels(names);
         getExports().addAll(Arrays.asList(names));
         return this;
     }
 
-    /** Throw exception if any argument is not a source. */
-    private void checkSources(String... names) {
+    private void checkLabels(String... names) {
         Set<String> missing = Sets.newHashSet(names);
-        missing.removeAll(getSources().keySet());
+        missing.removeAll(getLabels());
 
         if (missing.size() > 0) {
-            throw new IllegalArgumentException(String.format("No such source(s): %s", missing));
+            throw new IllegalArgumentException(String.format("No such labels(s): %s", missing));
         }
+    }
+
+    public ResultDescriptor calculate(CalculationDescriptor calculation) {
+        m_calculations.put(calculation.getLabel(), calculation);
+        return this;
+    }
+    
+    public ResultDescriptor calculate(String label, Calculation calculation, String... args) {
+        return calculate(new CalculationDescriptor(label, calculation, args));
+    }
+
+    public ResultDescriptor calculate(String label, final BinaryFunction binaryFunction, String arg1, String arg2) {
+        Calculation calculation = new Calculation() {
+            
+            @Override
+            public double apply(double... ds) {
+                checkArgument(ds.length == 2, "binaryFunctions expect to take exactly two arguments but we've been passed "+ds.length);
+                return binaryFunction.apply(ds[0], ds[1]);
+            }
+        };
+        return calculate(label, calculation, arg1, arg2);
+        
+    }
+    public ResultDescriptor calculate(String label, final UnaryFunction unaryFunction, String arg) {
+        Calculation calculation = new Calculation() {
+            
+            @Override
+            public double apply(double... ds) {
+                checkArgument(ds.length == 1, "unaryFunctions expect to take exactly one argument but we've been passed "+ds.length);
+                return unaryFunction.apply(ds[0]);
+            }
+        };
+        return calculate(label, calculation, arg);
+        
     }
 
 }

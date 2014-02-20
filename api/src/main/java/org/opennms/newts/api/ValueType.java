@@ -18,6 +18,10 @@ public abstract class ValueType<T extends Number> extends Number {
     public abstract ValueType<T> times(Number value);
 
     public abstract ValueType<T> divideBy(Number value);
+    
+    public boolean isNan() {
+        return Double.isNaN(doubleValue());
+    }
 
     abstract T getValue();
 
@@ -92,5 +96,6 @@ public abstract class ValueType<T extends Number> extends Number {
                 throw new IllegalArgumentException(String.format("Unknown metric type: %s", value.getType()));
         }
     }
+    
 
 }

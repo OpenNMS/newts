@@ -3,12 +3,51 @@ package org.opennms.newts.api.query;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.opennms.newts.api.Duration.*;
+import static org.opennms.newts.api.Timestamp.*;
+import static org.opennms.newts.api.query.Datasource.*;
+import static org.opennms.newts.api.query.ResultDescriptor.*;
+import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.*;
 
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Sets;
+
 
 public class ResultDescriptorTest {
+    
+    
+    
+    @Test
+    public void testDescriptor() {
+        BinaryFunction plus = new BinaryFunction() {
+            
+            @Override
+            public double apply(double a, double b) {
+                return a + b;
+            }
+        };
+        BinaryFunction minus = new BinaryFunction() {
+            
+            @Override
+            public double apply(double a, double b) {
+                return a - b;
+            }
+        };
+        
+        ResultDescriptor results = new ResultDescriptor()
+            .datasource("in", "ifInOctets", seconds(600), AVERAGE)
+            .datasource("out", "ifOutOctets", seconds(600), AVERAGE)
+            .calculate("sum", plus, "in", "out")
+            .calculate("diff", minus, "in", "out")
+            .export("sum", "diff");
+        
+        assertEquals(Sets.newHashSet("in", "out"), results.getDatasources().keySet());
+        
+        assertEquals(Sets.newHashSet("sum", "diff"), results.getExports());
+    }
 
     @Test
     public void testStep() {
@@ -25,13 +64,12 @@ public class ResultDescriptorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBadExport() {
-        new ResultDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export("bogus");
+        new ResultDescriptor().datasource("in", "ifInOctets", AVERAGE).export("bogus");
     }
 
     @Test
     public void testExports() {
-        ResultDescriptor descriptor = new ResultDescriptor().datasource("ifInOctets").average("in", "ifInOctets").export(
-                "in");
+        ResultDescriptor descriptor = new ResultDescriptor().datasource("in", "ifInOctets", AVERAGE).export("in");
 
         assertEquals(1, descriptor.getExports().size());
         assertEquals("in", descriptor.getExports().iterator().next());
@@ -42,14 +80,12 @@ public class ResultDescriptorTest {
 
         ResultDescriptor descriptor;
 
-        descriptor = new ResultDescriptor().datasource("temperature");
-        descriptor.average("avgTemp", "temperature");
+        descriptor = new ResultDescriptor().datasource("avgTemp", "temperature", AVERAGE);
 
-        Aggregate aggregate = descriptor.getAggregates().get("avgTemp");
-
-        assertEquals(Aggregate.Function.AVERAGE, aggregate.getFunction());
-        assertEquals("avgTemp", aggregate.getLabel());
-        assertEquals("temperature", aggregate.getSource());
+        Datasource ds = descriptor.getDatasources().get("avgTemp");
+        assertEquals(AVERAGE, ds.getAggregationFuction());
+        assertEquals("avgTemp", ds.getLabel());
+        assertEquals("temperature", ds.getSource());
 
     }
 
@@ -58,14 +94,12 @@ public class ResultDescriptorTest {
 
         ResultDescriptor descriptor;
 
-        descriptor = new ResultDescriptor().datasource("temperature");
-        descriptor.min("minTemp", "temperature");
+        descriptor = new ResultDescriptor().datasource("minTemp", "temperature", MIN);
 
-        Aggregate aggregate = descriptor.getAggregates().get("minTemp");
-
-        assertEquals(Aggregate.Function.MINIMUM, aggregate.getFunction());
-        assertEquals("minTemp", aggregate.getLabel());
-        assertEquals("temperature", aggregate.getSource());
+        Datasource ds = descriptor.getDatasources().get("minTemp");
+        assertEquals(MIN, ds.getAggregationFuction());
+        assertEquals("minTemp", ds.getLabel());
+        assertEquals("temperature", ds.getSource());
 
     }
 
@@ -74,15 +108,12 @@ public class ResultDescriptorTest {
 
         ResultDescriptor descriptor;
 
-        descriptor = new ResultDescriptor().datasource("temperature");
-        descriptor.max("maxTemp", "temperature");
+        descriptor = new ResultDescriptor().datasource("maxTemp", "temperature", MAX);
 
-        Aggregate aggregate = descriptor.getAggregates().get("maxTemp");
-
-        assertEquals(Aggregate.Function.MAXIMUM, aggregate.getFunction());
-        assertEquals("maxTemp", aggregate.getLabel());
-        assertEquals("temperature", aggregate.getSource());
-
+        Datasource ds = descriptor.getDatasources().get("maxTemp");
+        assertEquals(MAX, ds.getAggregationFuction());
+        assertEquals("maxTemp", ds.getLabel());
+        assertEquals("temperature", ds.getSource());
     }
 
     @Test
@@ -91,7 +122,7 @@ public class ResultDescriptorTest {
         ResultDescriptor descriptor;
         Datasource dataSource;
 
-        descriptor = new ResultDescriptor().datasource("ifInOctets");
+        descriptor = new ResultDescriptor().datasource("ifInOctets", AVERAGE);
 
         dataSource = descriptor.getDatasources().get("ifInOctets");
         assertEquals("ifInOctets", dataSource.getLabel());
@@ -102,46 +133,20 @@ public class ResultDescriptorTest {
 
         descriptor = new ResultDescriptor();
 
-        dataSource = descriptor.datasource("in", "ifInOctets").getDatasources().get("in");
+        dataSource = descriptor.datasource("in", "ifInOctets", AVERAGE).getDatasources().get("in");
         assertEquals("in", dataSource.getLabel());
         assertEquals("ifInOctets", dataSource.getSource());
 
         descriptor = new ResultDescriptor();
 
-        dataSource = descriptor.datasource("in", "ifInOctets", 900000).getDatasources().get("in");
+        dataSource = descriptor.datasource("in", "ifInOctets", 900000, AVERAGE).getDatasources().get("in");
         assertEquals("in", dataSource.getLabel());
         assertEquals("ifInOctets", dataSource.getSource());
         assertEquals(900, dataSource.getHeartbeat().asSeconds());
 
-        assertEquals(1, descriptor.getSources().size());
+        assertEquals(1, descriptor.getDatasources().size());
         assertEquals("in", descriptor.getLabels().iterator().next());
 
-    }
-
-    @Test
-    public void testAggregate() {
-
-        ResultDescriptor descriptor;
-
-        descriptor = new ResultDescriptor().datasource("inBytes", "ifInOctets");
-        descriptor.aggregate(new Aggregate(Aggregate.Function.MAXIMUM, "inMax", "inBytes"));
-
-        assertEquals(1, descriptor.getAggregates().size());
-        assertTrue(descriptor.getAggregates().containsKey("inMax"));
-
-        assertEquals(2, descriptor.getSources().size());
-        assertEquals("inMax", descriptor.getLabels().iterator().next());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAverageWithBadSource() {
-        new ResultDescriptor().average("avg", "notreal");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAggregateWithBadSource() {
-        new ResultDescriptor().aggregate(new Aggregate(Aggregate.Function.AVERAGE, "average", "bogus"));
     }
 
 }
