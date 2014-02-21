@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
@@ -54,7 +54,7 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
     private final Duration m_interval;
     private final Map<String, Duration> m_heartbeats;
     private final Iterator<Row> m_input;
-    private final Map<String, Measurement> m_lastUpdates = Maps.newHashMap();
+    private final Map<String, Sample> m_lastUpdates = Maps.newHashMap();
     private final Map<String, Accumulation> m_accumulation = Maps.newHashMap();
 
     private Row m_current = null;
@@ -105,8 +105,8 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
 
             Accumulation accumulation = m_accumulation.get(name);
 
-            // Add measurement with accumulated value to output row
-            output.addMeasurement(new Measurement(
+            // Add sample with accumulated value to output row
+            output.addSample(new Sample(
                     output.getTimestamp(),
                     output.getResource(),
                     name,
@@ -117,9 +117,9 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
             if (m_current != null) {
                 accumulation.reset();
 
-                Measurement measurement = m_current.getMeasurement(name);
+                Sample sample = m_current.getSample(name);
 
-                if (measurement == null) {
+                if (sample == null) {
                     continue;
                 }
 
@@ -127,7 +127,7 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
                     if (elapsed.lt(getHeartbeat(name))) {
                         accumulation.known = elapsed.asMillis();
-                        accumulation.value = measurement.getValue().times(elapsed.asMillis());
+                        accumulation.value = sample.getValue().times(elapsed.asMillis());
                     }
                     else {
                         accumulation.unknown = elapsed.asMillis();
@@ -143,9 +143,9 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
     private void accumulate(Row row, Timestamp intervalCeiling) {
 
         for (String name : m_metrics) {
-            Measurement current, last;
+            Sample current, last;
 
-            current = row.getMeasurement(name);
+            current = row.getSample(name);
 
             if (current == null) {
                 continue;

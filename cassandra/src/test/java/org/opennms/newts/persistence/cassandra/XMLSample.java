@@ -1,15 +1,24 @@
-package org.opennms.newts.rest;
+package org.opennms.newts.persistence.cassandra;
 
+
+import javax.xml.bind.annotation.*;
 import org.opennms.newts.api.MetricType;
 
 
-public class MeasurementDTO {
+@XmlAccessorType(XmlAccessType.FIELD)
+public class XMLSample {
 
+    @XmlElement(name = "Timestamp")
     private long m_timestamp;
-    private String m_resource;
+
+    @XmlElement(name = "Name")
     private String m_name;
+
+    @XmlElement(name = "Type")
     private MetricType m_type;
-    private Number m_value;
+
+    @XmlElement(name = "Value")
+    private Double m_value;
 
     public long getTimestamp() {
         return m_timestamp;
@@ -17,14 +26,6 @@ public class MeasurementDTO {
 
     public void setTimestamp(long timestamp) {
         m_timestamp = timestamp;
-    }
-
-    public String getResource() {
-        return m_resource;
-    }
-
-    public void setResource(String resource) {
-        m_resource = resource;
     }
 
     public String getName() {
@@ -43,11 +44,11 @@ public class MeasurementDTO {
         m_type = type;
     }
 
-    public Number getValue() {
+    public Double getValue() {
         return m_value;
     }
 
-    public void setValue(Number value) {
+    public void setValue(Double value) {
         m_value = value;
     }
 

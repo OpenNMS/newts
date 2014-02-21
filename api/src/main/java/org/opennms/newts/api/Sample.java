@@ -6,7 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Map;
 
 
-public class Measurement {
+public class Sample {
 
     private final Timestamp m_timestamp;
     private final String m_resource;
@@ -15,11 +15,11 @@ public class Measurement {
     private final ValueType<?> m_value;
     private final Map<String, String> m_attributes;
 
-    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value) {
+    public Sample(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value) {
         this(timestamp, resource, name, type, value, null);
     }
 
-    public Measurement(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
+    public Sample(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "timestamp");
         m_resource = checkNotNull(resource, "resource");
         m_name = checkNotNull(name, "name");

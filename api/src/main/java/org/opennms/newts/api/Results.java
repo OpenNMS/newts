@@ -10,22 +10,22 @@ import com.google.common.collect.Maps;
 
 public class Results implements Iterable<Results.Row> {
 
-    public static class Row implements Iterable<Measurement> {
+    public static class Row implements Iterable<Sample> {
 
         private Timestamp m_timestamp;
         private String m_resource;
-        private Map<String, Measurement> m_cells = Maps.newHashMap();
+        private Map<String, Sample> m_cells = Maps.newHashMap();
 
         public Row(Timestamp timestamp, String resource) {
             m_timestamp = timestamp;
             m_resource = resource;
         }
 
-        public void addMeasurement(Measurement measurement) {
-            m_cells.put(measurement.getName(), measurement);
+        public void addSample(Sample sample) {
+            m_cells.put(sample.getName(), sample);
         }
 
-        public Measurement getMeasurement(String name) {
+        public Sample getSample(String name) {
             return m_cells.get(name);
         }
 
@@ -37,13 +37,13 @@ public class Results implements Iterable<Results.Row> {
             return m_resource;
         }
 
-        public Collection<Measurement> getMeasurements() {
+        public Collection<Sample> getSamples() {
             return m_cells.values();
         }
 
         @Override
-        public Iterator<Measurement> iterator() {
-            return getMeasurements().iterator();
+        public Iterator<Sample> iterator() {
+            return getSamples().iterator();
         }
 
         @Override
@@ -55,16 +55,16 @@ public class Results implements Iterable<Results.Row> {
 
     Map<Timestamp, Row> m_rows = Maps.newTreeMap();
 
-    public void addMeasurement(Measurement measurement) {
+    public void addSample(Sample sample) {
 
-        Row row = m_rows.get(measurement.getTimestamp());
+        Row row = m_rows.get(sample.getTimestamp());
 
         if (row == null) {
-            row = new Row(measurement.getTimestamp(), measurement.getResource());
+            row = new Row(sample.getTimestamp(), sample.getResource());
             addRow(row);
         }
 
-        row.addMeasurement(measurement);
+        row.addSample(sample);
 
     }
 

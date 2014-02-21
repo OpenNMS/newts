@@ -20,11 +20,11 @@ public class PrimaryDataTest {
                 testCase.getEnd(),
                 testCase.getInterval(),
                 getHeartbeats(testCase),
-                testCase.getMeasurements().iterator());
+                testCase.getSamples().iterator());
     }
 
     private void execute(XMLTestCase testCase) {
-        assertRowsEqual(testCase.getExpectedResults(), getIterator(testCase));
+        assertRowsEqual(testCase.getMeasurements(), getIterator(testCase));
     }
 
     @Test

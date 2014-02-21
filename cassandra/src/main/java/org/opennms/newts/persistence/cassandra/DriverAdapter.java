@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
@@ -45,9 +45,9 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
         m_metrics = Sets.newHashSet(metrics);
 
         if (m_results.hasNext()) {
-            Measurement m = getMeasurement(m_results.next());
+            Sample m = getSample(m_results.next());
             m_next = new Results.Row(m.getTimestamp(), m.getResource());
-            addMeasurement(m_next, m);
+            addSample(m_next, m);
         }
 
     }
@@ -65,15 +65,15 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
         Results.Row nextNext = null;
 
         while (m_results.hasNext()) {
-            Measurement m = getMeasurement(m_results.next());
+            Sample m = getSample(m_results.next());
 
             if (m.getTimestamp().gt(m_next.getTimestamp())) {
                 nextNext = new Results.Row(m.getTimestamp(), m.getResource());
-                addMeasurement(nextNext, m);
+                addSample(nextNext, m);
                 break;
             }
 
-            addMeasurement(m_next, m);
+            addSample(m_next, m);
         }
 
         try {
@@ -94,15 +94,15 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
         return this;
     }
 
-    private void addMeasurement(Results.Row row, Measurement measurement) {
-        if (m_metrics.size() == 0 || m_metrics.contains(measurement.getName())) {
-            row.addMeasurement(measurement);
+    private void addSample(Results.Row row, Sample sample) {
+        if (m_metrics.size() == 0 || m_metrics.contains(sample.getName())) {
+            row.addSample(sample);
         }
     }
 
-    private Measurement getMeasurement(com.datastax.driver.core.Row row) {
+    private Sample getSample(com.datastax.driver.core.Row row) {
         MetricType type = getMetricType(row);
-        return new Measurement(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type));
+        return new Sample(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type));
     }
 
     private ValueType<?> getValue(com.datastax.driver.core.Row row, MetricType type) {

@@ -15,8 +15,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.MeasurementRepository;
+import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
@@ -37,19 +37,19 @@ public class Server {
 
     private static final String ALLOW_CORS = "*";
 
-    private Function<Row, Collection<MeasurementDTO>> m_rowFunc = new Function<Row, Collection<MeasurementDTO>>() {
+    private Function<Row, Collection<SampleDTO>> m_rowFunc = new Function<Row, Collection<SampleDTO>>() {
 
         @Override
-        public Collection<MeasurementDTO> apply(Row input) {
-            return Collections2.transform(input.getMeasurements(), m_toMeasurementDTO);
+        public Collection<SampleDTO> apply(Row input) {
+            return Collections2.transform(input.getSamples(), m_toSampletDTO);
         }
     };
 
-    private Function<Measurement, MeasurementDTO> m_toMeasurementDTO = new Function<Measurement, MeasurementDTO>() {
+    private Function<Sample, SampleDTO> m_toSampletDTO = new Function<Sample, SampleDTO>() {
 
         @Override
-        public MeasurementDTO apply(Measurement input) {
-            MeasurementDTO output = new MeasurementDTO();
+        public SampleDTO apply(Sample input) {
+            SampleDTO output = new SampleDTO();
             output.setResource(input.getResource());
             output.setTimestamp(input.getTimestamp().asMillis());
             output.setValue(input.getValue());
@@ -59,11 +59,11 @@ public class Server {
         }
     };
 
-    private Function<MeasurementDTO, Measurement> m_fromMeasurementDTO = new Function<MeasurementDTO, Measurement>() {
+    private Function<SampleDTO, Sample> m_fromSampleDTO = new Function<SampleDTO, Sample>() {
 
         @Override
-        public Measurement apply(MeasurementDTO m) {
-            return new Measurement(
+        public Sample apply(SampleDTO m) {
+            return new Sample(
                     new Timestamp(m.getTimestamp(), TimeUnit.MILLISECONDS),
                     m.getResource(),
                     m.getName(),
@@ -72,10 +72,10 @@ public class Server {
         }
     };
 
-    private final MeasurementRepository m_repository;
+    private final SampleRepository m_repository;
 
     @Inject
-    public Server(final MeasurementRepository repository) {
+    public Server(final SampleRepository repository) {
         m_repository = repository;
         initialize();
     }
@@ -88,18 +88,18 @@ public class Server {
             public Object handle(Request request, Response response) {
 
                 ObjectMapper mapper = new ObjectMapper();
-                ObjectReader reader = mapper.reader(new TypeReference<List<MeasurementDTO>>() {
+                ObjectReader reader = mapper.reader(new TypeReference<List<SampleDTO>>() {
                 });
-                Collection<MeasurementDTO> measurementDTOs = null;
+                Collection<SampleDTO> sampleDTOs = null;
 
                 try {
-                    measurementDTOs = reader.readValue(request.body());
+                    sampleDTOs = reader.readValue(request.body());
                 }
                 catch (IOException e) {
                     halt(400, String.format("Unable to parse request body as JSON (reason: %s) ", e.getMessage()));
                 }
 
-                m_repository.insert(Collections2.transform(measurementDTOs, m_fromMeasurementDTO));
+                m_repository.insert(Collections2.transform(sampleDTOs, m_fromSampleDTO));
 
                 return "";
             }

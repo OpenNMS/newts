@@ -10,99 +10,93 @@
   <Interval>300</Interval>
   <Heartbeat>600</Heartbeat>
 
-  <Measurements>
-    <Measurement>
+  <Samples>
+    <Sample>
       <Timestamp>0</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
       <Value>0</Value>
-    </Measurement>
-    <Measurement>
+    </Sample>
+    <Sample>
       <Timestamp>0</Timestamp>
       <Name>m1</Name>
       <Type>GAUGE</Type>
       <Value>1</Value>
-    </Measurement>
+    </Sample>
 
-    <Measurement>
+    <Sample>
       <Timestamp>350</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
       <Value>1</Value>
-    </Measurement>
-    <Measurement>
+    </Sample>
+    <Sample>
       <Timestamp>350</Timestamp>
       <Name>m1</Name>
       <Type>GAUGE</Type>
       <Value>2</Value>
-    </Measurement>
+    </Sample>
 
-    <Measurement>
+    <Sample>
       <Timestamp>650</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
       <Value>2</Value>
-    </Measurement>
-    <Measurement>
+    </Sample>
+    <Sample>
       <Timestamp>650</Timestamp>
       <Name>m1</Name>
       <Type>GAUGE</Type>
       <Value>3</Value>
-    </Measurement>
+    </Sample>
 
-    <Measurement>
+    <Sample>
       <Timestamp>950</Timestamp>
       <Name>m0</Name>
       <Type>GAUGE</Type>
       <Value>3</Value>
-    </Measurement>
-    <Measurement>
+    </Sample>
+    <Sample>
       <Timestamp>950</Timestamp>
       <Name>m1</Name>
       <Type>GAUGE</Type>
       <Value>4</Value>
-    </Measurement>
-  </Measurements>
+    </Sample>
+  </Samples>
 
-  <Results>
+  <Measurements>
     <Measurement>
       <Timestamp>300</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>1</Value>
     </Measurement>
     <Measurement>
       <Timestamp>300</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
     </Measurement>
 
     <Measurement>
       <Timestamp>600</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>1.833</Value>
     </Measurement>
     <Measurement>
       <Timestamp>600</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>2.833</Value>
     </Measurement>
 
     <Measurement>
       <Timestamp>900</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>2.833</Value>
     </Measurement>
     <Measurement>
       <Timestamp>900</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>3.833</Value>
     </Measurement>
-  </Results>
+  </Measurements>
 
 </TestCase>

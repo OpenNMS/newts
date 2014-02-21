@@ -1,7 +1,6 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,8 +12,9 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
-import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 
 import com.google.common.base.Function;
@@ -41,13 +41,13 @@ public class XMLTestCase {
     @XmlElement(name = "Heartbeat")
     private long m_heartbeat;
 
+    @XmlElementWrapper(name = "Samples")
+    @XmlElement(name = "Sample")
+    private List<XMLSample> m_samples;
+
     @XmlElementWrapper(name = "Measurements")
     @XmlElement(name = "Measurement")
     private List<XMLMeasurement> m_measurements;
-
-    @XmlElementWrapper(name = "Results")
-    @XmlElement(name = "Measurement")
-    private List<XMLMeasurement> m_expected;
 
     public String getResource() {
         return m_resource;
@@ -70,24 +70,24 @@ public class XMLTestCase {
     }
 
     @XmlTransient
-    private Function<XMLMeasurement, String> m_toMetricName = new Function<XMLMeasurement, String>() {
+    private Function<XMLSample, String> m_toMetricName = new Function<XMLSample, String>() {
 
         @Override
-        public String apply(XMLMeasurement input) {
+        public String apply(XMLSample input) {
             return input.getName();
         }
     };
 
     public String[] getMetrics() {
-        return Sets.newHashSet(Iterables.transform(m_measurements, m_toMetricName)).toArray(new String[0]);
+        return Sets.newHashSet(Iterables.transform(m_samples, m_toMetricName)).toArray(new String[0]);
     }
 
     @XmlTransient
-    private Function<XMLMeasurement, Measurement> m_toMeasurement = new Function<XMLMeasurement, Measurement>() {
+    private Function<XMLSample, Sample> m_toSample = new Function<XMLSample, Sample>() {
 
         @Override
-        public Measurement apply(XMLMeasurement input) {
-            return new Measurement(
+        public Sample apply(XMLSample input) {
+            return new Sample(
                     Timestamp.fromEpochSeconds(input.getTimestamp()),
                     getResource(),
                     input.getName(),
@@ -96,19 +96,36 @@ public class XMLTestCase {
         }
     };
 
-    public Results getMeasurements() {
-        return transform(m_measurements);
-    }
-
-    public Results getExpectedResults() {
-        return transform(m_expected);
-    }
-
-    private Results transform(Collection<XMLMeasurement> input) {
+    public Results getSamples() {
         Results r = new Results();
 
-        for (Measurement m : Iterables.transform(input, m_toMeasurement)) {
-            r.addMeasurement(m);
+        for (Sample s : Iterables.transform(m_samples, m_toSample)) {
+            r.addSample(s);
+        }
+
+        return r;
+    }
+
+    // FIXME: Post-refactor this will need to convert XMLMeasurements to Measurements
+    public Results getMeasurements() {
+
+        Function<XMLMeasurement, Sample> measurementToSample = new Function<XMLMeasurement, Sample>() {
+
+            @Override
+            public Sample apply(XMLMeasurement input) {
+                return new Sample(
+                        Timestamp.fromEpochSeconds(input.getTimestamp()),
+                        getResource(),
+                        input.getName(),
+                        MetricType.GAUGE,
+                        new Gauge(input.getValue()));
+            }
+        };
+
+        Results r = new Results();
+        
+        for (Sample s : Iterables.transform(m_measurements, measurementToSample)) {
+            r.addSample(s);
         }
 
         return r;

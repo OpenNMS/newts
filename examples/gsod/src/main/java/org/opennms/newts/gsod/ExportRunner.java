@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.opennms.newts.api.MeasurementRepository;
+import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
 
@@ -20,7 +20,7 @@ import com.google.inject.Injector;
 
 public class ExportRunner {
 
-    private final MeasurementRepository m_repository;
+    private final SampleRepository m_repository;
     private final CmdLineParser m_parser = new CmdLineParser(this);
 
     @Option(name = "-r", usage = "resource name to query (required)")
@@ -39,7 +39,7 @@ public class ExportRunner {
     private boolean m_needsHelp;
 
     @Inject
-    public ExportRunner(MeasurementRepository repository) {
+    public ExportRunner(SampleRepository repository) {
         m_repository = repository;
     }
 
@@ -75,7 +75,7 @@ public class ExportRunner {
         System.out.printf("timestamp,%s%n", m_metric);
 
         for (Results.Row row : m_repository.select(m_resource, timestamp(m_start), timestamp(m_end))) {
-            System.out.printf("%s,%.2f%n", row.getTimestamp().asDate(), row.getMeasurement(m_metric).getValue());
+            System.out.printf("%s,%.2f%n", row.getTimestamp().asDate(), row.getSample(m_metric).getValue());
         }
 
         return 0;

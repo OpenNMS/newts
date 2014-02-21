@@ -8,13 +8,13 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import com.google.common.base.Optional;
 
 
-public interface MeasurementRepository {
+public interface SampleRepository {
 
     /**
-     * Read stored measurements.
+     * Query measurements.
      * 
      * @param resource
-     *            name of the measured resource
+     *            name of the sampled resource
      * @param start
      *            query start time (defaults to 24 hours less than {@code end}, if absent)
      * @param end
@@ -28,10 +28,10 @@ public interface MeasurementRepository {
     public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution);
 
     /**
-     * Read stored measurements.
+     * Read stored samples.
      * 
      * @param resource
-     *            name of the measured resource
+     *            name of the sampled resource
      * @param start
      *            query start time (defaults to 24 hours less than {@code end}, if absent)
      * @param end
@@ -41,10 +41,10 @@ public interface MeasurementRepository {
     public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end);
 
     /**
-     * Write (store) measurements.
+     * Write (store) samples.
      * 
-     * @param measurements
+     * @param samples
      */
-    public void insert(Collection<Measurement> measurements);
+    public void insert(Collection<Sample> samples);
 
 }

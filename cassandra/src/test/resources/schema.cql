@@ -4,7 +4,7 @@ DROP KEYSPACE IF EXISTS newts;
 CREATE KEYSPACE newts
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
-CREATE TABLE newts.measurements (
+CREATE TABLE newts.samples (
     resource text,
     collected_at timestamp,
     metric_name text,

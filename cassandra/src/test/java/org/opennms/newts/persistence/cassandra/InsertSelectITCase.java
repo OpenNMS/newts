@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opennms.newts.api.Gauge;
-import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 
@@ -24,7 +24,7 @@ public class InsertSelectITCase extends AbstractCassandraTestCase {
     @Test
     public void test() {
 
-        List<Measurement> measurements = Lists.newArrayList();
+        List<Sample> samples = Lists.newArrayList();
         int rows = 10, cols = 3;
         String resource = "r";
 
@@ -32,11 +32,11 @@ public class InsertSelectITCase extends AbstractCassandraTestCase {
             Timestamp ts = Timestamp.fromEpochMillis(i * 1000);
 
             for (int j = 1; j <= cols; j++) {
-                measurements.add(new Measurement(ts, resource, "m" + j, GAUGE, new Gauge((i + 1) * j)));
+                samples.add(new Sample(ts, resource, "m" + j, GAUGE, new Gauge((i + 1) * j)));
             }
         }
 
-        getRepository().insert(measurements);
+        getRepository().insert(samples);
 
         Timestamp start = Timestamp.fromEpochMillis(0), end = Timestamp.fromEpochMillis(rows * 1000);
         Iterator<Row> results = getRepository().select(resource, Optional.of(start), Optional.of(end)).iterator();
@@ -51,15 +51,15 @@ public class InsertSelectITCase extends AbstractCassandraTestCase {
             assertEquals("Unexpected resource name", resource, row.getResource());
 
             for (int j = 1; j <= cols; j++) {
-                assertNotNull("Missing measurement: m" + j, row.getMeasurement("m" + j));
+                assertNotNull("Missing sample: m" + j, row.getSample("m" + j));
 
-                Measurement measurement = row.getMeasurement("m" + j);
+                Sample sample = row.getSample("m" + j);
 
-                assertEquals("Unexpected timestamp for metric m" + j, timestamp, measurement.getTimestamp());
-                assertEquals("Unexpected resource name", resource, measurement.getResource());
-                assertEquals("Unexpected metric name", "m" + j, measurement.getName());
-                assertEquals("Unexpected metric type", GAUGE, measurement.getType());
-                assertEquals((double) ((i + 1) * j), measurement.getValue().doubleValue(), 0.0d);
+                assertEquals("Unexpected timestamp for metric m" + j, timestamp, sample.getTimestamp());
+                assertEquals("Unexpected resource name", resource, sample.getResource());
+                assertEquals("Unexpected metric name", "m" + j, sample.getName());
+                assertEquals("Unexpected metric type", GAUGE, sample.getType());
+                assertEquals((double) ((i + 1) * j), sample.getValue().doubleValue(), 0.0d);
             }
 
         }

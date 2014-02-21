@@ -8,9 +8,9 @@ import java.util.Collection;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
-import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.MeasurementRepository;
-import org.opennms.newts.persistence.cassandra.CassandraMeasurementRepository;
+import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +23,14 @@ import com.codahale.metrics.MetricRegistry;
 public class NewtsProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewtsProducer.class);
-    private final MeasurementRepository m_repository;
+    private final SampleRepository m_repository;
 
     public NewtsProducer(NewtsEndpoint endpoint) {
         super(endpoint);
 
         LOG.debug("Creating Newts producer");
 
-        m_repository = new CassandraMeasurementRepository(
+        m_repository = new CassandraSampleRepository(
                 endpoint.getKeyspace(),
                 endpoint.getHostname(),
                 endpoint.getPort(),
@@ -41,11 +41,11 @@ public class NewtsProducer extends DefaultProducer {
     public void process(Exchange exchange) throws Exception {
         checkArgument(exchange.getIn().getBody() instanceof Collection);
 
-        Collection<Measurement> measurements = getTypeSafeCollection(
+        Collection<Sample> samples = getTypeSafeCollection(
                 (Collection<?>) exchange.getIn().getBody(),
-                Measurement.class);
+                Sample.class);
 
-        m_repository.insert(measurements);
+        m_repository.insert(samples);
 
     }
 

@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.opennms.newts.api.Gauge;
-import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.MeasurementRepository;
+import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,18 +39,18 @@ public class FileImport implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(FileImport.class);
     
     private final DateFormat m_dateFormat = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
-    private final MeasurementRepository m_repository;
+    private final SampleRepository m_repository;
     private final BufferedReader m_reader;
     private final Counter m_numRows;
-    private final Counter m_numMeasurements;
+    private final Counter m_numSamples;
     private final Timer m_writeTimer;
 
-    public FileImport(MeasurementRepository repository, MetricRegistry metrics, Path path)
+    public FileImport(SampleRepository repository, MetricRegistry metrics, Path path)
             throws FileNotFoundException, IOException {
 
         m_repository = repository;
         m_numRows = metrics.counter("num-rows");
-        m_numMeasurements = metrics.counter("num-measurements");
+        m_numSamples = metrics.counter("num-samples");
         m_writeTimer = metrics.timer("writes");
 
         InputStream gzipStream = new GZIPInputStream(new FileInputStream(path.toString()));
@@ -73,7 +73,7 @@ public class FileImport implements Runnable {
 
                 LOG.trace("Parsing {}", line);
 
-                List<Measurement> measurements = Lists.newArrayList();
+                List<Sample> samples = Lists.newArrayList();
 
                 Scanner scanner = new Scanner(line);
 
@@ -94,46 +94,46 @@ public class FileImport implements Runnable {
                 Timestamp ts = new Timestamp(date.getTime(), TimeUnit.MILLISECONDS);
 
                 double meanTemp = scanner.nextDouble();
-                measurements.add(new Measurement(ts, station, "meanTemperature", GAUGE, valueFor(meanTemp, 9999.9)));
+                samples.add(new Sample(ts, station, "meanTemperature", GAUGE, valueFor(meanTemp, 9999.9)));
 
                 int meanTemperatureCount = scanner.nextInt();
 
                 double dewpoint = scanner.nextDouble();
-                measurements.add(new Measurement(ts, station, "dewPoint", GAUGE, valueFor(dewpoint, 9999.9)));
+                samples.add(new Sample(ts, station, "dewPoint", GAUGE, valueFor(dewpoint, 9999.9)));
 
                 int dewpointCount = scanner.nextInt();
 
                 Gauge seaLevelPressure = valueFor(scanner.nextDouble(), 9999.9);
-                measurements.add(new Measurement(ts, station, "seaLevelPressure", GAUGE, seaLevelPressure));
+                samples.add(new Sample(ts, station, "seaLevelPressure", GAUGE, seaLevelPressure));
 
                 int seaLevelPressureCount = scanner.nextInt();
 
                 Gauge stationPressure = valueFor(scanner.nextDouble(), 9999.9);
-                measurements.add(new Measurement(ts, station, "stationPressure", GAUGE, stationPressure));
+                samples.add(new Sample(ts, station, "stationPressure", GAUGE, stationPressure));
 
                 int stationPressureCount = scanner.nextInt();
 
                 Gauge visibility = valueFor(scanner.nextDouble(), 999.9);
-                measurements.add(new Measurement(ts, station, "visibility", GAUGE, visibility));
+                samples.add(new Sample(ts, station, "visibility", GAUGE, visibility));
 
                 int visibilityCount = scanner.nextInt();
 
                 Gauge meanWindSpeed = new Gauge(scanner.nextDouble());
-                measurements.add(new Measurement(ts, station, "meanWindSpeed", GAUGE, meanWindSpeed));
+                samples.add(new Sample(ts, station, "meanWindSpeed", GAUGE, meanWindSpeed));
 
                 int meanWindSpeedCount = scanner.nextInt();
 
                 Gauge maxWindSpeed = valueFor(scanner.nextDouble(), 999.9);
-                measurements.add(new Measurement(ts, station, "maxWindSpeed", GAUGE, maxWindSpeed));
+                samples.add(new Sample(ts, station, "maxWindSpeed", GAUGE, maxWindSpeed));
 
                 Gauge maxWindGust = valueFor(scanner.nextDouble(), 999.9);
-                measurements.add(new Measurement(ts, station, "maxWindGust", GAUGE, maxWindGust));
+                samples.add(new Sample(ts, station, "maxWindGust", GAUGE, maxWindGust));
 
                 Gauge maxTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
-                measurements.add(new Measurement(ts, station, "maxTemperature", GAUGE, maxTemperature));
+                samples.add(new Sample(ts, station, "maxTemperature", GAUGE, maxTemperature));
 
                 Gauge minTemperature = valueFor(Double.parseDouble(scanner.next().replace("*", "")), 9999.9);
-                measurements.add(new Measurement(ts, station, "minTemperature", GAUGE, minTemperature));
+                samples.add(new Sample(ts, station, "minTemperature", GAUGE, minTemperature));
 
                 LOG.trace("Station number {}, WBAN {}, date {}, Max Temp {}...", station, wban, dateYMD, maxTemperature);
 
@@ -142,14 +142,14 @@ public class FileImport implements Runnable {
                 Context timerCtx = m_writeTimer.time();
 
                 try {
-                    m_repository.insert(measurements);
+                    m_repository.insert(samples);
                 }
                 finally {
                     timerCtx.stop();
                 }
 
                 m_numRows.inc();
-                m_numMeasurements.inc(10);
+                m_numSamples.inc(10);
 
             }
 

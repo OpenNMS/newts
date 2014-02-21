@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.inject.Inject;
 
-import org.opennms.newts.api.MeasurementRepository;
+import org.opennms.newts.api.SampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +24,13 @@ class FileVisitor extends SimpleFileVisitor<Path> {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileVisitor.class);
 
-    private final MeasurementRepository m_repository;
+    private final SampleRepository m_repository;
     private final ThreadPoolExecutor m_executor;
     private final MetricRegistry m_metrics;
     private final Counter m_numFiles;
 
     @Inject
-    FileVisitor(MeasurementRepository repository, ThreadPoolExecutor executor, MetricRegistry metrics) {
+    FileVisitor(SampleRepository repository, ThreadPoolExecutor executor, MetricRegistry metrics) {
 
         m_repository = repository;
         m_executor = executor;

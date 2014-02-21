@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.ValueType;
 
@@ -24,7 +24,7 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
 
     private final Iterator<Row> m_input;
     private final String[] m_metrics;
-    private final Map<String, Measurement> m_prevMeasurements = Maps.newHashMap();
+    private final Map<String, Sample> m_prevSamples = Maps.newHashMap();
 
     public Rate(Iterator<Row> input, String[] metrics) {
         m_input = checkNotNull(input, "input argument");
@@ -45,27 +45,27 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
         Row result = new Row(working.getTimestamp(), working.getResource());
 
         for (String metricName : m_metrics) {
-            Measurement measurement = working.getMeasurement(metricName);
+            Sample sample = working.getSample(metricName);
 
-            if (measurement != null) {
-                result.addMeasurement(getRate(measurement));
-                m_prevMeasurements.put(measurement.getName(), measurement);
+            if (sample != null) {
+                result.addSample(getRate(sample));
+                m_prevSamples.put(sample.getName(), sample);
             }
         }
 
         return result;
     }
 
-    private Measurement getRate(Measurement measurement) {
+    private Sample getRate(Sample sample) {
         ValueType<?> value = null;
-        Measurement previous = m_prevMeasurements.get(measurement.getName());
+        Sample previous = m_prevSamples.get(sample.getName());
 
         if (previous != null) {
-            long elapsed = measurement.getTimestamp().asSeconds() - previous.getTimestamp().asSeconds();
-            value = measurement.getValue().delta(previous.getValue()).divideBy(elapsed);
+            long elapsed = sample.getTimestamp().asSeconds() - previous.getTimestamp().asSeconds();
+            value = sample.getValue().delta(previous.getValue()).divideBy(elapsed);
         }
 
-        return new Measurement(measurement.getTimestamp(), measurement.getResource(), measurement.getName(), GAUGE, value);
+        return new Sample(sample.getTimestamp(), sample.getResource(), sample.getName(), GAUGE, value);
     }
 
     @Override
