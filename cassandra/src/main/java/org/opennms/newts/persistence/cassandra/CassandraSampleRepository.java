@@ -12,9 +12,10 @@ import java.util.Collection;
 import javax.inject.Named;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -46,27 +47,27 @@ public class CassandraSampleRepository implements SampleRepository {
     }
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
+    public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         @SuppressWarnings("unused") Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        Results samples = new Results();
+        Results<Measurement> measurements = new Results<Measurement>();
 
         // TODO: do.
 
-        return samples;
+        return measurements;
     }
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+    public Results<Sample> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        Results samples = new Results();
+        Results<Sample> samples = new Results<Sample>();
 
-        for (Results.Row row : new DriverAdapter(cassandraSelect(resource, lower, upper))) {
+        for (Results.Row<Sample> row : new DriverAdapter(cassandraSelect(resource, lower, upper))) {
             samples.addRow(row);
         }
 

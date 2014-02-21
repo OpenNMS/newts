@@ -9,8 +9,9 @@ import javax.inject.Inject;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
 import com.google.common.base.Optional;
@@ -74,8 +75,8 @@ public class ExportRunner {
 
         System.out.printf("timestamp,%s%n", m_metric);
 
-        for (Results.Row row : m_repository.select(m_resource, timestamp(m_start), timestamp(m_end))) {
-            System.out.printf("%s,%.2f%n", row.getTimestamp().asDate(), row.getSample(m_metric).getValue());
+        for (Results.Row<Sample> row : m_repository.select(m_resource, timestamp(m_start), timestamp(m_end))) {
+            System.out.printf("%s,%.2f%n", row.getTimestamp().asDate(), row.getElement(m_metric).getValue());
         }
 
         return 0;

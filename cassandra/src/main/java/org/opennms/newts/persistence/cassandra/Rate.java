@@ -20,13 +20,13 @@ import com.google.common.collect.Maps;
  * 
  * @author eevans
  */
-public class Rate implements Iterator<Row>, Iterable<Row> {
+public class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
-    private final Iterator<Row> m_input;
+    private final Iterator<Row<Sample>> m_input;
     private final String[] m_metrics;
     private final Map<String, Sample> m_prevSamples = Maps.newHashMap();
 
-    public Rate(Iterator<Row> input, String[] metrics) {
+    public Rate(Iterator<Row<Sample>> input, String[] metrics) {
         m_input = checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
     }
@@ -37,18 +37,18 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
     }
 
     @Override
-    public Row next() {
+    public Row<Sample> next() {
 
         if (!hasNext()) throw new NoSuchElementException();
 
-        Row working = m_input.next();
-        Row result = new Row(working.getTimestamp(), working.getResource());
+        Row<Sample> working = m_input.next();
+        Row<Sample> result = new Row<>(working.getTimestamp(), working.getResource());
 
         for (String metricName : m_metrics) {
-            Sample sample = working.getSample(metricName);
+            Sample sample = working.getElement(metricName);
 
             if (sample != null) {
-                result.addSample(getRate(sample));
+                result.addElement(getRate(sample));
                 m_prevSamples.put(sample.getName(), sample);
             }
         }
@@ -74,7 +74,7 @@ public class Rate implements Iterator<Row>, Iterable<Row> {
     }
 
     @Override
-    public Iterator<Row> iterator() {
+    public Iterator<Row<Sample>> iterator() {
         return this;
     }
 

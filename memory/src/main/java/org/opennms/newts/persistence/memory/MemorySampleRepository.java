@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 
@@ -22,21 +23,21 @@ public class MemorySampleRepository implements SampleRepository {
     private Map<String, HashMultimap<Timestamp, Sample>> m_storage = new HashMap<String, HashMultimap<Timestamp, Sample>>();
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
+    public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+    public Results<Sample> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        Results r = new Results();
+        Results<Sample> r = new Results<Sample>();
 
         for (Entry<Timestamp, Sample> entry : m_storage.get(resource).entries()) {
             if (entry.getKey().gte(lower) && entry.getKey().lte(upper)) {
-                r.addSample(entry.getValue());
+                r.addElement(entry.getValue());
             }
         }
 

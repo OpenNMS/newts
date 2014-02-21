@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
@@ -17,7 +18,7 @@ import org.opennms.newts.api.ValueType;
 import com.google.common.collect.Maps;
 
 
-public class PrimaryData implements Iterator<Row>, Iterable<Row> {
+public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
     private class Accumulation {
         private long known = 0, unknown = 0;
@@ -53,13 +54,13 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
     private final Iterator<Timestamp> m_timestamps;
     private final Duration m_interval;
     private final Map<String, Duration> m_heartbeats;
-    private final Iterator<Row> m_input;
+    private final Iterator<Row<Sample>> m_input;
     private final Map<String, Sample> m_lastUpdates = Maps.newHashMap();
     private final Map<String, Accumulation> m_accumulation = Maps.newHashMap();
 
-    private Row m_current = null;
+    private Row<Sample> m_current = null;
 
-    public PrimaryData(String resource, String[] metrics, Timestamp start, Timestamp end, Duration interval, Map<String, Duration> heartbeats, Iterator<Row> input) {
+    public PrimaryData(String resource, String[] metrics, Timestamp start, Timestamp end, Duration interval, Map<String, Duration> heartbeats, Iterator<Row<Sample>> input) {
         m_resource = checkNotNull(resource, "resource argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
         checkNotNull(start, "start argument");
@@ -80,11 +81,11 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
     }
 
     @Override
-    public Row next() {
+    public Row<Measurement> next() {
 
         if (!hasNext()) throw new NoSuchElementException();
 
-        Row output = new Row(m_timestamps.next(), m_resource);
+        Row<Measurement> output = new Row<>(m_timestamps.next(), m_resource);
 
         while (m_current != null) {
             accumulate(m_current, output.getTimestamp());
@@ -106,18 +107,17 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
             Accumulation accumulation = m_accumulation.get(name);
 
             // Add sample with accumulated value to output row
-            output.addSample(new Sample(
+            output.addElement(new Measurement(
                     output.getTimestamp(),
                     output.getResource(),
                     name,
-                    accumulation.type,
-                    accumulation.average()));
+                    accumulation.average().doubleValue()));
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
                 accumulation.reset();
 
-                Sample sample = m_current.getSample(name);
+                Sample sample = m_current.getElement(name);
 
                 if (sample == null) {
                     continue;
@@ -140,12 +140,12 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
         return output;
     }
 
-    private void accumulate(Row row, Timestamp intervalCeiling) {
+    private void accumulate(Row<Sample> row, Timestamp intervalCeiling) {
 
         for (String name : m_metrics) {
             Sample current, last;
 
-            current = row.getSample(name);
+            current = row.getElement(name);
 
             if (current == null) {
                 continue;
@@ -211,7 +211,7 @@ public class PrimaryData implements Iterator<Row>, Iterable<Row> {
     }
 
     @Override
-    public Iterator<Row> iterator() {
+    public Iterator<Row<Measurement>> iterator() {
         return this;
     }
 

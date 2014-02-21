@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
@@ -18,11 +18,11 @@ import com.datastax.driver.core.ResultSet;
 import com.google.common.collect.Sets;
 
 
-public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Row> {
+public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
 
     private final Iterator<com.datastax.driver.core.Row> m_results;
     private final Set<String> m_metrics;
-    private Results.Row m_next = null;
+    private Results.Row<Sample> m_next = null;
 
     public DriverAdapter(ResultSet input) {
         this(input, new String[0]);
@@ -46,7 +46,7 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
 
         if (m_results.hasNext()) {
             Sample m = getSample(m_results.next());
-            m_next = new Results.Row(m.getTimestamp(), m.getResource());
+            m_next = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
             addSample(m_next, m);
         }
 
@@ -58,17 +58,17 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
     }
 
     @Override
-    public Results.Row next() {
+    public Results.Row<Sample> next() {
 
         if (!hasNext()) throw new NoSuchElementException();
 
-        Results.Row nextNext = null;
+        Results.Row<Sample> nextNext = null;
 
         while (m_results.hasNext()) {
             Sample m = getSample(m_results.next());
 
             if (m.getTimestamp().gt(m_next.getTimestamp())) {
-                nextNext = new Results.Row(m.getTimestamp(), m.getResource());
+                nextNext = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
                 addSample(nextNext, m);
                 break;
             }
@@ -90,13 +90,13 @@ public class DriverAdapter implements Iterable<Results.Row>, Iterator<Results.Ro
     }
 
     @Override
-    public Iterator<Row> iterator() {
+    public Iterator<Row<Sample>> iterator() {
         return this;
     }
 
-    private void addSample(Results.Row row, Sample sample) {
+    private void addSample(Results.Row<Sample> row, Sample sample) {
         if (m_metrics.size() == 0 || m_metrics.contains(sample.getName())) {
-            row.addSample(sample);
+            row.addElement(sample);
         }
     }
 

@@ -15,9 +15,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
 import org.codehaus.jackson.type.TypeReference;
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
@@ -37,11 +37,11 @@ public class Server {
 
     private static final String ALLOW_CORS = "*";
 
-    private Function<Row, Collection<SampleDTO>> m_rowFunc = new Function<Row, Collection<SampleDTO>>() {
+    private Function<Row<Sample>, Collection<SampleDTO>> m_rowFunc = new Function<Row<Sample>, Collection<SampleDTO>>() {
 
         @Override
-        public Collection<SampleDTO> apply(Row input) {
-            return Collections2.transform(input.getSamples(), m_toSampletDTO);
+        public Collection<SampleDTO> apply(Row<Sample> input) {
+            return Collections2.transform(input.getElements(), m_toSampletDTO);
         }
     };
 
@@ -112,7 +112,7 @@ public class Server {
 
                 String resource = request.params(":resource");
 
-                Results select = m_repository.select(resource, getStart(request), getEnd(request));
+                Results<Sample> select = m_repository.select(resource, getStart(request), getEnd(request));
 
                 response.header("Access-Control-Allow-Origin", ALLOW_CORS); // Allow CORS
                 response.type("application/json");

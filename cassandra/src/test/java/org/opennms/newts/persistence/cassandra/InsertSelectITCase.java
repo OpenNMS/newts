@@ -39,21 +39,21 @@ public class InsertSelectITCase extends AbstractCassandraTestCase {
         getRepository().insert(samples);
 
         Timestamp start = Timestamp.fromEpochMillis(0), end = Timestamp.fromEpochMillis(rows * 1000);
-        Iterator<Row> results = getRepository().select(resource, Optional.of(start), Optional.of(end)).iterator();
+        Iterator<Row<Sample>> results = getRepository().select(resource, Optional.of(start), Optional.of(end)).iterator();
 
         for (int i = 1; i <= rows; i++) {
             assertTrue("Insufficient number of results", results.hasNext());
 
             Timestamp timestamp = Timestamp.fromEpochMillis(i * 1000);
-            Row row = results.next();
+            Row<Sample> row = results.next();
 
             assertEquals("Unexpected timestamp for row " + i, timestamp, row.getTimestamp());
             assertEquals("Unexpected resource name", resource, row.getResource());
 
             for (int j = 1; j <= cols; j++) {
-                assertNotNull("Missing sample: m" + j, row.getSample("m" + j));
+                assertNotNull("Missing sample: m" + j, row.getElement("m" + j));
 
-                Sample sample = row.getSample("m" + j);
+                Sample sample = row.getElement("m" + j);
 
                 assertEquals("Unexpected timestamp for metric m" + j, timestamp, sample.getTimestamp());
                 assertEquals("Unexpected resource name", resource, sample.getResource());

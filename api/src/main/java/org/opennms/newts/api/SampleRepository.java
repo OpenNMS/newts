@@ -25,7 +25,7 @@ public interface SampleRepository {
      *            temporal resolution of results
      * @return query results
      */
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution);
+    public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution);
 
     /**
      * Read stored samples.
@@ -38,7 +38,7 @@ public interface SampleRepository {
      *            query end time (defaults to current time if absent)
      * @return query results
      */
-    public Results select(String resource, Optional<Timestamp> start, Optional<Timestamp> end);
+    public Results<Sample> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end);
 
     /**
      * Write (store) samples.

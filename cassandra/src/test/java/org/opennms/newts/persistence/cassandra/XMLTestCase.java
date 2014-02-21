@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
-import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -82,50 +82,48 @@ public class XMLTestCase {
         return Sets.newHashSet(Iterables.transform(m_samples, m_toMetricName)).toArray(new String[0]);
     }
 
-    @XmlTransient
-    private Function<XMLSample, Sample> m_toSample = new Function<XMLSample, Sample>() {
+    public Results<Sample> getSamples() {
 
-        @Override
-        public Sample apply(XMLSample input) {
-            return new Sample(
-                    Timestamp.fromEpochSeconds(input.getTimestamp()),
-                    getResource(),
-                    input.getName(),
-                    input.getType(),
-                    new Gauge(input.getValue()));
-        }
-    };
+        Function<XMLSample, Sample> toSample = new Function<XMLSample, Sample>() {
 
-    public Results getSamples() {
-        Results r = new Results();
+            @Override
+            public Sample apply(XMLSample input) {
+                return new Sample(
+                        Timestamp.fromEpochSeconds(input.getTimestamp()),
+                        getResource(),
+                        input.getName(),
+                        input.getType(),
+                        new Gauge(input.getValue()));
+            }
+        };
 
-        for (Sample s : Iterables.transform(m_samples, m_toSample)) {
-            r.addSample(s);
+        Results<Sample> r = new Results<>();
+
+        for (Sample s : Iterables.transform(m_samples, toSample)) {
+            r.addElement(s);
         }
 
         return r;
     }
 
-    // FIXME: Post-refactor this will need to convert XMLMeasurements to Measurements
-    public Results getMeasurements() {
+    public Results<Measurement> getMeasurements() {
 
-        Function<XMLMeasurement, Sample> measurementToSample = new Function<XMLMeasurement, Sample>() {
+        Function<XMLMeasurement, Measurement> toMeasurement = new Function<XMLMeasurement, Measurement>() {
 
             @Override
-            public Sample apply(XMLMeasurement input) {
-                return new Sample(
+            public Measurement apply(XMLMeasurement input) {
+                return new Measurement(
                         Timestamp.fromEpochSeconds(input.getTimestamp()),
                         getResource(),
                         input.getName(),
-                        MetricType.GAUGE,
-                        new Gauge(input.getValue()));
+                        input.getValue());
             }
         };
 
-        Results r = new Results();
-        
-        for (Sample s : Iterables.transform(m_measurements, measurementToSample)) {
-            r.addSample(s);
+        Results<Measurement> r = new Results<>();
+
+        for (Measurement m : Iterables.transform(m_measurements, toMeasurement)) {
+            r.addElement(m);
         }
 
         return r;

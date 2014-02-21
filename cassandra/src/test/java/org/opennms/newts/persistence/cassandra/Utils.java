@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 
@@ -61,21 +62,21 @@ class Utils {
      * @param actualRows
      *            actual value
      */
-    static void assertRowsEqual(Iterable<Row> expectedRows, Iterable<Row> actualRows) {
+    static void assertRowsEqual(Iterable<Row<Measurement>> expectedRows, Iterable<Row<Measurement>> actualRows) {
 
-        Iterator<Row> expectedRowsIter = expectedRows.iterator();
+        Iterator<Row<Measurement>> expectedRowsIter = expectedRows.iterator();
 
-        for (Row actual : actualRows) {
+        for (Row<Measurement> actual : actualRows) {
             assertTrue("Extraneous result row(s)", expectedRowsIter.hasNext());
 
-            Row expected = expectedRowsIter.next();
+            Row<Measurement> expected = expectedRowsIter.next();
 
             assertEquals("Unexpected row resource", expected.getResource(), actual.getResource());
             assertEquals("Unexpected row timestamp", expected.getTimestamp(), actual.getTimestamp());
-            assertEquals("Sample count mismatch", expected.getSamples().size(), actual.getSamples().size());
+            assertEquals("Measurement count mismatch", expected.getElements().size(), actual.getElements().size());
 
-            for (Sample m : actual.getSamples()) {
-                assertSamplesEqual(expected.getSample(m.getName()), m);
+            for (Measurement m : actual.getElements()) {
+                assertSamplesEqual(expected.getElement(m.getName()), m);
             }
 
         }
@@ -92,11 +93,10 @@ class Utils {
      * @param actual
      *            actual value
      */
-    static void assertSamplesEqual(Sample expected, Sample actual) {
-        assertEquals("Unexpected sample name", expected.getName(), actual.getName());
-        assertEquals("Unexpected sample resource", expected.getResource(), actual.getResource());
-        assertEquals("Unexpected sample timestamp", expected.getTimestamp(), actual.getTimestamp());
-        assertEquals("Unexpected sample type", expected.getType(), actual.getType());
+    static void assertSamplesEqual(Measurement expected, Measurement actual) {
+        assertEquals("Unexpected measurement name", expected.getName(), actual.getName());
+        assertEquals("Unexpected measurement resource", expected.getResource(), actual.getResource());
+        assertEquals("Unexpected measurement timestamp", expected.getTimestamp(), actual.getTimestamp());
         assertEquals("Incorrect value", expected.getValue().doubleValue(), actual.getValue().doubleValue(), 0.01d);
     }
 
