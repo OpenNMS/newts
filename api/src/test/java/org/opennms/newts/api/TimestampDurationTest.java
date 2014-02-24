@@ -12,13 +12,23 @@ import org.junit.Test;
 public class TimestampDurationTest {
 
     @Test
+    public void testDurationMultiplication() {
+        assertEquals(Duration.seconds(25), Duration.seconds(5).times(5));
+    }
+
+    @Test
+    public void testDurationDivideBy() {
+        assertEquals(5, Duration.seconds(25).divideBy(Duration.seconds(5)));
+    }
+
+    @Test
     public void testDurationIsMultiple() {
         assertTrue(Duration.millis(50000).isMultiple(Duration.seconds(10)));
         assertFalse(Duration.seconds(5).isMultiple(Duration.seconds(2)));
     }
 
     @Test
-    public void testCeiling() {
+    public void testTimestampCeiling() {
         assertEquals(fromEpochSeconds(900), fromEpochSeconds(601).stepCeiling(Duration.seconds(300)));
         assertEquals(fromEpochSeconds(900), fromEpochSeconds(900).stepCeiling(Duration.seconds(300)));
     }

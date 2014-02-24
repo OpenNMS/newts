@@ -46,6 +46,11 @@ public class Duration implements Comparable<Duration> {
         return new Duration(getDuration() * value, getUnit());
     }
 
+    public long divideBy(Duration o) {
+        TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
+        return convert(u) / o.convert(u);
+    }
+
     public boolean isMultiple(Duration o) {
         TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
         return (this.gt(o) && ((convert(u) % o.convert(u)) == 0));
