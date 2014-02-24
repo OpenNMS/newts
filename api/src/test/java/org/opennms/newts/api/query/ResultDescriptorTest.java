@@ -3,16 +3,15 @@ package org.opennms.newts.api.query;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.opennms.newts.api.Duration.*;
-import static org.opennms.newts.api.Timestamp.*;
-import static org.opennms.newts.api.query.Datasource.*;
-import static org.opennms.newts.api.query.ResultDescriptor.*;
-import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.*;
+import static org.opennms.newts.api.Duration.seconds;
+import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.AVERAGE;
+import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.MAX;
+import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.MIN;
 
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Sets;
 
 

@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.query.Datasource.AggregationFunction;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
