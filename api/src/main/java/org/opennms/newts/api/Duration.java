@@ -46,6 +46,11 @@ public class Duration implements Comparable<Duration> {
         return new Duration(getDuration() * value, getUnit());
     }
 
+    public boolean isMultiple(Duration o) {
+        TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
+        return (this.gt(o) && ((convert(u) % o.convert(u)) == 0));
+    }
+
     @Override
     public String toString() {
         return String.format("%s[%d, %s]", getClass().getSimpleName(), m_duration, getUnit());
