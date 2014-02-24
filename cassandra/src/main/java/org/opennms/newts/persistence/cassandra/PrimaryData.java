@@ -21,21 +21,19 @@ import com.google.common.collect.Maps;
 public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
     private class Accumulation {
-        private long known = 0, unknown = 0;
+        private long known, unknown;
         private ValueType<?> value;
-        private MetricType type;
 
-        private Accumulation(MetricType type) {
-            value = ValueType.compose(0, type);
-            this.type = type;
+        private Accumulation() {
+            reset();
         }
 
         private double elapsed() {
             return known + unknown;
         }
 
-        private ValueType<?> average() {
-            return isValid() ? value.divideBy(known) : null;
+        private Double average() {
+            return isValid() ? value.divideBy(known).doubleValue() : Double.NaN;
         }
 
         private boolean isValid() {
@@ -44,7 +42,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
         private void reset() {
             known = unknown = 0;
-            value = ValueType.compose(0, type);
+            value = ValueType.compose(0, MetricType.GAUGE);
         }
 
     }
@@ -111,7 +109,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
                     output.getTimestamp(),
                     output.getResource(),
                     name,
-                    accumulation.average().doubleValue()));
+                    accumulation.average()));
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
@@ -167,9 +165,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
-            Accumulation accumulation = getOrCreateAccumulation(current.getName(), current.getType());
-
-            // FIXME: what happens if metric type changes mid-stream?
+            Accumulation accumulation = getOrCreateAccumulation(current.getName());
 
             if (elapsed.lt(getHeartbeat(current.getName()))) {
                 accumulation.known += elapsed.asMillis();
@@ -186,11 +182,11 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
         }
     }
 
-    public Accumulation getOrCreateAccumulation(String name, MetricType type) {
+    public Accumulation getOrCreateAccumulation(String name) {
         Accumulation result = m_accumulation.get(name);
 
         if (result == null) {
-            result = new Accumulation(type);
+            result = new Accumulation();
             m_accumulation.put(name, result);
         }
 
