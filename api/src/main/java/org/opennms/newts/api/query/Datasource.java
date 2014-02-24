@@ -1,27 +1,25 @@
 package org.opennms.newts.api.query;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.Gauge;
-import org.opennms.newts.api.ValueType;
 
 import com.google.common.base.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 
 public class Datasource {
     
-    public static interface AggregationFunction extends Function<List<ValueType<Double>>, ValueType<Double>> {
+    public static interface AggregationFunction extends Function<List<Double>, Double> {
         /**
          * An Aggregation function is a function that takes the list of PDPs should be aggregated in a single bucket
          * of resolution.  For example, if the step size if 5m and the resolution is 1h then the aggregation function
          * will be called with a list of 12 values.  These function should ignore all NaN values as if they were not
          * included in the list at all.
          */
-        public ValueType<Double> apply(List<ValueType<Double>> input);
+        public Double apply(List<Double> input);
     };
     
     public static enum StandardAggregationFunctions implements AggregationFunction {
@@ -31,28 +29,28 @@ public class Datasource {
         AVERAGE {
 
             @Override
-            public ValueType<Double> apply(List<ValueType<Double>> input) {
+            public Double apply(List<Double> input) {
                 int count = 0;
-                ValueType<Double> sum = new Gauge(0);
-                for(ValueType<Double> item : input) {
-                    if (!item.isNan()) {
-                        sum = sum.plus(item);
+                Double sum = 0.0d;
+                for(Double item : input) {
+                    if (!Double.isNaN(item)) {
+                        sum += item;
                         count++;
                     }
                 }
                 
-                return sum.divideBy(count);
+                return sum / count;
             }
             
         },
         MAX {
 
             @Override
-            public ValueType<Double> apply(List<ValueType<Double>> input) {
-                ValueType<Double> max = new Gauge(Double.MIN_VALUE);
-                for(ValueType<Double> item : input) {
-                    if (!item.isNan()) {
-                        double diff = item.minus(max).doubleValue();
+            public Double apply(List<Double> input) {
+                Double max = Double.MIN_VALUE;
+                for(Double item : input) {
+                    if (!Double.isNaN(item)) {
+                        double diff = item - max;
                         max = diff > 0 ? item : max;
                     }
                 }
@@ -63,11 +61,11 @@ public class Datasource {
         MIN {
 
             @Override
-            public ValueType<Double> apply(List<ValueType<Double>> input) {
-                ValueType<Double> min = new Gauge(Double.MAX_VALUE);
-                for(ValueType<Double> item : input) {
-                    if (!item.isNan()) {
-                        double diff = item.minus(min).doubleValue();
+            public Double apply(List<Double> input) {
+                Double min = Double.MAX_VALUE;
+                for(Double item : input) {
+                    if (!Double.isNaN(item)) {
+                        double diff = item - min;
                         min = diff < 0 ? item : min;
                     }
                 }
