@@ -7,6 +7,7 @@ import static org.opennms.newts.persistence.cassandra.Utils.getTestCase;
 
 import javax.xml.bind.JAXBException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -55,6 +56,12 @@ public class PrimaryDataTest {
     @Test
     public void testLongSamples() {
         execute(getTestCase("primaryData/longSamples.xml"));
+    }
+
+    @Test
+    @Ignore
+    public void testHeartbeat() {
+        execute(getTestCase("primaryData/heartbeat.xml"));
     }
 
 }
