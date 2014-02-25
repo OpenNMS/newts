@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;

@@ -4,8 +4,6 @@ package org.opennms.newts.persistence.cassandra;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 import static org.opennms.newts.persistence.cassandra.Utils.getTestCase;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.newts.api.query.Datasource.StandardAggregationFunctions;
