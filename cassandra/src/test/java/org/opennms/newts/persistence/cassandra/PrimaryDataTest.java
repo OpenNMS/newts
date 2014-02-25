@@ -35,12 +35,12 @@ public class PrimaryDataTest {
     }
 
     @Test
-    public void testShortSamples() throws JAXBException {
+    public void testShortSamples() {
         execute(getTestCase("primaryData/shortSamples.xml"));
     }
 
     @Test
-    public void testSkippedSample() throws JAXBException {
+    public void testSkippedSample() {
         execute(getTestCase("primaryData/skippedSample.xml"));
     }
 
