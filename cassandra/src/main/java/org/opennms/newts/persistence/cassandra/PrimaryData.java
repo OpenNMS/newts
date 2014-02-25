@@ -14,6 +14,8 @@ import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
+import org.opennms.newts.api.query.Datasource;
+import org.opennms.newts.api.query.ResultDescriptor;
 
 import com.google.common.collect.Maps;
 
@@ -47,27 +49,26 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
     }
 
+    private final ResultDescriptor m_resultDescriptor;
     private final String m_resource;
-    private final String[] m_metrics;
     private final Iterator<Timestamp> m_timestamps;
     private final Duration m_interval;
-    private final Map<String, Duration> m_heartbeats;
     private final Iterator<Row<Sample>> m_input;
     private final Map<String, Sample> m_lastUpdates = Maps.newHashMap();
     private final Map<String, Accumulation> m_accumulation = Maps.newHashMap();
 
     private Row<Sample> m_current = null;
 
-    public PrimaryData(String resource, String[] metrics, Timestamp start, Timestamp end, Duration interval, Map<String, Duration> heartbeats, Iterator<Row<Sample>> input) {
+    public PrimaryData(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Iterator<Row<Sample>> input) {
+        m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
-        m_metrics = checkNotNull(metrics, "metrics argument");
         checkNotNull(start, "start argument");
         checkNotNull(end, "end argument");
-        m_interval = checkNotNull(interval, "interval argument");
-        m_heartbeats = checkNotNull(heartbeats, "hearbeats argument");
         m_input = checkNotNull(input, "input argument");
 
-        m_timestamps = new IntervalGenerator(start, end, interval);
+        m_interval = resultDescriptor.getStep();
+
+        m_timestamps = new IntervalGenerator(start, end, m_interval);
 
         if (m_input.hasNext()) m_current = m_input.next();
 
@@ -100,22 +101,22 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
         }
 
         // Go time; We've accumulated enough to produce the output row
-        for (String name : m_metrics) {
+        for (Datasource ds : m_resultDescriptor.getDatasources().values()) {
 
-            Accumulation accumulation = m_accumulation.get(name);
+            Accumulation accumulation = m_accumulation.get(ds.getSource());
 
             // Add sample with accumulated value to output row
             output.addElement(new Measurement(
                     output.getTimestamp(),
                     output.getResource(),
-                    name,
+                    ds.getLabel(),
                     accumulation.average()));
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
                 accumulation.reset();
 
-                Sample sample = m_current.getElement(name);
+                Sample sample = m_current.getElement(ds.getSource());
 
                 if (sample == null) {
                     continue;
@@ -123,7 +124,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
-                    if (elapsed.lt(getHeartbeat(name))) {
+                    if (elapsed.lt(ds.getHeartbeat())) {
                         accumulation.known = elapsed.asMillis();
                         accumulation.value = sample.getValue().times(elapsed.asMillis());
                     }
@@ -140,10 +141,10 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
     private void accumulate(Row<Sample> row, Timestamp intervalCeiling) {
 
-        for (String name : m_metrics) {
+        for (Datasource ds : m_resultDescriptor.getDatasources().values()) {
             Sample current, last;
 
-            current = row.getElement(name);
+            current = row.getElement(ds.getSource());
 
             if (current == null) {
                 continue;
@@ -198,7 +199,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
      * default is even reasonable at all?), then do something better than the hard-coded value here.
      */
     private Duration getHeartbeat(String metricName) {
-        return m_heartbeats.containsKey(metricName) ? m_heartbeats.get(metricName) : m_interval.times(2);
+        return m_resultDescriptor.getDatasources().get(metricName).getHeartbeat();
     }
 
     @Override

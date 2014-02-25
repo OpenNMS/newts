@@ -68,7 +68,7 @@ public class XMLTestCase {
     public Duration getHeartbeat() {
         return Duration.seconds(m_heartbeat);
     }
-
+ 
     @XmlTransient
     private Function<XMLSample, String> m_toMetricName = new Function<XMLSample, String>() {
 
