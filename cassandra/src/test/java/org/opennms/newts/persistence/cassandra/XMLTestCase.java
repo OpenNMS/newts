@@ -16,6 +16,7 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.ValueType;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -93,7 +94,7 @@ public class XMLTestCase {
                         getResource(),
                         input.getName(),
                         input.getType(),
-                        new Gauge(input.getValue()));
+                        ValueType.compose(input.getValue(), input.getType()));
             }
         };
 
