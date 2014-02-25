@@ -109,7 +109,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
             output.addElement(new Measurement(
                     output.getTimestamp(),
                     output.getResource(),
-                    ds.getLabel(),
+                    ds.getSource(),
                     accumulation.average()));
 
             // If input is greater than row, accumulate remainder for next row

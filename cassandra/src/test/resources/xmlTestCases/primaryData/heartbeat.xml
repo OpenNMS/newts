@@ -8,7 +8,7 @@
   <Start>300</Start>
   <End>900</End>
   <Interval>300</Interval>
-  <Heartbeat>600</Heartbeat>
+  <Heartbeat>601</Heartbeat>
 
   <Samples>
     <Sample>
@@ -56,12 +56,12 @@
       <Type>GAUGE</Type>
       <Value>3</Value>
     </Sample>
-<!--     <Sample> -->
-<!--       <Timestamp>900</Timestamp> -->
-<!--       <Name>m1</Name> -->
-<!--       <Type>GAUGE</Type> -->
-<!--       <Value>4</Value> -->
-<!--     </Sample> -->
+    <Sample>
+      <Timestamp>900</Timestamp>
+      <Name>m1</Name>
+      <Type>GAUGE</Type>
+      <Value>4</Value>
+    </Sample>
   </Samples>
 
   <Measurements>
@@ -85,7 +85,7 @@
     <Measurement>
       <Timestamp>600</Timestamp>
       <Name>m1</Name>
-      <Value>2</Value>
+      <Value>NaN</Value>
     </Measurement>
 
     <Measurement>
@@ -97,7 +97,7 @@
     <Measurement>
       <Timestamp>900</Timestamp>
       <Name>m1</Name>
-      <Value>2</Value>
+      <Value>4</Value>
     </Measurement>
   </Measurements>
 
