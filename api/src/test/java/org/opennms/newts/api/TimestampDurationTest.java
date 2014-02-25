@@ -28,9 +28,15 @@ public class TimestampDurationTest {
     }
 
     @Test
+    public void testTimestampFloor() {
+       assertEquals(fromEpochSeconds(0), fromEpochSeconds(0).stepFloor(Duration.minutes(60)));
+    }
+
+    @Test
     public void testTimestampCeiling() {
         assertEquals(fromEpochSeconds(900), fromEpochSeconds(601).stepCeiling(Duration.seconds(300)));
         assertEquals(fromEpochSeconds(900), fromEpochSeconds(900).stepCeiling(Duration.seconds(300)));
+        assertEquals(fromEpochSeconds(3600), fromEpochSeconds(3300).stepCeiling(Duration.minutes(60)));
     }
 
     @Test
