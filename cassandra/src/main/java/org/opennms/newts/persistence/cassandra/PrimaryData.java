@@ -23,28 +23,46 @@ import com.google.common.collect.Maps;
 public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
     private class Accumulation {
-        private long known, unknown;
-        private ValueType<?> value;
+        private long m_known, m_unknown;
+        private ValueType<?> m_value;
 
         private Accumulation() {
             reset();
         }
 
-        private double elapsed() {
-            return known + unknown;
+        private void accumulate(Duration elapsed, Duration heartbeat, ValueType<?> value) {
+            if (elapsed.lt(heartbeat)) {
+                m_known += elapsed.asMillis();
+                m_value = m_value.plus(value.times(elapsed.asMillis()));
+            }
+            else {
+                m_unknown += elapsed.asMillis();
+            }
         }
 
-        private Double average() {
-            return isValid() ? value.divideBy(known).doubleValue() : Double.NaN;
+        private Double getAverage() {
+            return isValid() ? m_value.divideBy(m_known).doubleValue() : Double.NaN;
+        }
+
+        private long getKnown() {
+            return m_known;
+        }
+
+        private long getUnknown() {
+            return m_unknown;
+        }
+
+        private double getElapsed() {
+            return getKnown() + getUnknown();
         }
 
         private boolean isValid() {
-            return unknown < (elapsed() / 2);
+            return getUnknown() < (getElapsed() / 2);
         }
 
         private void reset() {
-            known = unknown = 0;
-            value = ValueType.compose(0, MetricType.GAUGE);
+            m_known = m_unknown = 0;
+            m_value = ValueType.compose(0, MetricType.GAUGE);
         }
 
     }
@@ -110,7 +128,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
                     output.getTimestamp(),
                     output.getResource(),
                     ds.getSource(),
-                    accumulation.average()));
+                    accumulation.getAverage()));
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
@@ -124,13 +142,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
-                    if (elapsed.lt(ds.getHeartbeat())) {
-                        accumulation.known = elapsed.asMillis();
-                        accumulation.value = sample.getValue().times(elapsed.asMillis());
-                    }
-                    else {
-                        accumulation.unknown = elapsed.asMillis();
-                    }
+                    accumulation.accumulate(elapsed, ds.getHeartbeat(), sample.getValue());
                 }
 
             }
@@ -166,15 +178,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
-            Accumulation accumulation = getOrCreateAccumulation(current.getName());
-
-            if (elapsed.lt(getHeartbeat(current.getName()))) {
-                accumulation.known += elapsed.asMillis();
-                accumulation.value = accumulation.value.plus(current.getValue().times(elapsed.asMillis()));
-            }
-            else {
-                accumulation.unknown += elapsed.asMillis();
-            }
+            getOrCreateAccumulation(current.getName()).accumulate(elapsed, ds.getHeartbeat(), current.getValue());
 
             // Postpone storing as lastUpdate, we'll need this sample again...
             if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval))) {
@@ -192,14 +196,6 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
         }
 
         return result;
-    }
-
-    /*
-     * FIXME: If a multiple of interval is a reasonable way of providing a default (is using a
-     * default is even reasonable at all?), then do something better than the hard-coded value here.
-     */
-    private Duration getHeartbeat(String metricName) {
-        return m_resultDescriptor.getDatasources().get(metricName).getHeartbeat();
     }
 
     @Override

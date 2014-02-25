@@ -4,7 +4,6 @@ package org.opennms.newts.persistence.cassandra;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 import static org.opennms.newts.persistence.cassandra.Utils.getTestCase;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.newts.api.query.Datasource.StandardAggregationFunctions;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -17,7 +16,7 @@ public class PrimaryDataTest {
         ResultDescriptor resultDescriptor = new ResultDescriptor(testCase.getInterval());
 
         for (String name : testCase.getMetrics()) {
-            resultDescriptor.datasource(name, StandardAggregationFunctions.AVERAGE);
+            resultDescriptor.datasource(name, name, testCase.getHeartbeat(), StandardAggregationFunctions.AVERAGE);
         }
 
         return new PrimaryData(
@@ -53,7 +52,6 @@ public class PrimaryDataTest {
     }
 
     @Test
-    @Ignore
     public void testOneToManySamples() {
         execute(getTestCase("primaryData/oneToMany.xml"));
     }
@@ -64,7 +62,6 @@ public class PrimaryDataTest {
     }
 
     @Test
-    @Ignore
     public void testHeartbeat() {
         execute(getTestCase("primaryData/heartbeat.xml"));
     }
