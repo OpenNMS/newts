@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Samples occur after to the nearest step interval boundary. -->
+<!-- TestData occur after to the nearest step interval boundary. -->
 
 <TestCase>
 
@@ -10,93 +10,85 @@
   <Interval>300</Interval>
   <Heartbeat>600</Heartbeat>
 
-  <Samples>
-    <Sample>
+  <TestData>
+    <Element>
       <Timestamp>0</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>0</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>0</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>1</Value>
-    </Sample>
+    </Element>
 
-    <Sample>
+    <Element>
       <Timestamp>350</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>1</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>350</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
-    </Sample>
+    </Element>
 
-    <Sample>
+    <Element>
       <Timestamp>650</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>650</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>3</Value>
-    </Sample>
+    </Element>
 
-    <Sample>
+    <Element>
       <Timestamp>950</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>3</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>950</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>4</Value>
-    </Sample>
-  </Samples>
+    </Element>
+  </TestData>
 
-  <Measurements>
-    <Measurement>
+  <Expected>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m0</Name>
       <Value>1</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m1</Name>
       <Value>2</Value>
-    </Measurement>
+    </Element>
 
-    <Measurement>
+    <Element>
       <Timestamp>600</Timestamp>
       <Name>m0</Name>
       <Value>1.833</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>600</Timestamp>
       <Name>m1</Name>
       <Value>2.833</Value>
-    </Measurement>
+    </Element>
 
-    <Measurement>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m0</Name>
       <Value>2.833</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m1</Name>
       <Value>3.833</Value>
-    </Measurement>
-  </Measurements>
+    </Element>
+  </Expected>
 
 </TestCase>

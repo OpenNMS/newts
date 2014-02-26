@@ -24,46 +24,46 @@ public class PrimaryDataTest {
                 testCase.getResource(),
                 testCase.getStart(),
                 testCase.getEnd(),
-                testCase.getSamples().iterator());
+                testCase.getTestDataAsSamples().iterator());
     }
 
     private void execute(XMLTestCase testCase) {
-        assertRowsEqual(testCase.getMeasurements(), getIterator(testCase));
+        assertRowsEqual(testCase.getExpected(), getIterator(testCase));
     }
 
     @Test
     public void testShortSamples() {
-        execute(getTestCase("primaryData/shortSamples.xml"));
+        execute(getTestCase("primary_data/shortSamples.xml"));
     }
 
     @Test
     public void testSkippedSample() {
-        execute(getTestCase("primaryData/skippedSample.xml"));
+        execute(getTestCase("primary_data/skippedSample.xml"));
     }
 
     @Test
     public void testManyToOneSamples() {
-        execute(getTestCase("primaryData/manyToOne.xml"));
+        execute(getTestCase("primary_data/manyToOne.xml"));
     }
 
     @Test
     public void testOneToOneSamples() {
-        execute(getTestCase("primaryData/oneToOne.xml"));
+        execute(getTestCase("primary_data/oneToOne.xml"));
     }
 
     @Test
     public void testOneToManySamples() {
-        execute(getTestCase("primaryData/oneToMany.xml"));
+        execute(getTestCase("primary_data/oneToMany.xml"));
     }
 
     @Test
     public void testLongSamples() {
-        execute(getTestCase("primaryData/longSamples.xml"));
+        execute(getTestCase("primary_data/longSamples.xml"));
     }
 
     @Test
     public void testHeartbeat() {
-        execute(getTestCase("primaryData/heartbeat.xml"));
+        execute(getTestCase("primary_data/heartbeat.xml"));
     }
 
 }

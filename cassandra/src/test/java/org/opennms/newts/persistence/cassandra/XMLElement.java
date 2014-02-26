@@ -1,21 +1,19 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import javax.xml.bind.annotation.*;
-import org.opennms.newts.api.MetricType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XMLSample {
+public class XMLElement {
 
     @XmlElement(name = "Timestamp")
     private long m_timestamp;
 
     @XmlElement(name = "Name")
     private String m_name;
-
-    @XmlElement(name = "Type")
-    private MetricType m_type;
 
     @XmlElement(name = "Value")
     private Double m_value;
@@ -34,14 +32,6 @@ public class XMLSample {
 
     public void setName(String name) {
         m_name = name;
-    }
-
-    public MetricType getType() {
-        return m_type;
-    }
-
-    public void setType(MetricType type) {
-        m_type = type;
     }
 
     public Double getValue() {

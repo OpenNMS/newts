@@ -10,95 +10,85 @@
   <Interval>300</Interval>
   <Heartbeat>601</Heartbeat>
 
-  <Samples>
-    <Sample>
+  <TestData>
+    <Element>
       <Timestamp>0</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>0</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>0</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>1</Value>
-    </Sample>
+    </Element>
 
-    <Sample>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>1</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
-    </Sample>
+    </Element>
 
-    <Sample>
+    <Element>
       <Timestamp>600</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
-    </Sample>
-<!--     <Sample> -->
+    </Element>
+<!--     <Element> -->
 <!--       <Timestamp>600</Timestamp> -->
 <!--       <Name>m1</Name> -->
-<!--       <Type>GAUGE</Type> -->
 <!--       <Value>3</Value> -->
-<!--     </Sample> -->
+<!--     </Element> -->
 
-    <Sample>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>3</Value>
-    </Sample>
-    <Sample>
+    </Element>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m1</Name>
-      <Type>GAUGE</Type>
       <Value>4</Value>
-    </Sample>
-  </Samples>
+    </Element>
+  </TestData>
 
-  <Measurements>
-    <Measurement>
+  <Expected>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m0</Name>
       <Value>1</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>300</Timestamp>
       <Name>m1</Name>
       <Value>2</Value>
-    </Measurement>
+    </Element>
 
-    <Measurement>
+    <Element>
       <Timestamp>600</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>2</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>600</Timestamp>
       <Name>m1</Name>
       <Value>NaN</Value>
-    </Measurement>
+    </Element>
 
-    <Measurement>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m0</Name>
-      <Type>GAUGE</Type>
       <Value>3</Value>
-    </Measurement>
-    <Measurement>
+    </Element>
+    <Element>
       <Timestamp>900</Timestamp>
       <Name>m1</Name>
       <Value>4</Value>
-    </Measurement>
-  </Measurements>
+    </Element>
+  </Expected>
 
 </TestCase>
