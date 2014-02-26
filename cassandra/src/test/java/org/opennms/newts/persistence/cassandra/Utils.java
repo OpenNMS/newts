@@ -18,8 +18,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.Sample;
 
 
 class Utils {
@@ -94,6 +94,8 @@ class Utils {
      *            actual value
      */
     static void assertSamplesEqual(Measurement expected, Measurement actual) {
+        checkNotNull(expected, "expected");
+        checkNotNull(actual, "actual");
         assertEquals("Unexpected measurement name", expected.getName(), actual.getName());
         assertEquals("Unexpected measurement resource", expected.getResource(), actual.getResource());
         assertEquals("Unexpected measurement timestamp", expected.getTimestamp(), actual.getTimestamp());

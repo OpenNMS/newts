@@ -43,6 +43,13 @@ public class XMLTestCase {
     @XmlElement(name = "Heartbeat")
     private long m_heartbeat;
 
+    @XmlElement(name = "Resolution")
+    private long m_resolution;
+
+    @XmlElementWrapper(name = "Datasources")
+    @XmlElement(name = "Datasource")
+    private List<XMLDatasource> m_datasources;
+
     @XmlElementWrapper(name = "TestData")
     @XmlElement(name = "Element")
     private List<XMLElement> m_testData;
@@ -69,6 +76,14 @@ public class XMLTestCase {
 
     public Duration getHeartbeat() {
         return Duration.seconds(m_heartbeat);
+    }
+
+    public Duration getResolution() {
+        return Duration.seconds(m_resolution);
+    }
+
+    public List<XMLDatasource> getDatasources() {
+        return m_datasources;
     }
 
     public String[] getMetrics() {
