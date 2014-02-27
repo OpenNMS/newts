@@ -42,7 +42,7 @@ class Utils {
      *            name of the xml test case
      * @return test case descriptor
      */
-    static XMLTestSpecification getTestCase(String name) {
+    static XMLTestSpecification getTestSpecification(String name) {
         String path = String.format("/xml_tests/%s", name);
         InputStream stream = checkNotNull(Utils.class.getResourceAsStream(path), "No such file in classpath: %s", path);
 
