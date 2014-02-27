@@ -66,14 +66,14 @@ public class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Mea
             // accumulate
             for (Datasource ds : getDatasources()) {
                 Measurement m = m_working.getElement(ds.getSource());
-                values.put(ds.getSource(), m != null ? m.getValue() : Double.NaN);
+                values.put(ds.getLabel(), m != null ? m.getValue() : Double.NaN);
             }
             // next working
             m_working = m_input.hasNext() ? m_input.next() : null;
         }
 
         for (Datasource ds : getDatasources()) {
-            Double v = aggregate(ds, values.get(ds.getSource()));
+            Double v = aggregate(ds, values.get(ds.getLabel()));
             m_nextOut.addElement(new Measurement(m_nextOut.getTimestamp(), m_resource, ds.getLabel(), v));
         }
 
