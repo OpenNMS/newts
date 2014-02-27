@@ -121,7 +121,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
         // Go time; We've accumulated enough to produce the output row
         for (Datasource ds : m_resultDescriptor.getDatasources().values()) {
 
-            Accumulation accumulation = m_accumulation.get(ds.getSource());
+            Accumulation accumulation = getOrCreateAccumulation(ds.getSource());
 
             // Add sample with accumulated value to output row
             output.addElement(new Measurement(

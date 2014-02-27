@@ -14,6 +14,7 @@ import javax.inject.Named;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
@@ -50,11 +51,19 @@ public class CassandraSampleRepository implements SampleRepository {
     public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
-        @SuppressWarnings("unused") Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
+        Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
+
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower, upper), descriptor.getSourceNames());
+        Rate rate = new Rate(driverAdapter, descriptor.getSourceNames());
+        PrimaryData primaryData = new PrimaryData(descriptor, resource, lower, upper, rate);
+        Aggregation aggregation = new Aggregation(descriptor, resource, lower, upper, resolution, primaryData);
+        Export export = new Export(descriptor.getExports(), aggregation);
 
         Results<Measurement> measurements = new Results<Measurement>();
 
-        // TODO: do.
+        for (Row<Measurement> row : export) {
+            measurements.addRow(row);
+        }
 
         return measurements;
     }
