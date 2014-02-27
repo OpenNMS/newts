@@ -7,9 +7,11 @@ import static org.opennms.newts.api.MetricType.GAUGE;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
-import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.ValueType;
 
 import com.google.common.collect.Maps;
@@ -23,10 +25,10 @@ import com.google.common.collect.Maps;
 public class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
     private final Iterator<Row<Sample>> m_input;
-    private final String[] m_metrics;
+    private final Set<String> m_metrics;
     private final Map<String, Sample> m_prevSamples = Maps.newHashMap();
 
-    public Rate(Iterator<Row<Sample>> input, String[] metrics) {
+    public Rate(Iterator<Row<Sample>> input, Set<String> metrics) {
         m_input = checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
     }

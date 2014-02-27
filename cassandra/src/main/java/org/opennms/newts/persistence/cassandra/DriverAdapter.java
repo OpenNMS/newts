@@ -3,23 +3,19 @@ package org.opennms.newts.persistence.cassandra;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.opennms.newts.api.Results;
-import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
-import org.opennms.newts.api.query.Datasource;
-import org.opennms.newts.api.query.ResultDescriptor;
 
 import com.datastax.driver.core.ResultSet;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 
 public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
@@ -29,7 +25,7 @@ public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Re
     private Results.Row<Sample> m_next = null;
 
     public DriverAdapter(ResultSet input) {
-        this(input, new ResultDescriptor());
+        this(input, Collections.<String>emptySet());
     }
 
     /**
@@ -41,12 +37,11 @@ public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Re
      *            the set of result metrics to include; an empty set indicates that all metrics
      *            should be included
      */
-    public DriverAdapter(ResultSet input, ResultDescriptor resultDescriptor) {
+    public DriverAdapter(ResultSet input, Set<String> metrics) {
         checkNotNull(input, "input argument");
-        checkNotNull(resultDescriptor, "result descriptor argument");
+        m_metrics = checkNotNull(metrics, "metrics argument");
 
         m_results = input.iterator();
-        m_metrics = getSourceNames(resultDescriptor);
 
         if (m_results.hasNext()) {
             Sample m = getSample(m_results.next());
@@ -127,17 +122,6 @@ public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Re
 
     private String getResource(com.datastax.driver.core.Row row) {
         return row.getString(SchemaConstants.F_RESOURCE);
-    }
-
-    private static Set<String> getSourceNames(ResultDescriptor resultDescriptor) {
-        final Function<Datasource, String> datasourceToSourceName = new Function<Datasource, String>() {
-            @Override
-            public String apply(Datasource input) {
-                return input.getSource();
-            }
-        };
-
-        return Sets.newHashSet(Iterables.transform(resultDescriptor.getDatasources().values(), datasourceToSourceName));
     }
 
 }

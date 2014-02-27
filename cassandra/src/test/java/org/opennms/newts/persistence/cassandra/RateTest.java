@@ -10,13 +10,16 @@ import static org.opennms.newts.api.MetricType.GAUGE;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.Test;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
+
+import com.google.common.collect.Sets;
 
 
 public class RateTest {
@@ -113,8 +116,8 @@ public class RateTest {
 
     }
 
-    private String[] getMetrics(int number) {
-        return Arrays.copyOf(m_metrics, number);
+    private Set<String> getMetrics(int number) {
+        return Sets.newHashSet(Arrays.copyOf(m_metrics, number));
     }
 
 }
