@@ -22,7 +22,7 @@ public class ExportTest extends AbstractXMLTestCase {
 
     @Override
     Iterable<Row<Measurement>> getIterator(XMLTestSpecification testSpec) {
-        return new Export(getResultDescriptor(testSpec).getExports(), testSpec.getTestDataAsMeasurements());
+        return new Export(getResultDescriptor(testSpec).getExports(), testSpec.getTestDataAsMeasurements().iterator());
     }
 
 }

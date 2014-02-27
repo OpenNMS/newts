@@ -18,10 +18,6 @@ public class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurem
 
     private Row<Measurement> m_current;
 
-    public Export(Set<String> exports, Iterable<Row<Measurement>> input) {
-        this(exports, input.iterator());
-    }
-
     public Export(Set<String> exports, Iterator<Row<Measurement>> input) {
         m_exports = checkNotNull(exports, "exports argument");
         m_input = checkNotNull(input, "input argument");
