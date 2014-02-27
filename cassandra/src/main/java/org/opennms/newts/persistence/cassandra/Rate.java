@@ -49,16 +49,22 @@ public class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
         for (String metricName : m_metrics) {
             Sample sample = working.getElement(metricName);
 
-            if (sample != null) {
-                result.addElement(getRate(sample));
-                m_prevSamples.put(sample.getName(), sample);
+            if (sample == null) {
+                continue;
             }
+
+            // Use rate as result if COUNTER, else pass through as-is.
+            result.addElement(sample.getType().equals(MetricType.COUNTER) ? getRate(sample) : sample);
+
+            m_prevSamples.put(sample.getName(), sample);
+
         }
 
         return result;
     }
 
     private Sample getRate(Sample sample) {
+
         ValueType<?> value = null;
         Sample previous = m_prevSamples.get(sample.getName());
 
