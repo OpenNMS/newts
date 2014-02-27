@@ -26,32 +26,32 @@ public class PrimaryDataTest extends AbstractXMLTestCase {
 
     @Test
     public void testShortSamples() {
-        execute("primary_data/shortSamples.xml");
+        execute("primary_data/short_samples.xml");
     }
 
     @Test
     public void testSkippedSample() {
-        execute("primary_data/skippedSample.xml");
+        execute("primary_data/skipped_sample.xml");
     }
 
     @Test
     public void testManyToOneSamples() {
-        execute("primary_data/manyToOne.xml");
+        execute("primary_data/many2one.xml");
     }
 
     @Test
     public void testOneToOneSamples() {
-        execute("primary_data/oneToOne.xml");
+        execute("primary_data/one2one.xml");
     }
 
     @Test
     public void testOneToManySamples() {
-        execute("primary_data/oneToMany.xml");
+        execute("primary_data/one2many.xml");
     }
 
     @Test
     public void testLongSamples() {
-        execute("primary_data/longSamples.xml");
+        execute("primary_data/long_samples.xml");
     }
 
     @Test
