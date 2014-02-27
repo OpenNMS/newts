@@ -1,17 +1,14 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
-import static org.opennms.newts.persistence.cassandra.Utils.getTestCase;
-
 import org.junit.Test;
 import org.opennms.newts.api.query.Datasource.StandardAggregationFunctions;
 import org.opennms.newts.api.query.ResultDescriptor;
 
 
-public class PrimaryDataTest {
+public class PrimaryDataTest extends AbstractXMLTestCase {
 
-    private PrimaryData getIterator(XMLTestCase testCase) {
+    PrimaryData getIterator(XMLTestSpecification testCase) {
 
         ResultDescriptor resultDescriptor = new ResultDescriptor(testCase.getInterval());
 
@@ -27,43 +24,39 @@ public class PrimaryDataTest {
                 testCase.getTestDataAsSamples().iterator());
     }
 
-    private void execute(XMLTestCase testCase) {
-        assertRowsEqual(testCase.getExpected(), getIterator(testCase));
-    }
-
     @Test
     public void testShortSamples() {
-        execute(getTestCase("primary_data/shortSamples.xml"));
+        execute("primary_data/shortSamples.xml");
     }
 
     @Test
     public void testSkippedSample() {
-        execute(getTestCase("primary_data/skippedSample.xml"));
+        execute("primary_data/skippedSample.xml");
     }
 
     @Test
     public void testManyToOneSamples() {
-        execute(getTestCase("primary_data/manyToOne.xml"));
+        execute("primary_data/manyToOne.xml");
     }
 
     @Test
     public void testOneToOneSamples() {
-        execute(getTestCase("primary_data/oneToOne.xml"));
+        execute("primary_data/oneToOne.xml");
     }
 
     @Test
     public void testOneToManySamples() {
-        execute(getTestCase("primary_data/oneToMany.xml"));
+        execute("primary_data/oneToMany.xml");
     }
 
     @Test
     public void testLongSamples() {
-        execute(getTestCase("primary_data/longSamples.xml"));
+        execute("primary_data/longSamples.xml");
     }
 
     @Test
     public void testHeartbeat() {
-        execute(getTestCase("primary_data/heartbeat.xml"));
+        execute("primary_data/heartbeat.xml");
     }
 
 }

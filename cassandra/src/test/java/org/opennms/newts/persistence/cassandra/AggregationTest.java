@@ -1,34 +1,36 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
-
 import org.junit.Test;
 import org.opennms.newts.api.query.ResultDescriptor;
 
 
-public class AggregationTest {
+public class AggregationTest extends AbstractXMLTestCase {
 
-    @Test
-    public void testOneHour() {
-
-        XMLTestCase testCase = Utils.getTestCase("aggregation/one_hour.xml");
+    Aggregation getIterator(XMLTestSpecification testCase) {
         ResultDescriptor resultDescriptor = new ResultDescriptor(testCase.getInterval());
 
         for (XMLDatasource ds : testCase.getDatasources()) {
             resultDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getFunction());
         }
 
-        Aggregation aggregation = new Aggregation(
+        return new Aggregation(
                 resultDescriptor,
                 testCase.getResource(),
                 testCase.getStart(),
                 testCase.getEnd(),
                 testCase.getResolution(),
                 testCase.getTestDataAsMeasurements().iterator());
+    }
 
-        assertRowsEqual(testCase.getExpected(), aggregation);
+    @Test
+    public void testMultipleAggregations() {
+        execute("aggregation/multiple_aggregations.xml");
+    }
 
+    @Test
+    public void testOneHour() {
+        execute("aggregation/one_hour.xml");
     }
 
 }

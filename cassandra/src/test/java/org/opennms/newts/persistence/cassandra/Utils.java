@@ -19,7 +19,6 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
-import org.opennms.newts.api.Sample;
 
 
 class Utils {
@@ -28,7 +27,7 @@ class Utils {
 
     static {
         try {
-            s_unmarshaller = JAXBContext.newInstance(XMLTestCase.class).createUnmarshaller();
+            s_unmarshaller = JAXBContext.newInstance(XMLTestSpecification.class).createUnmarshaller();
         }
         catch (JAXBException e) {
             throw propagate(e);
@@ -36,18 +35,18 @@ class Utils {
     }
 
     /**
-     * Obtain an {@link XMLTestCase} instance for the specified XML test descriptor.
+     * Obtain an {@link XMLTestSpecification} instance for the specified XML test descriptor.
      *
      * @param name
      *            name of the xml test case
      * @return test case descriptor
      */
-    static XMLTestCase getTestCase(String name) {
+    static XMLTestSpecification getTestCase(String name) {
         String path = String.format("/xml_tests/%s", name);
         InputStream stream = checkNotNull(Utils.class.getResourceAsStream(path), "No such file in classpath: %s", path);
 
         try {
-            return (XMLTestCase) s_unmarshaller.unmarshal(stream);
+            return (XMLTestSpecification) s_unmarshaller.unmarshal(stream);
         }
         catch (JAXBException e) {
             throw propagate(e);
@@ -86,7 +85,7 @@ class Utils {
     }
 
     /**
-     * Assert that two {@link Sample}s are equal.
+     * Assert that two {@link Measurements}s are equal.
      *
      * @param expected
      *            expected value
@@ -103,7 +102,7 @@ class Utils {
     }
 
     @SuppressWarnings("serial")
-    static Map<String, Duration> getHeartbeats(final XMLTestCase testCase) {
+    static Map<String, Duration> getHeartbeats(final XMLTestSpecification testCase) {
         return new HashMap<String, Duration>() {
             {
                 for (String metric : testCase.getMetrics())

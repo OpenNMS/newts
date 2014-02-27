@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- An hours worth of test data, hourly resolution, min, max, and average -->
+
+<TestCase>
+
+  <Resource>localhost</Resource>
+  <Start>1</Start>
+  <End>3300</End>
+  <Interval>300</Interval>
+  <Resolution>3600</Resolution>
+
+  <Datasources>
+    <Datasource>
+      <Label>m0-avg</Label>
+      <Source>m0</Source>
+      <Function>AVERAGE</Function>
+    </Datasource>
+    <Datasource>
+      <Label>m0-min</Label>
+      <Source>m0</Source>
+      <Function>MIN</Function>
+    </Datasource>
+    <Datasource>
+      <Label>m0-max</Label>
+      <Source>m0</Source>
+      <Function>MAX</Function>
+    </Datasource>
+  </Datasources>
+
+  <TestData>
+    <Element>
+      <Timestamp>1</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>300</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>600</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>900</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>1200</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>1500</Timestamp>
+      <Name>m0</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>1800</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+    <Element>
+      <Timestamp>2100</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+    <Element>
+      <Timestamp>2400</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+    <Element>
+      <Timestamp>2700</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+    <Element>
+      <Timestamp>3000</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+    <Element>
+      <Timestamp>3300</Timestamp>
+      <Name>m0</Name>
+      <Value>3</Value>
+    </Element>
+  </TestData>
+
+  <Expected>
+    <Element>
+      <Timestamp>0</Timestamp>
+      <Name>m0-avg</Name>
+      <Value>NaN</Value>
+    </Element>
+    <Element>
+      <Timestamp>3600</Timestamp>
+      <Name>m0-avg</Name>
+      <Value>2</Value>
+    </Element>
+    <Element>
+      <Timestamp>0</Timestamp>
+      <Name>m0-min</Name>
+      <Value>NaN</Value>
+    </Element>
+    <Element>
+      <Timestamp>3600</Timestamp>
+      <Name>m0-min</Name>
+      <Value>1</Value>
+    </Element>
+    <Element>
+      <Timestamp>0</Timestamp>
+      <Name>m0-max</Name>
+      <Value>NaN</Value>
+    </Element>
+    <Element>
+      <Timestamp>3600</Timestamp>
+      <Name>m0-max</Name>
+      <Value>3</Value>
+    </Element>
+  </Expected>
+
+</TestCase>

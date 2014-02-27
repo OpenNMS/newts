@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 
 @XmlRootElement(name = "TestCase")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XMLTestCase {
+public class XMLTestSpecification {
 
     public static final MetricType DEFAULT_SAMPLE_TYPE = MetricType.GAUGE;
 
