@@ -48,7 +48,12 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
 
         @Override
         public String toString() {
-            return String.format("%s[timestamp=%s, resource=%s", getClass().getSimpleName(), getTimestamp(), getResource());
+            return String.format(
+                    "%s[timestamp=%s, resource=%s, elements=%s",
+                    getClass().getSimpleName(),
+                    getTimestamp(),
+                    getResource(),
+                    getElements());
         }
 
     }
@@ -79,6 +84,11 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
     @Override
     public Iterator<Row<T>> iterator() {
         return getRows().iterator();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", getClass().getSimpleName(), getRows());
     }
 
 }
