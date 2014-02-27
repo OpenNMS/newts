@@ -1,7 +1,9 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -50,6 +52,10 @@ public class XMLTestSpecification {
     @XmlElement(name = "Datasource")
     private List<XMLDatasource> m_datasources;
 
+    @XmlElementWrapper(name = "Exports")
+    @XmlElement(name = "Export")
+    private List<String> m_exports;
+    
     @XmlElementWrapper(name = "TestData")
     @XmlElement(name = "Element")
     private List<XMLElement> m_testData;
@@ -83,7 +89,11 @@ public class XMLTestSpecification {
     }
 
     public List<XMLDatasource> getDatasources() {
-        return m_datasources;
+        return (m_datasources != null) ? m_datasources : Collections.<XMLDatasource>emptyList();
+    }
+
+    public Set<String> getExports() {
+        return (m_exports != null) ? Sets.newHashSet(m_exports) : Collections.<String>emptySet();
     }
 
     public String[] getMetrics() {

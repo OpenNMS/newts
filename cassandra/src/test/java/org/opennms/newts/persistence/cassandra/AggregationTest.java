@@ -1,21 +1,16 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static org.opennms.newts.persistence.cassandra.Utils.getResultDescriptor;
+
 import org.junit.Test;
-import org.opennms.newts.api.query.ResultDescriptor;
 
 
 public class AggregationTest extends AbstractXMLTestCase {
 
     Aggregation getIterator(XMLTestSpecification testCase) {
-        ResultDescriptor resultDescriptor = new ResultDescriptor(testCase.getInterval());
-
-        for (XMLDatasource ds : testCase.getDatasources()) {
-            resultDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getFunction());
-        }
-
         return new Aggregation(
-                resultDescriptor,
+                getResultDescriptor(testCase),
                 testCase.getResource(),
                 testCase.getStart(),
                 testCase.getEnd(),

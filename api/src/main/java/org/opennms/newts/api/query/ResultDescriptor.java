@@ -160,13 +160,11 @@ public class ResultDescriptor {
         return datasource(name, metricName, getStep().times(DEFAULT_HEARTBEAT_MULTIPLIER), aggregationFunction);
     }
 
-    public ResultDescriptor datasource(String name, String metricName, long heartbeat,
-            AggregationFunction aggregationFunction) {
+    public ResultDescriptor datasource(String name, String metricName, long heartbeat, AggregationFunction aggregationFunction) {
         return datasource(name, metricName, Duration.millis(heartbeat), aggregationFunction);
     }
 
-    public ResultDescriptor datasource(String name, String metricName, Duration heartbeat,
-            AggregationFunction aggregationFunction) {
+    public ResultDescriptor datasource(String name, String metricName, Duration heartbeat, AggregationFunction aggregationFunction) {
         return datasource(new Datasource(name, metricName, heartbeat, DEFAULT_XFF, aggregationFunction));
     }
 

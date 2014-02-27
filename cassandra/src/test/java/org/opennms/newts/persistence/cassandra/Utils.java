@@ -19,6 +19,7 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.query.ResultDescriptor;
 
 
 class Utils {
@@ -36,7 +37,7 @@ class Utils {
 
     /**
      * Obtain an {@link XMLTestSpecification} instance for the specified XML test descriptor.
-     *
+     * 
      * @param name
      *            name of the xml test case
      * @return test case descriptor
@@ -53,9 +54,21 @@ class Utils {
         }
     }
 
+    static ResultDescriptor getResultDescriptor(XMLTestSpecification testSpec) {
+        ResultDescriptor resultDescriptor = new ResultDescriptor(testSpec.getInterval());
+
+        for (XMLDatasource ds : testSpec.getDatasources()) {
+            resultDescriptor.datasource(ds.getLabel(), ds.getSource(), testSpec.getHeartbeat(), ds.getFunction());
+        }
+
+        resultDescriptor.export(testSpec.getExports().toArray(new String[0]));
+
+        return resultDescriptor;
+    }
+
     /**
      * Assert that two sets of {@link Row} results are equal.
-     *
+     * 
      * @param expectedRows
      *            expected value
      * @param actualRows
@@ -86,7 +99,7 @@ class Utils {
 
     /**
      * Assert that two {@link Measurements}s are equal.
-     *
+     * 
      * @param expected
      *            expected value
      * @param actual
