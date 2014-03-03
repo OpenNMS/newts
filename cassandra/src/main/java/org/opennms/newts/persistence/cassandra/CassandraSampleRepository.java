@@ -54,18 +54,8 @@ public class CassandraSampleRepository implements SampleRepository {
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
         DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower, upper), descriptor.getSourceNames());
-        Rate rate = new Rate(driverAdapter, descriptor.getSourceNames());
-        PrimaryData primaryData = new PrimaryData(descriptor, resource, lower, upper, rate);
-        Aggregation aggregation = new Aggregation(descriptor, resource, lower, upper, resolution, primaryData);
-        Export export = new Export(descriptor.getExports(), aggregation);
 
-        Results<Measurement> measurements = new Results<Measurement>();
-
-        for (Row<Measurement> row : export) {
-            measurements.addRow(row);
-        }
-
-        return measurements;
+        return new ResultProcessor(resource, lower, upper, descriptor, resolution).process(driverAdapter);
     }
 
     @Override
@@ -76,7 +66,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
         Results<Sample> samples = new Results<Sample>();
 
-        for (Results.Row<Sample> row : new DriverAdapter(cassandraSelect(resource, lower, upper))) {
+        for (Row<Sample> row : new DriverAdapter(cassandraSelect(resource, lower, upper))) {
             samples.addRow(row);
         }
 
