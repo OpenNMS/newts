@@ -114,14 +114,4 @@ class Utils {
         assertEquals("Incorrect value", expected.getValue().doubleValue(), actual.getValue().doubleValue(), 0.01d);
     }
 
-    @SuppressWarnings("serial")
-    static Map<String, Duration> getHeartbeats(final XMLTestSpecification testCase) {
-        return new HashMap<String, Duration>() {
-            {
-                for (String metric : testCase.getMetrics())
-                    put(metric, testCase.getHeartbeat());
-            }
-        };
-    }
-
 }
