@@ -5,18 +5,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -88,6 +86,7 @@ class Utils {
             assertEquals("Measurement count mismatch", expected.getElements().size(), actual.getElements().size());
 
             for (Measurement m : actual.getElements()) {
+                assertNotNull("Extraneous result measurement(s)", expected.getElement(m.getName()));
                 assertSamplesEqual(expected.getElement(m.getName()), m);
             }
 
