@@ -13,6 +13,7 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 
+// Encapsulation of results processing.
 
 public class ResultProcessor {
 
@@ -33,9 +34,10 @@ public class ResultProcessor {
     public Results<Measurement> process(Iterator<Row<Sample>> samples) {
         checkNotNull(samples, "samples argument");
 
+        // Build chain of iterators to process results as a stream
         Rate rate = new Rate(samples, m_resultDescriptor.getSourceNames());
-        PrimaryData primaryData = new PrimaryData(m_resultDescriptor, m_resource, m_start, m_end, rate);
-        Aggregation aggregation = new Aggregation(m_resultDescriptor, m_resource, m_start, m_end, m_resolution, primaryData);
+        PrimaryData primaryData = new PrimaryData(m_resource, m_start, m_end, m_resultDescriptor, rate);
+        Aggregation aggregation = new Aggregation(m_resource, m_start, m_end, m_resultDescriptor, m_resolution, primaryData);
         Export exports = new Export(m_resultDescriptor.getExports(), aggregation);
 
         Results<Measurement> measurements = new Results<Measurement>();

@@ -17,10 +17,10 @@ public class PrimaryDataTest extends AbstractXMLTestCase {
         }
 
         return new PrimaryData(
-                resultDescriptor,
                 testCase.getResource(),
                 testCase.getStart(),
                 testCase.getEnd(),
+                resultDescriptor,
                 testCase.getTestDataAsSamples().iterator());
     }
 

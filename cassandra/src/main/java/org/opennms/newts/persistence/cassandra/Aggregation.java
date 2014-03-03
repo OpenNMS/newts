@@ -19,6 +19,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 
+/**
+ * Apply aggregate functions to measurements.
+ *
+ * @author eevans
+ */
 class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
     private final ResultDescriptor m_resultDescriptor;
@@ -31,7 +36,7 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
     private Row<Measurement> m_working;
     private Row<Measurement> m_nextOut;
 
-    Aggregation(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Duration resolution, Iterator<Row<Measurement>> input) {
+    Aggregation(String resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Duration resolution, Iterator<Row<Measurement>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");

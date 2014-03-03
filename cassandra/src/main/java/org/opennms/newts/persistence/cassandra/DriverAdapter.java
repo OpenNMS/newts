@@ -18,6 +18,11 @@ import org.opennms.newts.api.ValueType;
 import com.datastax.driver.core.ResultSet;
 
 
+/**
+ * Map database results to Newts {@link Sample}s.
+ *
+ * @author eevans
+ */
 class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
 
     private final Iterator<com.datastax.driver.core.Row> m_results;
@@ -25,7 +30,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     private Results.Row<Sample> m_next = null;
 
     DriverAdapter(ResultSet input) {
-        this(input, Collections.<String>emptySet());
+        this(input, Collections.<String> emptySet());
     }
 
     /**

@@ -10,10 +10,10 @@ public class AggregationTest extends AbstractXMLTestCase {
 
     Aggregation getIterator(XMLTestSpecification testCase) {
         return new Aggregation(
-                getResultDescriptor(testCase),
                 testCase.getResource(),
                 testCase.getStart(),
                 testCase.getEnd(),
+                getResultDescriptor(testCase),
                 testCase.getResolution(),
                 testCase.getTestDataAsMeasurements().iterator());
     }

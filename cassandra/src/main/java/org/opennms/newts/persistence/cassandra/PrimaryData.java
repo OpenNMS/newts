@@ -20,6 +20,11 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import com.google.common.collect.Maps;
 
 
+/**
+ * Generate primary data point measurements from a stream of samples.
+ *
+ * @author eevans
+ */
 class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
     private class Accumulation {
@@ -77,7 +82,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
     private Row<Sample> m_current = null;
 
-    PrimaryData(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Iterator<Row<Sample>> input) {
+    PrimaryData(String resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Iterator<Row<Sample>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");

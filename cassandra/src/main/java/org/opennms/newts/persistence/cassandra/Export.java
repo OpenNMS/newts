@@ -11,6 +11,12 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 
 
+/**
+ * Filter results to a specified set of exports.
+ *
+ * @author eevans
+ *
+ */
 class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
     private final Set<String> m_exports;

@@ -18,7 +18,7 @@ import com.google.common.collect.Maps;
 
 
 /**
- * Calculates rate (per-second).
+ * Conditionally calculate rate (per-second) on samples.
  * 
  * @author eevans
  */
