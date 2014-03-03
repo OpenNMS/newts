@@ -15,13 +15,13 @@ import org.opennms.newts.api.Timestamp;
  * 
  * @author eevans
  */
-public class IntervalGenerator implements Iterator<Timestamp>, Iterable<Timestamp> {
+class IntervalGenerator implements Iterator<Timestamp>, Iterable<Timestamp> {
 
     private final Duration m_interval;
     private final Timestamp m_final;
     private Timestamp m_current;
 
-    public IntervalGenerator(Timestamp start, Timestamp finish, Duration interval) {
+    IntervalGenerator(Timestamp start, Timestamp finish, Duration interval) {
         m_interval = checkNotNull(interval, "interval argument");
         m_current = checkNotNull(start, "start argument").stepFloor(m_interval);
         m_final = checkNotNull(finish, "finish argument").stepCeiling(m_interval);

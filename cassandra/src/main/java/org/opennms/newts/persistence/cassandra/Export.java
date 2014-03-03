@@ -11,14 +11,14 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 
 
-public class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
+class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
     private final Set<String> m_exports;
     private final Iterator<Row<Measurement>> m_input;
 
     private Row<Measurement> m_current;
 
-    public Export(Set<String> exports, Iterator<Row<Measurement>> input) {
+    Export(Set<String> exports, Iterator<Row<Measurement>> input) {
         m_exports = checkNotNull(exports, "exports argument");
         m_input = checkNotNull(input, "input argument");
 

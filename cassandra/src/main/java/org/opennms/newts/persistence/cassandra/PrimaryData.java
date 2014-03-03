@@ -20,7 +20,7 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import com.google.common.collect.Maps;
 
 
-public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
+class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
     private class Accumulation {
         private long m_known, m_unknown;
@@ -77,7 +77,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
 
     private Row<Sample> m_current = null;
 
-    public PrimaryData(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Iterator<Row<Sample>> input) {
+    PrimaryData(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Iterator<Row<Sample>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");
@@ -187,7 +187,7 @@ public class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Mea
         }
     }
 
-    public Accumulation getOrCreateAccumulation(String name) {
+    private Accumulation getOrCreateAccumulation(String name) {
         Accumulation result = m_accumulation.get(name);
 
         if (result == null) {

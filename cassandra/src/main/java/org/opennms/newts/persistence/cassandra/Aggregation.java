@@ -19,7 +19,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 
-public class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
+class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
     private final ResultDescriptor m_resultDescriptor;
     private final String m_resource;
@@ -31,7 +31,7 @@ public class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Mea
     private Row<Measurement> m_working;
     private Row<Measurement> m_nextOut;
 
-    public Aggregation(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Duration resolution, Iterator<Row<Measurement>> input) {
+    Aggregation(ResultDescriptor resultDescriptor, String resource, Timestamp start, Timestamp end, Duration resolution, Iterator<Row<Measurement>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");

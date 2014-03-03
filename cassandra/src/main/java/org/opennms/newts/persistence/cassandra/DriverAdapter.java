@@ -18,13 +18,13 @@ import org.opennms.newts.api.ValueType;
 import com.datastax.driver.core.ResultSet;
 
 
-public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
+class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
 
     private final Iterator<com.datastax.driver.core.Row> m_results;
     private final Set<String> m_metrics;
     private Results.Row<Sample> m_next = null;
 
-    public DriverAdapter(ResultSet input) {
+    DriverAdapter(ResultSet input) {
         this(input, Collections.<String>emptySet());
     }
 
@@ -37,7 +37,7 @@ public class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Re
      *            the set of result metrics to include; an empty set indicates that all metrics
      *            should be included
      */
-    public DriverAdapter(ResultSet input, Set<String> metrics) {
+    DriverAdapter(ResultSet input, Set<String> metrics) {
         checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
 

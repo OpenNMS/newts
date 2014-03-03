@@ -22,13 +22,13 @@ import com.google.common.collect.Maps;
  * 
  * @author eevans
  */
-public class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
+class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
     private final Iterator<Row<Sample>> m_input;
     private final Set<String> m_metrics;
     private final Map<String, Sample> m_prevSamples = Maps.newHashMap();
 
-    public Rate(Iterator<Row<Sample>> input, Set<String> metrics) {
+    Rate(Iterator<Row<Sample>> input, Set<String> metrics) {
         m_input = checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
     }
