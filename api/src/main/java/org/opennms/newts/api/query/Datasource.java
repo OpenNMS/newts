@@ -3,79 +3,10 @@ package org.opennms.newts.api.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
-
 import org.opennms.newts.api.Duration;
-
-import com.google.common.base.Function;
 
 
 public class Datasource {
-    
-    public static interface AggregationFunction extends Function<Collection<Double>, Double> {
-        /**
-         * An Aggregation function is a function that takes the list of PDPs should be aggregated in a single bucket
-         * of resolution.  For example, if the step size if 5m and the resolution is 1h then the aggregation function
-         * will be called with a list of 12 values.  These function should ignore all NaN values as if they were not
-         * included in the list at all.
-         */
-        public Double apply(Collection<Double> input);
-    };
-    
-    public static enum StandardAggregationFunctions implements AggregationFunction {
-        
-        // These function assume that the xff calculation is done elsewhere and that the values that 
-        // are returned is non sensible if there are more NaN then defined by the xff.
-        AVERAGE {
-
-            @Override
-            public Double apply(Collection<Double> input) {
-                int count = 0;
-                Double sum = 0.0d;
-                for(Double item : input) {
-                    if (!Double.isNaN(item)) {
-                        sum += item;
-                        count++;
-                    }
-                }
-                
-                return sum / count;
-            }
-            
-        },
-        MAX {
-
-            @Override
-            public Double apply(Collection<Double> input) {
-                Double max = Double.MIN_VALUE;
-                for(Double item : input) {
-                    if (!Double.isNaN(item)) {
-                        double diff = item - max;
-                        max = diff > 0 ? item : max;
-                    }
-                }
-                return max;
-            }
-            
-        },
-        MIN {
-
-            @Override
-            public Double apply(Collection<Double> input) {
-                Double min = Double.MAX_VALUE;
-                for(Double item : input) {
-                    if (!Double.isNaN(item)) {
-                        double diff = item - min;
-                        min = diff < 0 ? item : min;
-                    }
-                }
-                return min;
-            }
-            
-        }
-        
-        
-    }
 
     private final String m_label;
     private final String m_source;

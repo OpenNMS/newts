@@ -2,7 +2,7 @@ package org.opennms.newts.persistence.cassandra;
 
 
 import org.junit.Test;
-import org.opennms.newts.api.query.Datasource.StandardAggregationFunctions;
+import org.opennms.newts.api.query.StandardAggregationFunctions;
 import org.opennms.newts.api.query.ResultDescriptor;
 
 

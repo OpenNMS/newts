@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opennms.newts.api.Duration;
-import org.opennms.newts.api.query.Datasource.AggregationFunction;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -19,41 +18,12 @@ import com.google.common.collect.Sets;
 
 public class ResultDescriptor {
 
-    public static interface Calculation {
-        double apply(double... ds);
-    }
-
     public static interface UnaryFunction {
         double apply(double a);
     }
 
     public static interface BinaryFunction {
         double apply(double a, double b);
-    }
-
-    public static class CalculationDescriptor {
-        private String m_label;
-        private Calculation m_calculation;
-        private String[] m_args;
-
-        public CalculationDescriptor(String label, Calculation calculation, String... args) {
-            m_label = label;
-            m_calculation = calculation;
-            m_args = args;
-        }
-
-        public String getLabel() {
-            return m_label;
-        }
-
-        public Calculation getCalculation() {
-            return m_calculation;
-        }
-
-        public String[] getArgs() {
-            return m_args;
-        }
-
     }
 
     /**
@@ -73,7 +43,7 @@ public class ResultDescriptor {
 
     private Duration m_step;
     private final Map<String, Datasource> m_datasources = Maps.newHashMap();
-    private final Map<String, CalculationDescriptor> m_calculations = Maps.newHashMap();
+    private final Map<String, Calculation> m_calculations = Maps.newHashMap();
 
     private final Set<String> m_exports = Sets.newHashSet();
 
@@ -112,7 +82,7 @@ public class ResultDescriptor {
         return m_datasources;
     }
 
-    public Map<String, CalculationDescriptor> getCalculations() {
+    public Map<String, Calculation> getCalculations() {
         return m_calculations;
     }
 
@@ -196,17 +166,17 @@ public class ResultDescriptor {
         }
     }
 
-    public ResultDescriptor calculate(CalculationDescriptor calculation) {
+    public ResultDescriptor calculate(Calculation calculation) {
         m_calculations.put(calculation.getLabel(), calculation);
         return this;
     }
 
-    public ResultDescriptor calculate(String label, Calculation calculation, String... args) {
-        return calculate(new CalculationDescriptor(label, calculation, args));
+    public ResultDescriptor calculate(String label, CalculationFunction calculationFunction, String... args) {
+        return calculate(new Calculation(label, calculationFunction, args));
     }
 
     public ResultDescriptor calculate(String label, final BinaryFunction binaryFunction, String arg1, String arg2) {
-        Calculation calculation = new Calculation() {
+        CalculationFunction calculationFunction = new CalculationFunction() {
 
             @Override
             public double apply(double... ds) {
@@ -215,12 +185,12 @@ public class ResultDescriptor {
                 return binaryFunction.apply(ds[0], ds[1]);
             }
         };
-        return calculate(label, calculation, arg1, arg2);
+        return calculate(label, calculationFunction, arg1, arg2);
 
     }
 
     public ResultDescriptor calculate(String label, final UnaryFunction unaryFunction, String arg) {
-        Calculation calculation = new Calculation() {
+        CalculationFunction calculationFunction = new CalculationFunction() {
 
             @Override
             public double apply(double... ds) {
@@ -229,19 +199,8 @@ public class ResultDescriptor {
                 return unaryFunction.apply(ds[0]);
             }
         };
-        return calculate(label, calculation, arg);
+        return calculate(label, calculationFunction, arg);
 
-    }
-
-    public ResultDescriptor sum(String label, String arg1, String arg2) {
-        BinaryFunction func = new BinaryFunction() {
-
-            @Override
-            public double apply(double a, double b) {
-                return a + b;
-            }
-        };
-        return calculate(label, func, arg1, arg2);
     }
 
 }

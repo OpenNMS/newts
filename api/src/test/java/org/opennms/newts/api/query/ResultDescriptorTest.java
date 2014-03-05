@@ -4,9 +4,9 @@ package org.opennms.newts.api.query;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.opennms.newts.api.Duration.seconds;
-import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.AVERAGE;
-import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.MAX;
-import static org.opennms.newts.api.query.Datasource.StandardAggregationFunctions.MIN;
+import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
+import static org.opennms.newts.api.query.StandardAggregationFunctions.MAX;
+import static org.opennms.newts.api.query.StandardAggregationFunctions.MIN;
 
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
@@ -16,37 +16,35 @@ import com.google.common.collect.Sets;
 
 
 public class ResultDescriptorTest {
-    
-    
-    
+
     @Test
     public void testDescriptor() {
         BinaryFunction plus = new BinaryFunction() {
-            
+
             @Override
             public double apply(double a, double b) {
                 return a + b;
             }
         };
         BinaryFunction minus = new BinaryFunction() {
-            
+
             @Override
             public double apply(double a, double b) {
                 return a - b;
             }
         };
-        
+
         ResultDescriptor results = new ResultDescriptor()
             .datasource("in", "ifInOctets", seconds(600), AVERAGE)
             .datasource("out", "ifOutOctets", seconds(600), AVERAGE)
             .calculate("sum", plus, "in", "out")
             .calculate("diff", minus, "in", "out")
-            .sum("total", "in", "out")
-            .export("sum", "diff", "total");
-        
+            .export("sum", "diff");
+
         assertEquals(Sets.newHashSet("in", "out"), results.getDatasources().keySet());
-        
-        assertEquals(Sets.newHashSet("sum", "diff", "total"), results.getExports());
+
+        assertEquals(Sets.newHashSet("sum", "diff"), results.getExports());
+
     }
 
     @Test

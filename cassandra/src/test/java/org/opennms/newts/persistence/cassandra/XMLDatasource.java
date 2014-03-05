@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.opennms.newts.api.query.Datasource.StandardAggregationFunctions;
+import org.opennms.newts.api.query.StandardAggregationFunctions;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
