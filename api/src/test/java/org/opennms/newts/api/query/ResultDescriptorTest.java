@@ -28,7 +28,7 @@ public class ResultDescriptorTest {
     }
 
     @Test
-    public void testDescriptor() {
+    public void testCalculations() {
         BinaryFunction plus = new BinaryFunction() {
 
             @Override
