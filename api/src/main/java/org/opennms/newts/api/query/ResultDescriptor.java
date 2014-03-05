@@ -112,6 +112,10 @@ public class ResultDescriptor {
         return m_datasources;
     }
 
+    public Map<String, CalculationDescriptor> getCalculations() {
+        return m_calculations;
+    }
+
     /**
      * Returns the set of unique source names; The names of the underlying samples used as the
      * source of aggregations.
@@ -227,6 +231,17 @@ public class ResultDescriptor {
         };
         return calculate(label, calculation, arg);
 
+    }
+
+    public ResultDescriptor sum(String label, String arg1, String arg2) {
+        BinaryFunction func = new BinaryFunction() {
+
+            @Override
+            public double apply(double a, double b) {
+                return a + b;
+            }
+        };
+        return calculate(label, func, arg1, arg2);
     }
 
 }

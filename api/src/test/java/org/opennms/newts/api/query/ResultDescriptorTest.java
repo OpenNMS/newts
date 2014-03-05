@@ -41,11 +41,12 @@ public class ResultDescriptorTest {
             .datasource("out", "ifOutOctets", seconds(600), AVERAGE)
             .calculate("sum", plus, "in", "out")
             .calculate("diff", minus, "in", "out")
-            .export("sum", "diff");
+            .sum("total", "in", "out")
+            .export("sum", "diff", "total");
         
         assertEquals(Sets.newHashSet("in", "out"), results.getDatasources().keySet());
         
-        assertEquals(Sets.newHashSet("sum", "diff"), results.getExports());
+        assertEquals(Sets.newHashSet("sum", "diff", "total"), results.getExports());
     }
 
     @Test
