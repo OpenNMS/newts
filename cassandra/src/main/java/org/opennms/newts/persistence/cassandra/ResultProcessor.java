@@ -38,7 +38,8 @@ public class ResultProcessor {
         Rate rate = new Rate(samples, m_resultDescriptor.getSourceNames());
         PrimaryData primaryData = new PrimaryData(m_resource, m_start, m_end, m_resultDescriptor, rate);
         Aggregation aggregation = new Aggregation(m_resource, m_start, m_end, m_resultDescriptor, m_resolution, primaryData);
-        Export exports = new Export(m_resultDescriptor.getExports(), aggregation);
+        Compute compute = new Compute(m_resultDescriptor, aggregation);
+        Export exports = new Export(m_resultDescriptor.getExports(), compute);
 
         Results<Measurement> measurements = new Results<Measurement>();
 
