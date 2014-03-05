@@ -17,6 +17,16 @@ import com.google.common.collect.Sets;
 
 public class ResultDescriptorTest {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalculateLabelInUse() {
+        new ResultDescriptor().datasource("in", AVERAGE).datasource("out", AVERAGE).calculate("out", null, "in", "out");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalculateBadLabel() {
+        new ResultDescriptor().datasource("in", AVERAGE).calculate("sum", null, "in", "out");
+    }
+
     @Test
     public void testDescriptor() {
         BinaryFunction plus = new BinaryFunction() {

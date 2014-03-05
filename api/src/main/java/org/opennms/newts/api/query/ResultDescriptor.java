@@ -167,6 +167,8 @@ public class ResultDescriptor {
     }
 
     public ResultDescriptor calculate(Calculation calculation) {
+        checkLabels(calculation.getArgs());
+        checkArgument(!getLabels().contains(calculation.getLabel()), "label \"%s\" already in use", calculation.getLabel());
         m_calculations.put(calculation.getLabel(), calculation);
         return this;
     }
