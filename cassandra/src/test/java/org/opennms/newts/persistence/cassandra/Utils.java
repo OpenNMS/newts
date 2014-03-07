@@ -42,6 +42,9 @@ class Utils {
         }
 
         AbstractRowsBuilder<T> row(Timestamp timestamp) {
+            if (m_current != null && (!timestamp.gt(m_current.getTimestamp()))) {
+                throw new IllegalArgumentException("rows must be added in sort order");
+            }
             m_current = new Row<>(timestamp, m_resource);
             m_results.add(m_current);
             return this;
