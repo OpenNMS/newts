@@ -53,6 +53,13 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
         m_working = m_input.hasNext() ? m_input.next() : null;
         m_nextOut = m_timestamps.hasNext() ? new Row<Measurement>(m_timestamps.next(), m_resource) : null;
 
+        // If the input stream contains any Samples earlier than what's relevant, iterate past them.
+        if (m_nextOut != null) {
+            while (m_working != null && m_working.getTimestamp().lte(m_nextOut.getTimestamp().minus(m_resolution))) {
+                m_working = nextWorking();
+            }
+        }
+
     }
 
     @Override
@@ -73,8 +80,8 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
                 Measurement m = m_working.getElement(ds.getSource());
                 values.put(ds.getLabel(), m != null ? m.getValue() : Double.NaN);
             }
-            // next working
-            m_working = m_input.hasNext() ? m_input.next() : null;
+
+            m_working = nextWorking();
         }
 
         for (Datasource ds : getDatasources()) {
@@ -106,6 +113,10 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
         Timestamp rangeLower = m_nextOut.getTimestamp().minus(m_resolution);
 
         return m_working.getTimestamp().lte(rangeUpper) && m_working.getTimestamp().gt(rangeLower);
+    }
+
+    private Row<Measurement> nextWorking() {
+        return m_input.hasNext() ? m_input.next() : null;
     }
 
     private Collection<Datasource> getDatasources() {
