@@ -4,6 +4,7 @@ package org.opennms.newts.persistence.cassandra;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -23,11 +24,11 @@ import com.google.common.collect.Lists;
 
 public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
 
-    private void writeSamples(Iterable<Row<Sample>> samples) {
+    private void writeSamples(Iterator<Row<Sample>> samples) {
         List<Sample> writeSamples = Lists.newArrayList();
 
-        for (Row<Sample> row : samples) {
-            writeSamples.addAll(row.getElements());
+        while (samples.hasNext()) {
+            writeSamples.addAll(samples.next().getElements());
         }
 
         getRepository().insert(writeSamples);
@@ -36,7 +37,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
     @Test
     public void test() {
 
-        Results<Sample> testSamples = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testSamples = new SampleRowsBuilder("localhost", MetricType.GAUGE)
                 .row(900000000).element("m0", 1)        // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0", 1)
                 .row(900000600).element("m0", 1)
@@ -67,7 +68,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300))
             .datasource("m0-avg", "m0", Duration.seconds(600), AVERAGE).export("m0-avg");
 
-        Results<Measurement> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
                 .row(900003600).element("m0-avg", 2)
                 .row(900007200).element("m0-avg", 2)
                 .build();
@@ -81,7 +82,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
                 rDescriptor,
                 Duration.minutes(60));
 
-        assertRowsEqual(expected, results);
+        assertRowsEqual(expected, results.iterator());
 
     }
 

@@ -4,9 +4,11 @@ package org.opennms.newts.persistence.cassandra;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 import org.opennms.newts.api.Measurement;
-import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
 import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
@@ -29,7 +31,7 @@ public class ComputeTest {
     @Test
     public void test() {
 
-        Results<Measurement> testData = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
                 .row(300).element("in", 2).element("out", 2)
                 .row(600).element("in", 6).element("out", 4)
                 .build();
@@ -39,12 +41,12 @@ public class ComputeTest {
                 .datasource("out", AVERAGE)
                 .calculate("total", ADD, "in", "out");
 
-        Results<Measurement> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
                 .row(300).element("in", 2).element("out", 2).element("total", 4)
                 .row(600).element("in", 6).element("out", 4).element("total", 10)
                 .build();
 
-        Compute compute = new Compute(rDescriptor, testData.iterator());
+        Compute compute = new Compute(rDescriptor, testData);
 
         assertRowsEqual(expected, compute);
 

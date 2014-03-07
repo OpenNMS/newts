@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,31 +19,31 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.newts.api.Element;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
 
+import com.google.common.collect.Lists;
+
 
 class Utils {
 
     static abstract class AbstractRowsBuilder<T extends Element<?>> {
 
-        private final Results<T> m_results;
+        private final List<Row<T>> m_results = Lists.newArrayList();
         private final String m_resource;
 
         private Row<T> m_current;
 
         AbstractRowsBuilder(String resource) {
             m_resource = checkNotNull(resource, "resource argument");
-            m_results = new Results<>();
         }
 
         AbstractRowsBuilder<T> row(Timestamp timestamp) {
             m_current = new Row<>(timestamp, m_resource);
-            m_results.addRow(m_current);
+            m_results.add(m_current);
             return this;
         }
 
@@ -64,8 +65,8 @@ class Utils {
 
         abstract AbstractRowsBuilder<T> element(String name, double value);
 
-        Results<T> build() {
-            return m_results;
+        Iterator<Row<T>> build() {
+            return m_results.iterator();
         }
 
     }
@@ -152,14 +153,14 @@ class Utils {
      * @param actualRows
      *            actual value
      */
-    static void assertRowsEqual(Iterable<Row<Measurement>> expectedRows, Iterable<Row<Measurement>> actualRows) {
+    static void assertRowsEqual(Iterator<Row<Measurement>> expectedRows, Iterator<Row<Measurement>> actualRows) {
 
-        Iterator<Row<Measurement>> expectedRowsIter = expectedRows.iterator();
+        while (actualRows.hasNext()) {
+            Row<Measurement> actual = actualRows.next();
 
-        for (Row<Measurement> actual : actualRows) {
-            assertTrue("Extraneous result row(s)", expectedRowsIter.hasNext());
+            assertTrue("Extraneous result row(s)", expectedRows.hasNext());
 
-            Row<Measurement> expected = expectedRowsIter.next();
+            Row<Measurement> expected = expectedRows.next();
 
             assertEquals("Unexpected row resource", expected.getResource(), actual.getResource());
             assertEquals("Unexpected row timestamp", expected.getTimestamp(), actual.getTimestamp());
@@ -172,7 +173,7 @@ class Utils {
 
         }
 
-        assertFalse("Missing result rows(s)", expectedRowsIter.hasNext());
+        assertFalse("Missing result rows(s)", expectedRows.hasNext());
 
     }
 

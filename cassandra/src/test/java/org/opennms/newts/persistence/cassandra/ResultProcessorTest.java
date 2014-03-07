@@ -3,11 +3,13 @@ package org.opennms.newts.persistence.cassandra;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
-import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -19,7 +21,7 @@ public class ResultProcessorTest {
     @Test
     public void test() {
 
-        Results<Sample> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
                 .row(900000000).element("m0", 1)        // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0", 1)
                 .row(900000600).element("m0", 1)
@@ -50,7 +52,7 @@ public class ResultProcessorTest {
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300))
                 .datasource("m0-avg", "m0", Duration.seconds(600), AVERAGE).export("m0-avg");
 
-        Results<Measurement> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
                 .row(900003600).element("m0-avg", 2.0)
                 .row(900007200).element("m0-avg", 2.0)
                 .build();
@@ -62,7 +64,7 @@ public class ResultProcessorTest {
                 rDescriptor,
                 Duration.minutes(60));
 
-        assertRowsEqual(expected, processor.process(testData.iterator()));
+        assertRowsEqual(expected, processor.process(testData).iterator());
 
     }
 
