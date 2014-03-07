@@ -15,6 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -59,7 +60,7 @@ public class RateTest {
 
         // result_1 is always null
         assertTrue(output.hasNext());
-        assertNull(output.next().getElement(m_metrics[0]).getValue());
+        assertEquals(new Gauge(Double.NaN), output.next().getElement(m_metrics[0]).getValue());
 
         // result_2, rate 100
         assertTrue(output.hasNext());

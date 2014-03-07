@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -23,6 +24,8 @@ import com.google.common.collect.Maps;
  * @author eevans
  */
 class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
+
+    private static final Gauge NAN = new Gauge(Double.NaN);
 
     private final Iterator<Row<Sample>> m_input;
     private final Set<String> m_metrics;
@@ -65,7 +68,7 @@ class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
     private Sample getRate(Sample sample) {
 
-        ValueType<?> value = null;
+        ValueType<?> value = NAN;
         Sample previous = m_prevSamples.get(sample.getName());
 
         if (previous != null) {

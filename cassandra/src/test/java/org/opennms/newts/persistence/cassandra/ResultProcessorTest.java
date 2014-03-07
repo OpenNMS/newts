@@ -19,6 +19,55 @@ import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 public class ResultProcessorTest {
 
     @Test
+    public void testCounterRate() {
+
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.COUNTER)
+                .row(900000000).element("m0",  3000)        // Thu Jul  9 11:00:00 CDT 1998
+                .row(900000300).element("m0",  6000)
+                .row(900000600).element("m0",  9000)
+                .row(900000900).element("m0", 12000)
+                .row(900001200).element("m0", 15000)
+                .row(900001500).element("m0", 18000)
+                .row(900001800).element("m0", 21000)
+                .row(900002100).element("m0", 24000)
+                .row(900002400).element("m0", 27000)
+                .row(900002700).element("m0", 30000)
+                .row(900003000).element("m0", 33000)
+                .row(900003300).element("m0", 36000)
+                .row(900003600).element("m0", 39000)
+                .row(900003900).element("m0", 42000)
+                .row(900004200).element("m0", 45000)
+                .row(900004500).element("m0", 48000)
+                .row(900004800).element("m0", 51000)
+                .row(900005100).element("m0", 54000)
+                .row(900005400).element("m0", 57000)
+                .row(900005700).element("m0", 60000)
+                .row(900006000).element("m0", 63000)
+                .row(900006300).element("m0", 66000)
+                .row(900006600).element("m0", 69000)
+                .row(900006900).element("m0", 72000)
+                .row(900007200).element("m0", 75000)        // Thu Jul  9 13:00:00 CDT 1998
+                .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300)).datasource("m0", AVERAGE).export("m0");
+
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+                .row(900003600).element("m0", 10.0)
+                .row(900007200).element("m0", 10.0)
+                .build();
+
+        ResultProcessor processor = new ResultProcessor(
+                "localhost",
+                Timestamp.fromEpochSeconds(900003600),
+                Timestamp.fromEpochSeconds(900007200),
+                rDescriptor,
+                Duration.minutes(60));
+
+        assertRowsEqual(expected, processor.process(testData).iterator());
+
+    }
+
+    @Test
     public void test() {
 
         Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
