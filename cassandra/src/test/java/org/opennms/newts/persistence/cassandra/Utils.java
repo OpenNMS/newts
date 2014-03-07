@@ -2,19 +2,13 @@ package org.opennms.newts.persistence.cassandra;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.opennms.newts.api.Element;
 import org.opennms.newts.api.Measurement;
@@ -23,7 +17,6 @@ import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
-import org.opennms.newts.api.query.ResultDescriptor;
 
 import com.google.common.collect.Lists;
 
@@ -104,48 +97,6 @@ class Utils {
             return this;
         }
 
-    }
-
-    private static Unmarshaller s_unmarshaller;
-
-    static {
-        try {
-            s_unmarshaller = JAXBContext.newInstance(XMLTestSpecification.class).createUnmarshaller();
-        }
-        catch (JAXBException e) {
-            throw propagate(e);
-        }
-    }
-
-    /**
-     * Obtain an {@link XMLTestSpecification} instance for the specified XML test descriptor.
-     * 
-     * @param name
-     *            name of the xml test case
-     * @return test case descriptor
-     */
-    static XMLTestSpecification getTestSpecification(String name) {
-        String path = String.format("/xml_tests/%s", name);
-        InputStream stream = checkNotNull(Utils.class.getResourceAsStream(path), "No such file in classpath: %s", path);
-
-        try {
-            return (XMLTestSpecification) s_unmarshaller.unmarshal(stream);
-        }
-        catch (JAXBException e) {
-            throw propagate(e);
-        }
-    }
-
-    static ResultDescriptor getResultDescriptor(XMLTestSpecification testSpec) {
-        ResultDescriptor resultDescriptor = new ResultDescriptor(testSpec.getInterval());
-
-        for (XMLDatasource ds : testSpec.getDatasources()) {
-            resultDescriptor.datasource(ds.getLabel(), ds.getSource(), testSpec.getHeartbeat(), ds.getFunction());
-        }
-
-        resultDescriptor.export(testSpec.getExports().toArray(new String[0]));
-
-        return resultDescriptor;
     }
 
     /**
