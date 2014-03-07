@@ -36,7 +36,7 @@ public class ResultProcessor {
 
         // Build chain of iterators to process results as a stream
         Rate rate = new Rate(samples, m_resultDescriptor.getSourceNames());
-        PrimaryData primaryData = new PrimaryData(m_resource, m_start, m_end, m_resultDescriptor, rate);
+        PrimaryData primaryData = new PrimaryData(m_resource, m_start.minus(m_resolution), m_end, m_resultDescriptor, rate);
         Aggregation aggregation = new Aggregation(m_resource, m_start, m_end, m_resultDescriptor, m_resolution, primaryData);
         Compute compute = new Compute(m_resultDescriptor, aggregation);
         Export exports = new Export(m_resultDescriptor.getExports(), compute);

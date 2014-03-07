@@ -53,7 +53,7 @@ public class CassandraSampleRepository implements SampleRepository {
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower, upper), descriptor.getSourceNames());
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(resolution), upper), descriptor.getSourceNames());
 
         return new ResultProcessor(resource, lower, upper, descriptor, resolution).process(driverAdapter);
     }
