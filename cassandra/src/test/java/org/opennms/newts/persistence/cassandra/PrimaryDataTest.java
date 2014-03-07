@@ -36,9 +36,9 @@ public class PrimaryDataTest {
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
-                .row(300).element("m0", 1.167).element("m1", 2.167)
-                .row(600).element("m0", 2.167).element("m1", 3.167)
-                .row(900).element("m0", 3.000).element("m1", 4.000)
+                .row(300).element("m0", 1.16666667).element("m1", 2.16666667)
+                .row(600).element("m0", 2.16666667).element("m1", 3.16666667)
+                .row(900).element("m0",        3.0).element("m1",        4.0)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
@@ -69,8 +69,8 @@ public class PrimaryDataTest {
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
-                .row(300).element("m0", 1.000).element("m1", 2.167)
-                .row(600).element("m0", 3.000).element("m1", 3.167)
+                .row(300).element("m0", 1.000).element("m1", 2.16666667)
+                .row(600).element("m0", 3.000).element("m1", 3.16666667)
                 .row(900).element("m0", 3.000).element("m1", 4.000)
                 .build();
 
@@ -206,9 +206,9 @@ public class PrimaryDataTest {
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
-                .row( 300).element("m0", 1.000).element("m1", 2.000)
-                .row( 600).element("m0", 1.833).element("m1", 2.833)
-                .row( 900).element("m0", 2.833).element("m1", 3.833)
+                .row( 300).element("m0",        1.0).element("m1",        2.0)
+                .row( 600).element("m0", 1.83333333).element("m1", 2.83333333)
+                .row( 900).element("m0", 2.83333333).element("m1", 3.83333333)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(

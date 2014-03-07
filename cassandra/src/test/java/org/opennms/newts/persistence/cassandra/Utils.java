@@ -194,7 +194,7 @@ class Utils {
         assertEquals("Unexpected measurement name", expected.getName(), actual.getName());
         assertEquals("Unexpected measurement resource", expected.getResource(), actual.getResource());
         assertEquals("Unexpected measurement timestamp", expected.getTimestamp(), actual.getTimestamp());
-        assertEquals("Incorrect value", expected.getValue().doubleValue(), actual.getValue().doubleValue(), 0.01d);
+        assertEquals("Incorrect value", expected.getValue().doubleValue(), actual.getValue().doubleValue(), 0.00000001d);
     }
 
 }
