@@ -1,6 +1,7 @@
 package org.opennms.newts.api;
 
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -75,6 +76,11 @@ public class Duration implements Comparable<Duration> {
     public boolean equals(Object o) {
         if (!(o instanceof Duration)) return false;
         return compareTo((Duration) o) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(Long.valueOf(convert(TimeUnit.NANOSECONDS)));
     }
 
     public boolean lt(Duration o) {

@@ -73,7 +73,7 @@ public class TimestampDurationTest {
 
         assertEquals(after1Milli.m_time, 1001);
         assertEquals(after1Milli.m_unit, TimeUnit.MILLISECONDS);
-
+        
         // Duration comparison
         assertTrue(sec.equals(Duration.millis(1000)));
         assertTrue(Duration.millis(1000).equals(Duration.seconds(1)));
@@ -83,6 +83,7 @@ public class TimestampDurationTest {
         assertTrue(milli.lte(sec));
         assertTrue(milli.lte(Duration.millis(1)));
         assertTrue(milli.gte(Duration.millis(1)));
+        assertEquals(kMillis.hashCode(), sec.hashCode());
 
     }
 

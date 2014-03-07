@@ -2,6 +2,7 @@ package org.opennms.newts.api;
 
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -102,8 +103,14 @@ public class Timestamp implements Comparable<Timestamp> {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hashCode(Long.valueOf(convert(TimeUnit.NANOSECONDS)));
+    }
+
+    @Override
     public int compareTo(Timestamp o) {
-        return asMillis() < o.asMillis() ? -1 : asMillis() > o.asMillis() ? 1 : 0;
+        TimeUnit unit = finest(getUnit(), o.getUnit());
+        return convert(unit) < o.convert(unit) ? -1 : (convert(unit) > o.convert(unit) ? 1 : 0);
     }
 
     @Override
