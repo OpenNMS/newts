@@ -3,6 +3,8 @@ TODO
 
  * REST interface
  * Implement temporal row-key partitioning
+ * Make column TTLs an option
+ * Implement indexing of resources
  * If calculations of calculations are permitted, then the current implementation
    is buggy, and calculations need to be performed in dependency-order.  If not,
    ResultDescriptor should except if you try this.  Either way, a test is needed.
