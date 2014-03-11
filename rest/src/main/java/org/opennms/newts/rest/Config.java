@@ -1,27 +1,38 @@
 package org.opennms.newts.rest;
 
 
-import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
+import javax.validation.constraints.NotNull;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.inject.AbstractModule;
-import com.google.inject.name.Names;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yammer.dropwizard.config.Configuration;
 
 
-public class Config extends AbstractModule {
+public class Config extends Configuration {
 
-    @Override
-    protected void configure() {
+    @NotEmpty
+    @JsonProperty
+    private String cassandraKeyspace;
 
-        bind(SampleRepository.class).to(CassandraSampleRepository.class);
+    @NotEmpty
+    @JsonProperty
+    private String cassandraHost;
 
-        bind(String.class).annotatedWith(Names.named("cassandraHost")).toInstance("localhost");
-        bind(Integer.class).annotatedWith(Names.named("cassandraPort")).toInstance(9042);
-        bind(String.class).annotatedWith(Names.named("cassandraKeyspace")).toInstance("newts");
+    @NotNull
+    @JsonProperty
+    private int cassandraPort;
 
-        bind(MetricRegistry.class).toInstance(new MetricRegistry());
+    public String getCassandraKeyspace() {
+        return cassandraKeyspace;
+    }
 
+    public String getCassandraHost() {
+        return cassandraHost;
+    }
+
+    public int getCassandraPort() {
+        return cassandraPort;
     }
 
 }

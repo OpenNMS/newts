@@ -1,0 +1,8 @@
+
+# This is a Dropwizard-based configuration file, see the documentation at
+# http://www.dropwizard.io for additional configuration information.
+
+# Cassandra connection information
+cassandraKeyspace: newts
+cassandraHost: localhost
+cassandraPort: 9042
