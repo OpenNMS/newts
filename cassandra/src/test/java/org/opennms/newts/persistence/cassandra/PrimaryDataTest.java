@@ -20,6 +20,39 @@ import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 public class PrimaryDataTest {
 
     @Test
+    public void testLeadingSamplesMiss() {
+
+        // Missing a couple leading samples
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+                .row(900000600).element("m0", 1)
+                .row(900000900).element("m0", 2)
+                .row(900001200).element("m0", 3)
+                .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300))
+                .datasource("m0", "m0", Duration.seconds(600), null);
+
+        // Expected results
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+                .row(900000000).element("m0", Double.NaN)
+                .row(900000300).element("m0", Double.NaN)
+                .row(900000600).element("m0", 1)
+                .row(900000900).element("m0", 2)
+                .row(900001200).element("m0", 3)
+                .build();
+
+        PrimaryData primaryData = new PrimaryData(
+                "localhost",
+                Timestamp.fromEpochSeconds(900000000),
+                Timestamp.fromEpochSeconds(900001200),
+                rDescriptor,
+                testData);
+
+        assertRowsEqual(expected, primaryData);
+
+    }
+
+    @Test
     public void testShortSamples() {
 
         // Samples occur prior to the nearest step interval boundary.

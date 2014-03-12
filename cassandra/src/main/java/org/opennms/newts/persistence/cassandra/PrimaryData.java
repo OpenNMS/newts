@@ -174,6 +174,11 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                 continue;
             }
 
+            // Accumulate nothing when samples are beyond this interval
+            if (intervalCeiling.lt(last.getTimestamp())) {
+                continue;
+            }
+
             Duration elapsed;
 
             if (row.getTimestamp().gt(intervalCeiling)) {
