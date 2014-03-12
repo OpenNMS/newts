@@ -77,7 +77,7 @@
                   implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.opennms.newts.rest.Service</mainClass>
+                  <mainClass>org.opennms.newts.rest.NewtsService</mainClass>
                 </transformer>
               </transformers>
             </configuration>

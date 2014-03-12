@@ -4,14 +4,15 @@ package org.opennms.newts.rest;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
+import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
 
 
-public class Service extends com.yammer.dropwizard.Service<Config> {
+public class NewtsService extends Service<Config> {
 
     public static void main(String... args) throws Exception {
-        new Service().run(args);
+        new NewtsService().run(args);
     }
 
     @Override
