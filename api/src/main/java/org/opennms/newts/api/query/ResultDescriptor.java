@@ -205,4 +205,15 @@ public class ResultDescriptor {
 
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[interval=%s, datasources=%s, calculations=%s, exports=%s]",
+                getClass().getSimpleName(),
+                getStep(),
+                getDatasources().values(),
+                getCalculations().values(),
+                getExports());
+    }
+
 }

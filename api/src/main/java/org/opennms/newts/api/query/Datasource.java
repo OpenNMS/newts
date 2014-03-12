@@ -46,4 +46,16 @@ public class Datasource {
         return m_aggregationFunction;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[%s, source=%s, heatbeat=%s, xff=%s, function=%s]",
+                getClass().getSimpleName(),
+                getLabel(),
+                getSource(),
+                getHeartbeat(),
+                getXff(),
+                getAggregationFuction());
+    }
+
 }

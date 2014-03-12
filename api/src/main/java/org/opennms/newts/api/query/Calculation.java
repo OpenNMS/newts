@@ -32,4 +32,14 @@ public class Calculation {
         return m_args;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[%s, function=%s, args=%s]",
+                getClass().getSimpleName(),
+                getLabel(),
+                getCalculationFunction(),
+                getArgs());
+    }
+
 }
