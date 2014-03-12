@@ -1,44 +1,198 @@
 [
   {
-    "timestamp": 0,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 10000
+    "timestamp": 900000000000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
   },
   {
-    "timestamp": 300000,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 20000
+    "timestamp": 900000300000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
   },
   {
-    "timestamp": 600000,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 30000
+    "timestamp": 900000600000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
   },
   {
-    "timestamp": 900000,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 40000
+    "timestamp": 900000900000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
   },
   {
-    "timestamp": 1200000,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 50000
+    "timestamp": 900001200000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 116
   },
   {
-    "timestamp": 1500000,
-    "resource": "localhost",
-    "name": "eth0",
-    "type": "COUNTER",
-    "value": 60000
+    "timestamp": 900001500000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900001800000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900002100000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900002400000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900002700000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003000000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003300000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003600000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900003900000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900004200000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900004500000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900004800000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900005100000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900005400000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 116
+  },
+  {
+    "timestamp": 900005700000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900006000000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006300000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006600000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006900000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007200000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007500000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007800000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900008100000,
+    "resource": "localhost.temps",
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
   }
 ]

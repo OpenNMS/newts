@@ -6,3 +6,28 @@
 cassandraKeyspace: newts
 cassandraHost: localhost
 cassandraPort: 9042
+
+reports:
+  temps:
+    interval: 300000
+    datasources:
+      - label: inlet
+        source: inlet
+        function: AVERAGE
+        heartbeat: 600000
+    exports:
+      - inlet
+  octets:
+    interval: 300000
+    datasources:
+      - label: inOctets
+        source: ifInOctets
+        heartbeat: 600000
+        function: AVERAGE
+      - label: outOctets
+        source: ifOutOctets
+        heartbeat: 600000
+        function: AVERAGE
+    exports:
+      - inOctets
+      - outOctets

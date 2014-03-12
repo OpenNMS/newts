@@ -18,6 +18,7 @@ To get started reading/writing data, try:
         -d @measurements.txt \
         http://0.0.0.0:8080/samples
 
-    $ curl -D - -X GET 'http://0.0.0.0:8080/samples/localhost?start=0&end=1800000'; echo
+    $ curl -D - -X GET 'http://0.0.0.0:8080/samples/localhost.temps?start=900003900000&end=900008100000'; echo
+    $ curl -D - -X GET 'http://0.0.0.0:8080/measurements/temps/localhost.temps?end=900008100000&start=900003900000&resolution=1200000'; echo
 
 

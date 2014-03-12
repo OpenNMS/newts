@@ -29,7 +29,7 @@ public class NewtsService extends Service<Config> {
 
         SampleRepository repository = new CassandraSampleRepository(keyspace, host, port, null);
 
-        environment.addResource(new MeasurementsResource(repository));
+        environment.addResource(new MeasurementsResource(repository, configuration.getReports()));
         environment.addResource(new SamplesResource(repository));
 
         environment.addHealthCheck(new RepositoryHealthCheck(repository));

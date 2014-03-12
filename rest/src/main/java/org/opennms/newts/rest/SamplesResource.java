@@ -81,7 +81,7 @@ public class SamplesResource {
     @Timed
     @Path("/{resource}")
     public Collection<Collection<SampleDTO>> getSamples(@PathParam("resource") String resource,
-            @QueryParam("start") Optional<Integer> start, @QueryParam("end") Optional<Integer> end) {
+            @QueryParam("start") Optional<Long> start, @QueryParam("end") Optional<Long> end) {
 
         Optional<Timestamp> lower = getOptionalTimestamp(start);
         Optional<Timestamp> upper = getOptionalTimestamp(end);
@@ -97,7 +97,7 @@ public class SamplesResource {
         });
     }
 
-    private Optional<Timestamp> getOptionalTimestamp(Optional<Integer> value) {
+    private Optional<Timestamp> getOptionalTimestamp(Optional<Long> value) {
         return value.isPresent() ? Optional.of(Timestamp.fromEpochMillis(value.get())) : Optional.<Timestamp> absent();
     }
 

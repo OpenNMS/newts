@@ -1,6 +1,8 @@
 package org.opennms.newts.rest;
 
 
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -23,6 +25,9 @@ public class Config extends Configuration {
     @JsonProperty
     private int cassandraPort;
 
+    @JsonProperty
+    private Map<String, ResultDescriptorDTO> reports;
+
     public String getCassandraKeyspace() {
         return cassandraKeyspace;
     }
@@ -33,6 +38,10 @@ public class Config extends Configuration {
 
     public int getCassandraPort() {
         return cassandraPort;
+    }
+
+    public Map<String, ResultDescriptorDTO> getReports() {
+        return reports;
     }
 
 }
