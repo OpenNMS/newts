@@ -1,7 +1,7 @@
 TODO
 ====
 
- * REST interface
+ * Validate query start/end times
  * Implement temporal row-key partitioning
  * Make column TTLs an option
  * Implement indexing of resources
@@ -12,3 +12,9 @@ TODO
    that stores a binary encoded value according to the type).  Do we have the
    right set of types?
  * Use a prepared statement in CassandraSampleRepository#cassandraSelect
+
+
+newts-rest
+----------
+ * Implement report/result descriptor creation via REST interface
+ * Report/result descriptor validation

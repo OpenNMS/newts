@@ -8,6 +8,16 @@ cassandraHost: localhost
 cassandraPort: 9042
 
 reports:
+  gsod:
+    interval: 3600000
+    datasources:
+      - label: temperature
+        source: meanTemperature
+        function: AVERAGE
+        heartbeat: 600000
+    exports:
+      - temperature
+
   temps:
     interval: 300000
     datasources:
@@ -17,6 +27,7 @@ reports:
         heartbeat: 600000
     exports:
       - inlet
+
   octets:
     interval: 300000
     datasources:
