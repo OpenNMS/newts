@@ -28,6 +28,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     private final Iterator<com.datastax.driver.core.Row> m_results;
     private final Set<String> m_metrics;
     private Results.Row<Sample> m_next = null;
+    private int m_count = 0;
 
     DriverAdapter(ResultSet input) {
         this(input, Collections.<String> emptySet());
@@ -49,7 +50,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
         m_results = input.iterator();
 
         if (m_results.hasNext()) {
-            Sample m = getSample(m_results.next());
+            Sample m = getNextSample();
             m_next = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
             addSample(m_next, m);
         }
@@ -69,7 +70,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
         Results.Row<Sample> nextNext = null;
 
         while (m_results.hasNext()) {
-            Sample m = getSample(m_results.next());
+            Sample m = getNextSample();
 
             if (m.getTimestamp().gt(m_next.getTimestamp())) {
                 nextNext = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
@@ -98,34 +99,43 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
         return this;
     }
 
+    public int getResultCount() {
+        return m_count;
+    }
+
     private void addSample(Results.Row<Sample> row, Sample sample) {
         if (m_metrics.size() == 0 || m_metrics.contains(sample.getName())) {
             row.addElement(sample);
         }
     }
 
-    private Sample getSample(com.datastax.driver.core.Row row) {
+    private Sample getNextSample() {
+        m_count += 1;
+        return getSample(m_results.next());
+    }
+
+    private static Sample getSample(com.datastax.driver.core.Row row) {
         MetricType type = getMetricType(row);
         return new Sample(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type));
     }
 
-    private ValueType<?> getValue(com.datastax.driver.core.Row row, MetricType type) {
+    private static ValueType<?> getValue(com.datastax.driver.core.Row row, MetricType type) {
         return ValueType.compose(row.getBytes(SchemaConstants.F_VALUE), type);
     }
 
-    private MetricType getMetricType(com.datastax.driver.core.Row row) {
+    private static MetricType getMetricType(com.datastax.driver.core.Row row) {
         return MetricType.valueOf(row.getString(SchemaConstants.F_METRIC_TYPE));
     }
 
-    private String getMetricName(com.datastax.driver.core.Row row) {
+    private static String getMetricName(com.datastax.driver.core.Row row) {
         return row.getString(SchemaConstants.F_METRIC_NAME);
     }
 
-    private Timestamp getTimestamp(com.datastax.driver.core.Row row) {
+    private static Timestamp getTimestamp(com.datastax.driver.core.Row row) {
         return Timestamp.fromEpochMillis(row.getDate(SchemaConstants.F_COLLECTED).getTime());
     }
 
-    private String getResource(com.datastax.driver.core.Row row) {
+    private static String getResource(com.datastax.driver.core.Row row) {
         return row.getString(SchemaConstants.F_RESOURCE);
     }
 

@@ -7,16 +7,29 @@ cassandraKeyspace: newts
 cassandraHost: localhost
 cassandraPort: 9042
 
+logging:
+  level: DEBUG
+
 reports:
   gsod:
     interval: 3600000
     datasources:
-      - label: temperature
+      - label: meanTemp
         source: meanTemperature
         function: AVERAGE
         heartbeat: 600000
+      - label: maxTemp
+        source: maxTemperature
+        function: AVERAGE
+        heartbeat: 600000
+      - label: minTemp
+        source: minTemperature
+        function: AVERAGE
+        heartbeat: 600000
     exports:
-      - temperature
+      - meanTemp
+      - maxTemp
+      - minTemp
 
   temps:
     interval: 300000

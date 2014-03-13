@@ -20,6 +20,8 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.datastax.driver.core.Cluster;
@@ -33,6 +35,8 @@ import com.google.inject.Inject;
 
 
 public class CassandraSampleRepository implements SampleRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CassandraSampleRepository.class);
 
     private Session m_session;
     @SuppressWarnings("unused") private MetricRegistry m_registry;
@@ -53,9 +57,15 @@ public class CassandraSampleRepository implements SampleRepository {
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(resolution), upper), descriptor.getSourceNames());
+        LOG.debug("Querying database for resource {}, from {} to {}", resource, lower.minus(resolution), upper);
 
-        return new ResultProcessor(resource, lower, upper, descriptor, resolution).process(driverAdapter);
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(resolution), upper), descriptor.getSourceNames());
+        Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, resolution).process(driverAdapter);
+
+        LOG.debug("{} results returned from database", driverAdapter.getResultCount());
+
+        return results;
+
     }
 
     @Override
@@ -64,11 +74,16 @@ public class CassandraSampleRepository implements SampleRepository {
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
-        Results<Sample> samples = new Results<Sample>();
+        LOG.debug("Querying database for resource {}, from {} to {}", resource, lower, upper);
 
-        for (Row<Sample> row : new DriverAdapter(cassandraSelect(resource, lower, upper))) {
+        Results<Sample> samples = new Results<Sample>();
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower, upper));
+
+        for (Row<Sample> row : driverAdapter) {
             samples.addRow(row);
         }
+
+        LOG.debug("{} results returned from database", driverAdapter.getResultCount());
 
         return samples;
     }

@@ -24,6 +24,11 @@
   <dependencies>
 
     <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -37,9 +42,12 @@
       <version>2.0.0-rc2</version>
     </dependency>
     <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
     </dependency>
 
     <dependency>
