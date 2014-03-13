@@ -53,6 +53,8 @@ public class MeasurementsResource {
         Optional<Timestamp> lower = Transform.fromOptionalSeconds(start);
         Optional<Timestamp> upper = Transform.fromOptionalSeconds(end);
 
+        // TODO: Actually handle case of absent resolution.
+
         LOG.debug(
                 "Retrieving measurements for report {}, resource {}, from {} to {} w/ resolution {}",
                 report,
