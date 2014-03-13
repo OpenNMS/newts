@@ -18,6 +18,11 @@ import com.google.common.collect.Sets;
 public class ResultDescriptorTest {
 
     @Test(expected = IllegalArgumentException.class)
+    public void testInvalidHeartbeat() {
+        new ResultDescriptor(Duration.seconds(300)).datasource("in", "in", Duration.seconds(100), null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testCalculateLabelInUse() {
         new ResultDescriptor().datasource("in", AVERAGE).datasource("out", AVERAGE).calculate("out", null, "in", "out");
     }
@@ -59,12 +64,12 @@ public class ResultDescriptorTest {
 
     @Test
     public void testStep() {
-        assertEquals(400000, new ResultDescriptor(400000).getStep().asMillis());
-        assertEquals(400000, new ResultDescriptor(Duration.millis(400000)).getStep().asMillis());
-        assertEquals(ResultDescriptor.DEFAULT_STEP, new ResultDescriptor().getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor(400000).getInterval().asMillis());
+        assertEquals(400000, new ResultDescriptor(Duration.millis(400000)).getInterval().asMillis());
+        assertEquals(ResultDescriptor.DEFAULT_STEP, new ResultDescriptor().getInterval().asMillis());
 
-        assertEquals(400000, new ResultDescriptor().step(400000).getStep().asMillis());
-        assertEquals(400000, new ResultDescriptor().step(Duration.millis(400000)).getStep().asMillis());
+        assertEquals(400000, new ResultDescriptor().step(400000).getInterval().asMillis());
+        assertEquals(400000, new ResultDescriptor().step(Duration.millis(400000)).getInterval().asMillis());
 
         assertTrue(new ResultDescriptor().step(1000) instanceof ResultDescriptor);
         assertTrue(new ResultDescriptor().step(Duration.millis(1000)) instanceof ResultDescriptor);

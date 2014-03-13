@@ -41,7 +41,7 @@ public class ResultDescriptor {
      */
     public static final double DEFAULT_XFF = 0.5;
 
-    private Duration m_step;
+    private Duration m_interval;
     private final Map<String, Datasource> m_datasources = Maps.newHashMap();
     private final Map<String, Calculation> m_calculations = Maps.newHashMap();
 
@@ -71,11 +71,11 @@ public class ResultDescriptor {
      *            duration as an instance of {@link Duration}
      */
     public ResultDescriptor(Duration step) {
-        m_step = step;
+        m_interval = step;
     }
 
-    public Duration getStep() {
-        return m_step;
+    public Duration getInterval() {
+        return m_interval;
     }
 
     public Map<String, Datasource> getDatasources() {
@@ -122,7 +122,7 @@ public class ResultDescriptor {
     }
 
     public ResultDescriptor step(Duration step) {
-        m_step = step;
+        m_interval = step;
         return this;
     }
 
@@ -131,7 +131,7 @@ public class ResultDescriptor {
     }
 
     public ResultDescriptor datasource(String name, String metricName, AggregationFunction aggregationFunction) {
-        return datasource(name, metricName, getStep().times(DEFAULT_HEARTBEAT_MULTIPLIER), aggregationFunction);
+        return datasource(name, metricName, getInterval().times(DEFAULT_HEARTBEAT_MULTIPLIER), aggregationFunction);
     }
 
     public ResultDescriptor datasource(String name, String metricName, long heartbeat, AggregationFunction aggregationFunction) {
@@ -145,6 +145,7 @@ public class ResultDescriptor {
     ResultDescriptor datasource(Datasource ds) {
         checkNotNull(ds, "data source argument");
         checkArgument(!getLabels().contains(ds.getLabel()), "label \"%s\" already in use", ds.getLabel());
+        checkArgument(ds.getHeartbeat().gte(getInterval()), "heartbeat cannot be smaller than sample interval");
 
         getDatasources().put(ds.getLabel(), ds);
 
@@ -210,7 +211,7 @@ public class ResultDescriptor {
         return String.format(
                 "%s[interval=%s, datasources=%s, calculations=%s, exports=%s]",
                 getClass().getSimpleName(),
-                getStep(),
+                getInterval(),
                 getDatasources().values(),
                 getCalculations().values(),
                 getExports());

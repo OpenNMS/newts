@@ -89,7 +89,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
         checkNotNull(end, "end argument");
         m_input = checkNotNull(input, "input argument");
 
-        m_interval = resultDescriptor.getStep();
+        m_interval = resultDescriptor.getInterval();
 
         m_timestamps = new IntervalGenerator(start, end, m_interval);
 
