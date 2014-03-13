@@ -24,4 +24,8 @@ newts-rest
  * Report/result descriptor validation
  * Properly handle optional resolution query argument (default to something
    reasonable)
+ * Textual resolution query args, (1hr, 2d, etc)
+ * Add duration query arg (use in place of start/end)
+ * Support ISO timestamps start/end
+ * Make JAX-RS convert resource args to Timestamp (provider)
  * Evaluate result representations; Improve
