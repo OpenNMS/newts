@@ -12,45 +12,43 @@ logging:
 
 reports:
   gsod:
-    interval: 3600000
+    interval: 3600
     datasources:
       - label: meanTemp
         source: meanTemperature
         function: AVERAGE
-        heartbeat: 600000
+        heartbeat: 7200
       - label: maxTemp
         source: maxTemperature
         function: AVERAGE
-        heartbeat: 600000
+        heartbeat: 7200
       - label: minTemp
         source: minTemperature
         function: AVERAGE
-        heartbeat: 600000
+        heartbeat: 7200
     exports:
       - meanTemp
-      - maxTemp
-      - minTemp
 
   temps:
-    interval: 300000
+    interval: 300
     datasources:
       - label: inlet
         source: inlet
         function: AVERAGE
-        heartbeat: 600000
+        heartbeat: 600
     exports:
       - inlet
 
   octets:
-    interval: 300000
+    interval: 300
     datasources:
       - label: inOctets
         source: ifInOctets
-        heartbeat: 600000
+        heartbeat: 600
         function: AVERAGE
       - label: outOctets
         source: ifOutOctets
-        heartbeat: 600000
+        heartbeat: 600
         function: AVERAGE
     exports:
       - inOctets

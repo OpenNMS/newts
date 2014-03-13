@@ -42,7 +42,7 @@ public class MeasurementsResource {
             @Override
             public MeasurementDTO apply(Measurement input) {
                 return new MeasurementDTO(
-                        input.getTimestamp().asMillis(),
+                        input.getTimestamp().asSeconds(),
                         input.getResource(),
                         input.getName(),
                         input.getValue());
@@ -64,19 +64,20 @@ public class MeasurementsResource {
     public Collection<Collection<MeasurementDTO>> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") String resource,
-            @QueryParam("start") Optional<Long> start,
-            @QueryParam("end") Optional<Long> end,
+            @QueryParam("start") Optional<Integer> start,
+            @QueryParam("end") Optional<Integer> end,
             @QueryParam("resolution") Optional<Integer> resolution) {
 
         Optional<Timestamp> lower = getOptionalTimestamp(start);
         Optional<Timestamp> upper = getOptionalTimestamp(end);
 
-        LOG.trace(
-                "Retrieving matching measurements for report {}, resource {}, from {} to {}",
+        LOG.debug(
+                "Retrieving matching measurements for report {}, resource {}, from {} to {} w/ resolution {}",
                 report,
                 resource,
                 lower,
-                upper);
+                upper,
+                resolution);
 
         ResultDescriptorDTO descrDTO = m_reports.get(report);
 
@@ -84,10 +85,10 @@ public class MeasurementsResource {
             return null;
         }
 
-        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.millis(descrDTO.getInterval()));
+        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(descrDTO.getInterval()));
 
         for (ResultDescriptorDTO.Datasource ds : descrDTO.getDatasources()) {
-            rDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getHeartbeat(), ds.getFunction());
+            rDescriptor.datasource(ds.getLabel(), ds.getSource(), Duration.seconds(ds.getHeartbeat()), ds.getFunction());
         }
 
         rDescriptor.export(descrDTO.getExports());
@@ -97,7 +98,7 @@ public class MeasurementsResource {
                 lower,
                 upper,
                 rDescriptor,
-                Duration.millis(resolution.get()));
+                Duration.seconds(resolution.get()));
 
         return Collections2.transform(measurements.getRows(), new Function<Row<Measurement>, Collection<MeasurementDTO>>() {
 
@@ -109,8 +110,8 @@ public class MeasurementsResource {
     }
 
     // FIXME: Copypasta; Duplicated in SamplesResource.java
-    private Optional<Timestamp> getOptionalTimestamp(Optional<Long> value) {
-        return value.isPresent() ? Optional.of(Timestamp.fromEpochMillis(value.get())) : Optional.<Timestamp> absent();
+    private Optional<Timestamp> getOptionalTimestamp(Optional<Integer> value) {
+        return value.isPresent() ? Optional.of(Timestamp.fromEpochSeconds(value.get())) : Optional.<Timestamp> absent();
     }
 
 }
