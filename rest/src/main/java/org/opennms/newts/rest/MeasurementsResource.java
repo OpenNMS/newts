@@ -16,16 +16,13 @@ import javax.ws.rs.core.MediaType;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
-import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
 import com.yammer.metrics.annotation.Timed;
 
 
@@ -34,21 +31,6 @@ import com.yammer.metrics.annotation.Timed;
 public class MeasurementsResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(MeasurementsResource.class);
-    private static final Function<Measurement, MeasurementDTO> MEASUREMENT_TO_DTO;
-
-    static {
-        MEASUREMENT_TO_DTO = new Function<Measurement, MeasurementDTO>() {
-
-            @Override
-            public MeasurementDTO apply(Measurement input) {
-                return new MeasurementDTO(
-                        input.getTimestamp().asSeconds(),
-                        input.getResource(),
-                        input.getName(),
-                        input.getValue());
-            }
-        };
-    }
 
     private final SampleRepository m_repository;
     private final Map<String, ResultDescriptorDTO> m_reports;
@@ -68,30 +50,25 @@ public class MeasurementsResource {
             @QueryParam("end") Optional<Integer> end,
             @QueryParam("resolution") Optional<Integer> resolution) {
 
-        Optional<Timestamp> lower = getOptionalTimestamp(start);
-        Optional<Timestamp> upper = getOptionalTimestamp(end);
+        Optional<Timestamp> lower = Transform.fromOptionalSeconds(start);
+        Optional<Timestamp> upper = Transform.fromOptionalSeconds(end);
 
         LOG.debug(
-                "Retrieving matching measurements for report {}, resource {}, from {} to {} w/ resolution {}",
+                "Retrieving measurements for report {}, resource {}, from {} to {} w/ resolution {}",
                 report,
                 resource,
                 lower,
                 upper,
                 resolution);
 
-        ResultDescriptorDTO descrDTO = m_reports.get(report);
+        ResultDescriptorDTO descriptorDTO = m_reports.get(report);
 
-        if (descrDTO == null) {
+        // Report not found; 404
+        if (descriptorDTO == null) {
             return null;
         }
 
-        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(descrDTO.getInterval()));
-
-        for (ResultDescriptorDTO.Datasource ds : descrDTO.getDatasources()) {
-            rDescriptor.datasource(ds.getLabel(), ds.getSource(), Duration.seconds(ds.getHeartbeat()), ds.getFunction());
-        }
-
-        rDescriptor.export(descrDTO.getExports());
+        ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
         Results<Measurement> measurements = m_repository.select(
                 resource,
@@ -100,18 +77,7 @@ public class MeasurementsResource {
                 rDescriptor,
                 Duration.seconds(resolution.get()));
 
-        return Collections2.transform(measurements.getRows(), new Function<Row<Measurement>, Collection<MeasurementDTO>>() {
-
-            @Override
-            public Collection<MeasurementDTO> apply(Row<Measurement> input) {
-                return Collections2.transform(input.getElements(), MEASUREMENT_TO_DTO);
-            }
-        });
-    }
-
-    // FIXME: Copypasta; Duplicated in SamplesResource.java
-    private Optional<Timestamp> getOptionalTimestamp(Optional<Integer> value) {
-        return value.isPresent() ? Optional.of(Timestamp.fromEpochSeconds(value.get())) : Optional.<Timestamp> absent();
+        return Transform.measurements(measurements);
     }
 
 }
