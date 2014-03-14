@@ -17,11 +17,11 @@ newts-cassandra
  * Implement temporal row-key partitioning
  * Make column TTLs an option
  * Use a prepared statement in CassandraSampleRepository#cassandraSelect
+ * Enable CQL driver compression
 
 newts-rest
 ----------
  * Implement report/result descriptor creation via REST interface
- * Report/result descriptor validation
  * Properly handle optional resolution query argument (default to something
    reasonable)
  * Textual resolution query args, (1hr, 2d, etc)

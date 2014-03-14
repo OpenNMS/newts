@@ -75,7 +75,12 @@ class Transform {
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(rDescriptorDTO.getInterval()));
 
         for (ResultDescriptorDTO.Datasource ds : rDescriptorDTO.getDatasources()) {
-            rDescriptor.datasource(ds.getLabel(), ds.getSource(), Duration.seconds(ds.getHeartbeat()), ds.getFunction());
+            if (ds.getHeartbeat() != null) {
+                rDescriptor.datasource(ds.getLabel(), ds.getSource(), Duration.seconds(ds.getHeartbeat()), ds.getFunction());
+            }
+            else {
+                rDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getFunction());
+            }
         }
 
         rDescriptor.export(rDescriptorDTO.getExports());

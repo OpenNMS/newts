@@ -1,33 +1,34 @@
 package org.opennms.newts.rest;
 
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.opennms.newts.api.query.StandardAggregationFunctions;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class ResultDescriptorDTO {
 
     public static class Datasource {
-        private final String m_label;
-        private final String m_source;
-        private final StandardAggregationFunctions m_function;
-        private final int m_heartbeat;
 
-        @JsonCreator
-        public Datasource(
-                @JsonProperty("label") String label,
-                @JsonProperty("source") String source,
-                @JsonProperty("function") StandardAggregationFunctions function,
-                @JsonProperty("heartbeat") Integer heartbeat) {
+        @NotEmpty
+        @JsonProperty("label")
+        private String m_label;
 
-            m_label = label;
-            m_source = source;
-            m_function = function;
-            m_heartbeat = heartbeat;
+        @NotEmpty
+        @JsonProperty("source")
+        private String m_source;
 
-        }
+        @NotNull
+        @JsonProperty("function")
+        private StandardAggregationFunctions m_function;
+
+        @JsonProperty("heartbeat")
+        private Integer m_heartbeat;
 
         public String getLabel() {
             return m_label;
@@ -41,7 +42,7 @@ public class ResultDescriptorDTO {
             return m_function;
         }
 
-        public int getHeartbeat() {
+        public Integer getHeartbeat() {
             return m_heartbeat;
         }
 
@@ -62,21 +63,17 @@ public class ResultDescriptorDTO {
 
     }
 
-    private final int m_interval;
-    private final Datasource[] m_datasources;
-    private final String[] m_exports;
+    @Min(value = 1)
+    @JsonProperty("interval")
+    private int m_interval = 300;
 
-    @JsonCreator
-    public ResultDescriptorDTO(
-            @JsonProperty("interval") Integer interval,
-            @JsonProperty("datasources") Datasource[] datasources,
-            @JsonProperty("exports") String[] exports) {
+    @Valid
+    @JsonProperty("datasources")
+    private Datasource[] m_datasources;
 
-        m_interval = interval;
-        m_datasources = datasources;
-        m_exports = exports;
-
-    }
+    @NotEmpty
+    @JsonProperty("exports")
+    private String[] m_exports;
 
     public int getInterval() {
         return m_interval;

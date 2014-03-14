@@ -1,11 +1,12 @@
 package org.opennms.newts.rest;
 
 
+import java.util.Collections;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yammer.dropwizard.config.Configuration;
@@ -13,35 +14,35 @@ import com.yammer.dropwizard.config.Configuration;
 
 public class Config extends Configuration {
 
-    @NotEmpty
-    @JsonProperty
-    private String cassandraKeyspace;
+    @JsonProperty("cassandraKeyspace")
+    private String m_cassandraKeyspace = "newts";
 
-    @NotEmpty
-    @JsonProperty
-    private String cassandraHost;
+    @JsonProperty("cassandraHost")
+    private String m_cassandraHost = "localhost";
 
-    @NotNull
-    @JsonProperty
-    private int cassandraPort;
+    @Min(value = 1024)
+    @Max(value = 65535)
+    @JsonProperty("cassandraPort")
+    private int m_cassandraPort = 9042;
 
-    @JsonProperty
-    private Map<String, ResultDescriptorDTO> reports;
+    @Valid
+    @JsonProperty("reports")
+    private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
 
     public String getCassandraKeyspace() {
-        return cassandraKeyspace;
+        return m_cassandraKeyspace;
     }
 
     public String getCassandraHost() {
-        return cassandraHost;
+        return m_cassandraHost;
     }
 
     public int getCassandraPort() {
-        return cassandraPort;
+        return m_cassandraPort;
     }
 
     public Map<String, ResultDescriptorDTO> getReports() {
-        return reports;
+        return m_reports;
     }
 
 }
