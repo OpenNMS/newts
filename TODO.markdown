@@ -8,6 +8,8 @@ TODO
  * Revisit the ValueType classes.  Is this the right way to go about it, (a blob
    that stores a binary encoded value according to the type).  Do we have the
    right set of types?
+ * Add licensing
+ * Have added to a CI system
 
 newts-cassandra
 ---------------
