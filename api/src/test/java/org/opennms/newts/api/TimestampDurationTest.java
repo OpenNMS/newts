@@ -12,6 +12,11 @@ import org.junit.Test;
 public class TimestampDurationTest {
 
     @Test
+    public void testDurationAddition() {
+        assertEquals(Duration.minutes(5), Duration.seconds(120).plus(Duration.minutes(3)));
+    }
+
+    @Test
     public void testDurationMultiplication() {
         assertEquals(Duration.seconds(25), Duration.seconds(5).times(5));
     }

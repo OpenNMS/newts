@@ -47,6 +47,11 @@ public class Duration implements Comparable<Duration> {
         return m_unit;
     }
 
+    public Duration plus(Duration o) {
+        TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
+        return new Duration(convert(u) + o.convert(u), u);
+    }
+
     public Duration times(long value) {
         return new Duration(getDuration() * value, getUnit());
     }

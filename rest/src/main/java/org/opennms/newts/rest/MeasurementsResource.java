@@ -11,9 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.SampleRepository;
@@ -46,14 +47,34 @@ public class MeasurementsResource {
     public Collection<Collection<MeasurementDTO>> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") String resource,
-            @QueryParam("start") Optional<Integer> start,
-            @QueryParam("end") Optional<Integer> end,
-            @QueryParam("resolution") Optional<Integer> resolution) {
+            @QueryParam("start") Optional<TimestampParam> start,
+            @QueryParam("end") Optional<TimestampParam> end,
+            @QueryParam("resolution") Optional<String> resolutionParam) {
 
-        Optional<Timestamp> lower = Transform.fromOptionalSeconds(start);
-        Optional<Timestamp> upper = Transform.fromOptionalSeconds(end);
+        Optional<Timestamp> lower = start.isPresent() ? Optional.of(start.get().get()) : Optional.<Timestamp>absent();
+        Optional<Timestamp> upper = end.isPresent() ? Optional.of(end.get().get()) : Optional.<Timestamp>absent();
 
-        // TODO: Actually handle case of absent resolution.
+        /*
+         * XXX: This resource method should accept a DurationParam instance for the resolution query
+         * parameter. However, for reasons I cannot not (yet) fathom, Jersey bitches about a missing
+         * dependency at startup, and the resource is not loaded. 
+         *
+         * ERROR [2014-03-19 20:20:31,705] com.sun.jersey.spi.inject.Errors: The following errors and
+         * warnings have been detected with resource and/or provider classes:
+         *    SEVERE: Missing dependency for method public java.util.Collection org.opennms.newts.rest.MeasurementsResource.getMeasurements(java.lang.String,java.lang.String,com.google.common.base.Optional,com.google.common.base.Optional,org.opennms.newts.rest.DurationParam)
+         * at parameter at index 4
+         *
+         * ETOOMUCHMAGIC
+         *
+         */
+        if (!resolutionParam.isPresent()) {
+            throw new WebApplicationException(
+                    Response.status(Response.Status.BAD_REQUEST)
+                            .entity("the 'resolution' query argument is mandatory (for the time being)")
+                            .build());
+        }
+
+        DurationParam resolution = new DurationParam(resolutionParam.get());
 
         LOG.debug(
                 "Retrieving measurements for report {}, resource {}, from {} to {} w/ resolution {}",
@@ -77,7 +98,7 @@ public class MeasurementsResource {
                 lower,
                 upper,
                 rDescriptor,
-                Duration.seconds(resolution.get()));
+                resolution.get());
 
         return Transform.measurements(measurements);
     }
