@@ -46,10 +46,10 @@ public class SamplesResource {
     @Timed
     @Path("/{resource}")
     public Collection<Collection<SampleDTO>> getSamples(@PathParam("resource") String resource,
-            @QueryParam("start") Optional<Integer> start, @QueryParam("end") Optional<Integer> end) {
+            @QueryParam("start") Optional<TimestampParam> start, @QueryParam("end") Optional<TimestampParam> end) {
 
-        Optional<Timestamp> lower = Transform.fromOptionalSeconds(start);
-        Optional<Timestamp> upper = Transform.fromOptionalSeconds(end);
+        Optional<Timestamp> lower = start.isPresent() ? Optional.of(start.get().get()) : Optional.<Timestamp>absent();
+        Optional<Timestamp> upper = end.isPresent() ? Optional.of(end.get().get()) : Optional.<Timestamp>absent();
 
         Results<Sample> samples = m_sampleRepository.select(resource, lower, upper);
 
