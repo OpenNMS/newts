@@ -29,3 +29,4 @@ newts-rest
  * Add duration query arg (use in place of start/end)
  * Evaluate result representations; Improve
  * Rewrite README in a more expressive markup
+ * Handling of exceptions raised from the repository
