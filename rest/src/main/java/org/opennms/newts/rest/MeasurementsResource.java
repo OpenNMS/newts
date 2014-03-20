@@ -3,7 +3,6 @@ package org.opennms.newts.rest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -44,7 +43,7 @@ public class MeasurementsResource {
     @GET
     @Path("/{report}/{resource}")
     @Timed
-    public Collection<Collection<MeasurementDTO>> getMeasurements(
+    public Results<Measurement> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") String resource,
             @QueryParam("start") Optional<TimestampParam> start,
@@ -93,14 +92,7 @@ public class MeasurementsResource {
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        Results<Measurement> measurements = m_repository.select(
-                resource,
-                lower,
-                upper,
-                rDescriptor,
-                resolution.get());
-
-        return Transform.measurements(measurements);
+        return m_repository.select(resource, lower, upper, rDescriptor, resolution.get());
     }
 
 }

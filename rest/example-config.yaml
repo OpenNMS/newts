@@ -8,7 +8,7 @@ cassandraHost: localhost
 cassandraPort: 9042
 
 logging:
-  level: DEBUG
+  level: INFO
 
 reports:
   gsod:

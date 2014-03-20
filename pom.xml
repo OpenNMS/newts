@@ -26,12 +26,14 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <junitVersion>4.11</junitVersion>
     <guavaVersion>15.0</guavaVersion>
     <guiceVersion>4.0-beta</guiceVersion>
+    <jacksonVersion>2.1.4</jacksonVersion>
+    <junitVersion>4.11</junitVersion>
     <logbackVersion>1.0.10</logbackVersion>
-    <slf4jVersion>1.7.3</slf4jVersion>
     <metricsVersion>3.0.1</metricsVersion>
+    <mockitoVersion>1.9.5</mockitoVersion>
+    <slf4jVersion>1.7.3</slf4jVersion>
   </properties>
 
   <dependencyManagement>
@@ -61,11 +63,21 @@
         <artifactId>metrics-core</artifactId>
         <version>${metricsVersion}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jacksonVersion}</version>
+      </dependency>
             
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junitVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${mockitoVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

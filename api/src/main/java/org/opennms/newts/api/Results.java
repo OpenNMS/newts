@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Maps;
 
 
+@JsonSerialize(using = ResultsSerializer.class)
 public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
 
     public static class Row<T extends Element<?>> implements Iterable<T> {

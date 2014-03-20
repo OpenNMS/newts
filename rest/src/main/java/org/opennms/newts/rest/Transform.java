@@ -95,6 +95,7 @@ class Transform {
      *            measurements to be converted
      * @return converted measurements
      */
+    @Deprecated
     static Collection<Collection<MeasurementDTO>> measurements(Results<Measurement> measurements) {
         return Collections2.transform(measurements.getRows(), new Function<Row<Measurement>, Collection<MeasurementDTO>>() {
 
@@ -123,6 +124,7 @@ class Transform {
      *            samples to be converted
      * @return converted samples
      */
+    @Deprecated
     static Collection<Collection<SampleDTO>> samples(Results<Sample> samples) {
         return Collections2.transform(samples.getRows(), new Function<Row<Sample>, Collection<SampleDTO>>() {
 
@@ -141,6 +143,7 @@ class Transform {
      *            the value to convert
      * @return the converted value
      */
+    @Deprecated
     static Optional<Timestamp> fromOptionalSeconds(Optional<Integer> value) {
         return value.isPresent() ? Optional.of(Timestamp.fromEpochSeconds(value.get())) : Optional.<Timestamp> absent();
     }

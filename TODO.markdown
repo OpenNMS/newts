@@ -27,6 +27,6 @@ newts-rest
  * Properly handle optional resolution query argument (default to something
    reasonable)
  * Add duration query arg (use in place of start/end)
- * Evaluate result representations; Improve
  * Rewrite README in a more expressive markup
  * Handling of exceptions raised from the repository
+ * Clean up unused code from Transform
