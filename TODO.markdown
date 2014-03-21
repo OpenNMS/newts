@@ -41,3 +41,4 @@ newts-rest
    *Note: Classes (TimestampParam/DurationParam) have been created, but result
    in Jersey exceptions that cause the resource(s) to not load.  This needs to
    be sussed out.*
+ * Add attributes to SampleDTO

@@ -28,39 +28,116 @@ API
 ---
 Samples
 ~~~~~~~
+Writing
++++++++
+::
+   
+    POST /samples
+
+Representation::
+
+    [
+        {
+          "timestamp" : 900000000,
+          "resource"  : "localhost",
+          "name"      : "temperature",
+          "type"      : GAUGE,
+          "value"     : 97.5
+        },
+        {
+          "timestamp" : 900000000,
+          "resource"  : "localhost",
+          "name"      : "humidity",
+          "type"      : GAUGE,
+          "value"     : 45.0
+        },
+        ...
+    ]
+
+Reading
++++++++
 ::
 
-    POST /samples
     GET /samples/<resource>?start=<start>&end=<end>
+
+Representation::
+
+    [
+      [
+        {
+          "temperature": {
+            "timestamp" : 900000000,
+            "type"      : "GAUGE",
+            "value"     : 97.5
+          }
+        },
+        {
+          "humidity": {
+            "timestamp" : 900000000,
+            "type"      : "GAUGE",
+            "value"     : 45.0
+          }
+        },
+      ],
+      [
+        ...
+      ],
+      ...
+    ]
 
 Query arguments:
 
-  sample
+  start
     Query start time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.
+    `ISO 8601`_ timestamp.  *Optional; defaults to 24 hours less than end.*
   end
     Query end time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.
+    `ISO 8601`_ timestamp.  *Optional; defaults to the current time.*
 
 
 Measurements
 ~~~~~~~~~~~~
+Reading
++++++++
 ::
 
     GET /measurements/<report>/<resource>?start=<start>&end=<end>&resolution=<resolution>
 
+Representation::
+
+    [
+      [
+        {
+          "temperature": {
+            "timestamp" : 900000000,
+            "value"     : 97.5
+          }
+        },
+        {
+          "humidity": {
+            "timestamp" : 900000000,
+            "value"     : 45.0
+          }
+        },
+      ],
+      [
+        ...
+      ],
+      ...
+    ]
+
 Query arguments:
     
-  sample
+  start
     Query start time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.
+    `ISO 8601`_ timestamp.  *Optional; defaults to 24 hours less than end.*
   end
     Query end time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.
+    `ISO 8601`_ timestamp.  *Optional; defaults to the current time.*
   resolution
     The resolution of measurements returned, specified as an integer value,
     followed by a resolution unit specifier character.  Valid unit specifiers
-    are ``s``, ``m``, ``h``, ``d``, and ``w``.
+    are ``s``, ``m``, ``h``, ``d``, and ``w``.  *Required*.
 
     Examples: ``15m``, ``1d``, ``1w`` (for 15 minutes, 1 day, and 1 week
     respectively).
