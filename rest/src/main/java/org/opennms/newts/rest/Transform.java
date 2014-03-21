@@ -3,6 +3,8 @@ package org.opennms.newts.rest;
 
 import java.util.Collection;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
@@ -146,6 +148,21 @@ class Transform {
     @Deprecated
     static Optional<Timestamp> fromOptionalSeconds(Optional<Integer> value) {
         return value.isPresent() ? Optional.of(Timestamp.fromEpochSeconds(value.get())) : Optional.<Timestamp> absent();
+    }
+
+    /**
+     * Parse an {@link Optional} String to {@link Timestamp}.
+     * <p>
+     * Parsing is done with {@link TimestampParam} which will raise the appropriate
+     * {@link WebApplicationException} if a validation error occurs.
+     * </p>
+     *
+     * @param value
+     *            the string to parse
+     * @return the timestamp wrapped in {@link Optional}
+     */
+    static Optional<Timestamp> timestampFromString(Optional<String> value) {
+        return value.isPresent() ? Optional.of(new TimestampParam(value.get()).get()) : Optional.<Timestamp>absent();
     }
 
 }

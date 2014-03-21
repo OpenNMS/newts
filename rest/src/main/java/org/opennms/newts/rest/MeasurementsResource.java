@@ -46,17 +46,14 @@ public class MeasurementsResource {
     public Results<Measurement> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") String resource,
-            @QueryParam("start") Optional<TimestampParam> start,
-            @QueryParam("end") Optional<TimestampParam> end,
+            @QueryParam("start") Optional<String> start,
+            @QueryParam("end") Optional<String> end,
             @QueryParam("resolution") Optional<String> resolutionParam) {
-
-        Optional<Timestamp> lower = start.isPresent() ? Optional.of(start.get().get()) : Optional.<Timestamp>absent();
-        Optional<Timestamp> upper = end.isPresent() ? Optional.of(end.get().get()) : Optional.<Timestamp>absent();
 
         /*
          * XXX: This resource method should accept a DurationParam instance for the resolution query
-         * parameter. However, for reasons I cannot not (yet) fathom, Jersey bitches about a missing
-         * dependency at startup, and the resource is not loaded. 
+         * parameter, and TimestampParam for start/end. However, for reasons I cannot not (yet) fathom,
+         * Jersey bitches about a missing dependency at startup, and the resource is not loaded. 
          *
          * ERROR [2014-03-19 20:20:31,705] com.sun.jersey.spi.inject.Errors: The following errors and
          * warnings have been detected with resource and/or provider classes:
@@ -66,6 +63,9 @@ public class MeasurementsResource {
          * ETOOMUCHMAGIC
          *
          */
+        Optional<Timestamp> lower = Transform.timestampFromString(start);
+        Optional<Timestamp> upper = Transform.timestampFromString(end);
+
         if (!resolutionParam.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.BAD_REQUEST)
@@ -81,7 +81,7 @@ public class MeasurementsResource {
                 resource,
                 lower,
                 upper,
-                resolution);
+                resolution.get());
 
         ResultDescriptorDTO descriptorDTO = m_reports.get(report);
 

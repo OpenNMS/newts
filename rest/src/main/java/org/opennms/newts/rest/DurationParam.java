@@ -9,6 +9,12 @@ import org.opennms.newts.api.Duration;
 import com.yammer.dropwizard.jersey.params.AbstractParam;
 
 
+/**
+ * JAX-RS parameter that encapsulates creation of {@link Duration} instances from a string
+ * specifier. Non-parseable values will result in a {@code 400 Bad Request} response.
+ *
+ * @author eevans
+ */
 public class DurationParam extends AbstractParam<Duration> {
 
     private static final PeriodFormatter formatter = new PeriodFormatterBuilder()

@@ -46,10 +46,18 @@ public class SamplesResource {
     @Timed
     @Path("/{resource}")
     public Results<Sample> getSamples(@PathParam("resource") String resource,
-            @QueryParam("start") Optional<TimestampParam> start, @QueryParam("end") Optional<TimestampParam> end) {
+            @QueryParam("start") Optional<String> start, @QueryParam("end") Optional<String> end) {
 
-        Optional<Timestamp> lower = start.isPresent() ? Optional.of(start.get().get()) : Optional.<Timestamp>absent();
-        Optional<Timestamp> upper = end.isPresent() ? Optional.of(end.get().get()) : Optional.<Timestamp>absent();
+        /*
+         * XXX: This resource method should use TimestampParam as the type for the start and end
+         * arguments, but some of these custom parameters are causing Jersey fits, and so for
+         * consistency sake we'll eschew them all for the time being.
+         * 
+         * Transform#timestampFromString uses TimestampParam to parse the String parameter, and so
+         * appropriately excepts on validation failures (resulting in 400 Bad Request responses).
+         */
+        Optional<Timestamp> lower = Transform.timestampFromString(start);
+        Optional<Timestamp> upper = Transform.timestampFromString(end);
 
         return m_sampleRepository.select(resource, lower, upper);
 
