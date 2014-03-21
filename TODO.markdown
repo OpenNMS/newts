@@ -35,7 +35,6 @@ newts-rest
  * Rewrite README in a more expressive markup
  * Handling of exceptions raised from the repository
  * Clean up unused code from Transform
- * Write resource tests
  * Use custom parameters for Timestamps and Duration.  It's tempting to use
    Timestamp and Duration directly, but that would mean introducing
    depenedencies on Dropwizard and Joda to newts-api (so best not to).
