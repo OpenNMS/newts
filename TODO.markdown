@@ -10,6 +10,9 @@ TODO
    right set of types?
  * Add licensing
  * Have added to a CI system
+ * Consider removing memory backend module
+ * Consider removing camel backend module
+ * Implement an alternative storage backend
 
 newts-cassandra
 ---------------
@@ -20,6 +23,7 @@ newts-cassandra
  * Make column TTLs an option
  * Use a prepared statement in CassandraSampleRepository#cassandraSelect
  * Enable CQL driver compression
+ * Consider moving result processing code into its own module
 
 newts-rest
 ----------

@@ -1,0 +1,14 @@
+{
+  "interval": 300,
+  "datasources": [
+    {
+      "label"     : "temperature",
+      "source"    : "temperature",
+      "function"  : "AVERAGE",
+      "heartbeat" : 600
+    }
+  ],
+  "exports": [
+    "temperature"
+  ]
+}
