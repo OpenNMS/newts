@@ -28,6 +28,8 @@ reports:
         heartbeat: 7200
     exports:
       - meanTemp
+      - maxTemp
+      - minTemp
 
   temps:
     interval: 300

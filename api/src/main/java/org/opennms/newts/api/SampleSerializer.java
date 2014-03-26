@@ -12,6 +12,7 @@ public class SampleSerializer extends JsonSerializer<Sample> {
     @Override
     public void serialize(Sample value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
         jgen.writeStartObject();
+        jgen.writeStringField("name", value.getName());
         jgen.writeNumberField("timestamp", value.getTimestamp().asSeconds());
         jgen.writeStringField("type", value.getType().toString());
         jgen.writeObjectField("value", value.getValue());

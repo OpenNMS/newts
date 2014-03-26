@@ -1,6 +1,7 @@
 package org.opennms.newts.rest;
 
 
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
@@ -22,6 +23,8 @@ public class NewtsService extends Service<Config> {
 
     @Override
     public void run(Config configuration, Environment environment) throws Exception {
+
+        environment.addFilter(CrossOriginFilter.class, "/*");
 
         String host = configuration.getCassandraHost();
         int port = configuration.getCassandraPort();

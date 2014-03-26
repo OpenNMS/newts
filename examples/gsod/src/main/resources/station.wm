@@ -1,0 +1,33 @@
+<html>
+<head>
+  <title>Station: ${stationName}</title>
+  <link href="/style.css" rel="stylesheet" type="text/css">
+  <script language="javascript" type="text/javascript" src="/jquery.js"></script>
+  <script language="javascript" type="text/javascript" src="/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="/jquery.flot.time.js"></script>
+  <script language="javascript" type="text/javascript" src="/newts.js"></script>
+  <script type="text/javascript">
+      $(function() {
+          $.getJSON("http://localhost:8080/measurements/gsod/${id}?start=1988-05-01&end=1988-08-01&resolution=1w", function(data) {
+              var options = {
+                      series: {
+                          points : { show: true },
+                          lines  : { show: true }
+                      },
+                      xaxis: { mode: "time" }
+                  }
+              $.plot("#plot", transform(data), options);
+          });
+      });
+  </script>
+</head>
+
+<body>
+
+<h1>Summer 1988</h1>
+
+<div id="plot" class="visualization"></div>
+
+</body>
+
+</html>

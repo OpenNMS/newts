@@ -21,9 +21,7 @@ public class ResultsSerializer extends JsonSerializer<Results<Element<?>>> {
             jgen.writeStartArray();
 
             for (Element<?> elem : row.getElements()) {
-                jgen.writeStartObject();
-                provider.defaultSerializeField(elem.getName(), elem, jgen);
-                jgen.writeEndObject();
+                provider.defaultSerializeValue(elem, jgen);
             }
 
             jgen.writeEndArray();

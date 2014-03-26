@@ -37,6 +37,12 @@
       <artifactId>dropwizard-core</artifactId>
       <version>0.6.2</version>
     </dependency>
+    <!-- Needed for CORS filter -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlets</artifactId>
+      <version>8.1.10.v20130312</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
