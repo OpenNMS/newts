@@ -1,5 +1,24 @@
 
-.visualization {
+div.visualization {
     width: 600px;
     height: 400px;
+}
+
+div.small-visualization {
+    width: 450px;
+    height: 200px;
+    margin: 0 2em 0 1em;
+}
+
+div.wrapper {
+    float: left;
+}
+
+div.container {
+    overflow: hidden;
+    margin: 1em 0 1em 0;
+}
+
+h3.label {
+    margin: 0 0 .25em 1em;
 }

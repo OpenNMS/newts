@@ -1,3 +1,4 @@
+<!-- -*- mode: html; -*- -->
 <html>
 <head>
   <title>Station: ${stationName}</title>
@@ -8,7 +9,7 @@
   <script language="javascript" type="text/javascript" src="/newts.js"></script>
   <script type="text/javascript">
       $(function() {
-          $.getJSON("http://localhost:8080/measurements/gsod/${id}?start=1988-05-01&end=1988-08-01&resolution=1w", function(data) {
+          $.getJSON(measurementsUrl("${id}", "${start}", "${end}", "${resolution}"), function(data) {
               var options = {
                       series: {
                           points : { show: true },
@@ -24,7 +25,7 @@
 
 <body>
 
-<h1>Summer 1988</h1>
+<h1>${location}</h1>
 
 <div id="plot" class="visualization"></div>
 

@@ -1,0 +1,5 @@
+GSOD users:
+
+We are pleased to announce the completion of improvements to the full period of record for GSOD.  The changes involved handling of automated station present weather reports, allowing for multiple reports of weather conditions (not previously transmitted by those stations).  This affects the weather occurrences field (last field in GSOD), mainly for US stations.  These stations will now have a higher count for various types of weather (eg, thunderstorm).
+
+A change was also made to better manage the use of all of the data groups in the input dataset - ISD.  This change affected fields such as max/min temperature and wind gust, to maximize the availability of those parameters in GSOD.  Although all global stations were affected the impact was limited to less than 1% of the data overall.

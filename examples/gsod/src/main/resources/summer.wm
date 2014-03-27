@@ -1,0 +1,77 @@
+<!-- -*- mode: html; -*- -->
+<html>
+<head>
+  <title>Texas, Summer 1988</title>
+  <link href="/style.css" rel="stylesheet" type="text/css">
+  <script language="javascript" type="text/javascript" src="/jquery.js"></script>
+  <script language="javascript" type="text/javascript" src="/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="/jquery.flot.time.js"></script>
+  <script language="javascript" type="text/javascript" src="/newts.js"></script>
+  <script type="text/javascript">
+      $(function() {
+          var options = {
+              series: {
+                  points : { show: true },
+                  lines  : { show: true }
+              },
+              xaxis: { mode: "time" }
+          }
+
+          $.getJSON(summerUrl(${stationIds.get("ksat")}), function(data) {
+              $.plot("#ksat", transform(data), options);
+          });
+          $.getJSON(summerUrl(${stationIds.get("kdal")}), function(data) {
+              $.plot("#kdal", transform(data), options);
+          });
+          $.getJSON(summerUrl(${stationIds.get("kelp")}), function(data) {
+              $.plot("#kelp", transform(data), options);
+          });
+          $.getJSON(summerUrl(${stationIds.get("kiah")}), function(data) {
+              $.plot("#kiah", transform(data), options);
+          });
+          $.getJSON(summerUrl(${stationIds.get("kaus")}), function(data) {
+              $.plot("#kaus", transform(data), options);
+          });
+          $.getJSON(summerUrl(${stationIds.get("klbb")}), function(data) {
+              $.plot("#klbb", transform(data), options);
+          });
+      });
+  </script>
+</head>
+
+<body>
+  <div id="upper" class="container">
+    <div class="wrapper">
+      <h3 class="label">San Antonio</h3>
+      <div id="ksat" class="small-visualization"></div>
+    </div>
+    <div class="wrapper">
+      <h3 class="label">Dallas</h3>
+      <div id="kdal" class="small-visualization"></div>
+    </div>
+  </div>
+
+  <div id="middle" class="container">
+    <div class="wrapper">
+      <h3 class="label">El Paso</h3>
+      <div id="kelp" class="small-visualization"></div>
+    </div>
+    <div class="wrapper">
+      <h3 class="label">Houston</h3>
+      <div id="kiah" class="small-visualization"></div>
+    </div>
+  </div>
+
+  <div id="lower" class="container">
+    <div class="wrapper">
+      <h3 class="label">Austin</h3>
+      <div id="kaus" class="small-visualization"></div>
+    </div>
+    <div class="wrapper">
+      <h3 class="label">Lubbock</h3>
+      <div id="klbb" class="small-visualization"></div>
+    </div>
+  </div>
+</body>
+
+</html>

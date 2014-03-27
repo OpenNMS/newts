@@ -1,0 +1,22 @@
+<!-- -*- mode: html; -*- -->
+<html>
+<head>
+  <title>Available Stations</title>
+</head>
+
+<body>
+
+#set($stationName="")
+
+<ol>
+  #foreach($stationName in $stationsMap.keySet())
+    <li>
+      <a href="/stations/$stationName?start=1988-05-01&end=1988-08-01&resolution=1w">
+        $stationsMap.get($stationName)</a>
+    </li>
+  #end
+</ol>
+
+</body>
+
+</html>
