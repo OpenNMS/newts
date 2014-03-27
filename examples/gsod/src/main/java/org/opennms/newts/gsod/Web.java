@@ -4,7 +4,6 @@ package org.opennms.newts.gsod;
 import static spark.Spark.get;
 import static spark.Spark.staticFileLocation;
 
-import java.util.Collections;
 import java.util.Map;
 
 import spark.Request;
