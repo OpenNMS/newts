@@ -24,6 +24,8 @@ newts-cassandra
  * Use a prepared statement in CassandraSampleRepository#cassandraSelect
  * Enable CQL driver compression
  * Consider moving result processing code into its own module
+ * Better handle schema creation, (better as-in, not a flat file containing
+   CQL markup buried in src/test/resources).
 
 newts-rest
 ----------
