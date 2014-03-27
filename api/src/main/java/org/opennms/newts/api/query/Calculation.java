@@ -4,6 +4,8 @@ package org.opennms.newts.api.query;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
+
 
 public class Calculation {
 
@@ -39,7 +41,7 @@ public class Calculation {
                 getClass().getSimpleName(),
                 getLabel(),
                 getCalculationFunction(),
-                getArgs());
+                Arrays.asList(getArgs()));
     }
 
 }

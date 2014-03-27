@@ -1,6 +1,8 @@
 package org.opennms.newts.rest;
 
 
+import java.util.Arrays;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -93,8 +95,8 @@ public class ResultDescriptorDTO {
                 "%s[interval=%d, datasources=%s, exports=%s]",
                 getClass().getSimpleName(),
                 getInterval(),
-                getDatasources(),
-                getExports());
+                Arrays.asList(getDatasources()),
+                Arrays.asList(getExports()));
     }
 
 }
