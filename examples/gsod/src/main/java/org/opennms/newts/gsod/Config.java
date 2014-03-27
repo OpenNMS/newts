@@ -1,6 +1,8 @@
 package org.opennms.newts.gsod;
 
 
+import java.util.Properties;
+
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
@@ -16,9 +18,11 @@ public class Config extends AbstractModule {
 
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
-        bind(String.class).annotatedWith(Names.named("cassandraKeyspace")).toInstance("newts");
-        bind(String.class).annotatedWith(Names.named("cassandraHost")).toInstance("localhost");
-        bind(Integer.class).annotatedWith(Names.named("cassandraPort")).toInstance(9042);
+        Properties properties = new Properties();
+        properties.put("cassandraKeyspace", System.getProperty("cassandraKeyspace", "newts"));
+        properties.put("cassandraHost", System.getProperty("cassandraHost", "localhost"));
+        properties.put("cassandraPort", System.getProperty("cassandraPort", "9042"));
+        Names.bindProperties(binder(), properties);
 
         bind(MetricRegistry.class).toInstance(new MetricRegistry());
 
