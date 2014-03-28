@@ -35,7 +35,7 @@ To import the included data, run::
    mvn exec:java -Dexec.mainClass="org.opennms.newts.gsod.ImportRunner" \
            -Dexec.arguments="ftp.ncdc.noaa.gov/pub/data/gsod/1988/"
 
-The importer accepts a single argument for the name of a directory that
+The importer accepts a single argument for the name of a directory that is
 searched recursively for GSOD data files.  You can load additional data by
 changing this argument accordingly::
 

@@ -43,3 +43,8 @@ newts-rest
    in Jersey exceptions that cause the resource(s) to not load.  This needs to
    be sussed out.*
  * Add attributes to SampleDTO
+
+newts-gsod
+----------
+ * For sake of consistency, considering making import/export use the REST
+   interface, instead of connecting directly to Cassandra.
