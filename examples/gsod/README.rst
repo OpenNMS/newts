@@ -11,29 +11,40 @@ The entire GSOD dataset is quite large (more than 7GB at the time of
 writing), but a small sample covering 6 Texas cities for the year 1988 is
 provided for purposes of running this demo.
 
-Getting started
----------------
+Prerequisites
+-------------
 
-This demo requires that a Cassandra cluster and Newts `REST endpoint`_ are
-already setup and running.  The `REST endpoint`_ comes with a sample
-configuration (``example-config.yaml``) that contains a ``gsod`` report
-definition.  If you are not running the endpoint with the included sample
-config, then make sure to copy that report definition into your config.
+Before attempting to start this demo, you should have a running Cassandra
+cluster, and a Newts `REST endpoint`_.  Setting up Cassandra is beyond the
+scope of this document, so have a look at the `Cassandra Wiki`_ if you need
+help with that.  Directions on setting up a `REST endpoint`_ can be found
+in the README for that module.
 
-To build the GSOD example code::
+Building
+--------
+
+To build the GSOD example code, run::
 
    mvn install
 
 Importing Data
 ~~~~~~~~~~~~~~
 
-Use the following to import the included sample data::
+To import the included data, run::
 
    mvn exec:java -Dexec.mainClass="org.opennms.newts.gsod.ImportRunner" \
            -Dexec.arguments="ftp.ncdc.noaa.gov/pub/data/gsod/1988/"
 
-You can override the Cassandra hostname, port, and keyspace name using system
-properties, if needed::
+The importer accepts a single argument for the name of a directory that
+searched recursively for GSOD data files.  You can load additional data by
+changing this argument accordingly::
+
+   mvn exec:java -Dexec.mainClass="org.opennms.newts.gsod.ImportRunner" \
+           -Dexec.arguments="/path/to/additional/data"
+
+The import process connects to Cassandra directly, if necessary you can
+override the Cassandra hostname, port, and keyspace name using system
+properties.  For example::
 
    mvn exec:java -Dexec.mainClass="org.opennms.newts.gsod.ImportRunner" \
           -Dexec.arguments="ftp.ncdc.noaa.gov/pub/data/gsod/1988/" \
@@ -50,6 +61,7 @@ View Examples
 You can either view individual graphs of the `6 Texas stations`_, or see a
 report of all 6 for the `Summer of 1988`_.
 
+
 .. _Global Surface Summary of Day: https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00516
 
 .. _REST endpoint: https://github.com/OpenNMS/newts/blob/master/rest/README.rst
@@ -57,4 +69,6 @@ report of all 6 for the `Summer of 1988`_.
 .. _6 Texas stations: http://localhost:4567/stations
 
 .. _Summer of 1988: http://localhost:4567/summer88
+
+.. _Cassandra Wiki: https://wiki.apache.org/cassandra/GettingStarted
 

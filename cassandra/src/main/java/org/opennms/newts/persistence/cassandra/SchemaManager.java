@@ -45,12 +45,12 @@ public class SchemaManager {
             throw new RuntimeException(String.format("%s missing from classpath!", SCHEMA_FILE));
         }
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
         String line, scrubbed;
         StringBuilder statement = new StringBuilder();
 
-        while ((line = br.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             scrubbed = scrub(line);
             statement.append(scrubbed);
 
