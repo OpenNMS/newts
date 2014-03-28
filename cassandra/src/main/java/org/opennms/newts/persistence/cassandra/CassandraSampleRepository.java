@@ -42,7 +42,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @SuppressWarnings("unused") private MetricRegistry m_registry;
 
     @Inject
-    public CassandraSampleRepository(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port, MetricRegistry registry) {
+    public CassandraSampleRepository(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port, MetricRegistry registry) {
 
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);

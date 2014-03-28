@@ -37,7 +37,7 @@ properties, if needed::
 
    mvn exec:java -Dexec.mainClass="org.opennms.newts.gsod.ImportRunner" \
           -Dexec.arguments="ftp.ncdc.noaa.gov/pub/data/gsod/1988/" \
-          -DcassandraKeyspace=newts -DcassandraHost=localhost -DcassandraPort=9042
+          -Dcassandra.keyspace=newts -Dcassandra.host=localhost -Dcassandra.port=9042
   
 Starting Demo Webserver
 ~~~~~~~~~~~~~~~~~~~~~~~

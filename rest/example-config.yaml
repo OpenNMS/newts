@@ -3,9 +3,9 @@
 # http://www.dropwizard.io for additional configuration information.
 
 # Cassandra connection information
-cassandraKeyspace: newts
-cassandraHost: localhost
-cassandraPort: 9042
+cassandra.keyspace: newts
+cassandra.host: localhost
+cassandra.port: 9042
 
 logging:
   level: INFO

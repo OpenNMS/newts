@@ -19,9 +19,9 @@ public class Config extends AbstractModule {
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
         Properties properties = new Properties();
-        properties.put("cassandraKeyspace", System.getProperty("cassandraKeyspace", "newts"));
-        properties.put("cassandraHost", System.getProperty("cassandraHost", "localhost"));
-        properties.put("cassandraPort", System.getProperty("cassandraPort", "9042"));
+        properties.put("cassandra.keyspace", System.getProperty("cassandra.keyspace", "newts"));
+        properties.put("cassandra.host", System.getProperty("cassandra.host", "localhost"));
+        properties.put("cassandra.port", System.getProperty("cassandra.port", "9042"));
         Names.bindProperties(binder(), properties);
 
         bind(MetricRegistry.class).toInstance(new MetricRegistry());

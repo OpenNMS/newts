@@ -14,15 +14,15 @@ import com.yammer.dropwizard.config.Configuration;
 
 public class Config extends Configuration {
 
-    @JsonProperty("cassandraKeyspace")
+    @JsonProperty("cassandra.keyspace")
     private String m_cassandraKeyspace = "newts";
 
-    @JsonProperty("cassandraHost")
+    @JsonProperty("cassandra.host")
     private String m_cassandraHost = "localhost";
 
     @Min(value = 1024)
     @Max(value = 65535)
-    @JsonProperty("cassandraPort")
+    @JsonProperty("cassandra.port")
     private int m_cassandraPort = 9042;
 
     @Valid
