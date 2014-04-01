@@ -18,14 +18,13 @@ newts-cassandra
 ---------------
  * Cassandra drivers DEBUG output is very chatty; Create a logging
    configuration for the tests, level INFO.
- * Validate query start/end times
  * Implement temporal row-key partitioning
  * Make column TTLs an option
  * Use a prepared statement in CassandraSampleRepository#cassandraSelect
  * Enable CQL driver compression
  * Consider moving result processing code into its own module
  * Better handle schema creation, (better as-in, not a flat file containing
-   CQL markup buried in src/test/resources).
+   CQL markup buried in src/main/resources).
 
 newts-rest
 ----------
@@ -34,7 +33,6 @@ newts-rest
  * Properly handle optional resolution query argument (default to something
    reasonable)
  * Add duration query arg (use in place of start/end)
- * Handling of exceptions raised from the repository
  * Clean up unused code from Transform
  * Use custom parameters for Timestamps and Duration.  It's tempting to use
    Timestamp and Duration directly, but that would mean introducing

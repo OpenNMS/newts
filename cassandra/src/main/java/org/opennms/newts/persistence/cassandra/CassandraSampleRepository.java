@@ -31,6 +31,7 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 
@@ -54,6 +55,8 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
 
+        validateSelect(start, end);
+
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
 
@@ -70,6 +73,8 @@ public class CassandraSampleRepository implements SampleRepository {
 
     @Override
     public Results<Sample> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+
+        validateSelect(start, end);
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
@@ -119,6 +124,12 @@ public class CassandraSampleRepository implements SampleRepository {
         select.where(lte(SchemaConstants.F_COLLECTED, end.asDate()));
 
         return m_session.execute(select);
+    }
+
+    private void validateSelect(Optional<Timestamp> start, Optional<Timestamp> end) {
+        if ((start.isPresent() && end.isPresent()) && start.get().gt(end.get())) {
+            throw new IllegalArgumentException("start time must be less than end time");
+        }
     }
 
 }

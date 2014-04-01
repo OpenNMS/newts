@@ -37,6 +37,8 @@ public class NewtsService extends Service<Config> {
 
         environment.addHealthCheck(new RepositoryHealthCheck(repository));
 
+        environment.addProvider(IllegalArgumentExceptionMapper.class);
+
     }
 
 }
