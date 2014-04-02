@@ -7,6 +7,10 @@ Building::
 
     $ mvn clean package
 
+Initialize the database (Cassandra must be running)::
+
+    $ java -jar target/newts-rest-<version>-SNAPSHOT.jar init config.yaml
+
 Starting the REST server from the build directory::
 
     $ java -jar target/newts-rest-<version>-SNAPSHOT.jar server config.yaml
@@ -65,18 +69,16 @@ Representation::
     [
       [
         {
-          "temperature": {
-            "timestamp" : 900000000,
-            "type"      : "GAUGE",
-            "value"     : 97.5
-          }
+          "name"      : "temperature",
+          "timestamp" : 900000000,
+          "type"      : "GAUGE",
+          "value"     : 97.5
         },
         {
-          "humidity": {
-            "timestamp" : 900000000,
-            "type"      : "GAUGE",
-            "value"     : 45.0
-          }
+          "name"      : "humidity",
+          "timestamp" : 900000000,
+          "type"      : "GAUGE",
+          "value"     : 45.0
         },
       ],
       [
@@ -108,16 +110,14 @@ Representation::
     [
       [
         {
-          "temperature": {
-            "timestamp" : 900000000,
-            "value"     : 97.5
-          }
+          "name"      : "temperature",
+          "timestamp" : 900000000,
+          "value"     : 97.5
         },
         {
-          "humidity": {
-            "timestamp" : 900000000,
-            "value"     : 45.0
-          }
+          "name"      : "humidity",
+          "timestamp" : 900000000,
+          "value"     : 45.0
         },
       ],
       [
