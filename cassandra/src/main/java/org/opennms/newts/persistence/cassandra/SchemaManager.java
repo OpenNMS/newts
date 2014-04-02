@@ -14,16 +14,17 @@ import com.datastax.driver.core.exceptions.AlreadyExistsException;
 import com.google.inject.Inject;
 
 
-public class SchemaManager {
+public class SchemaManager implements AutoCloseable {
 
     private static final String SCHEMA_FILE = "schema.cql";
 
+    private Cluster m_cluster;
     private Session m_session;
 
     @Inject
     public SchemaManager(@Named("cassandraHost") String host, @Named("cassandraPort") int port) {
-        Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
-        m_session = cluster.connect();
+        m_cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
+        m_session = m_cluster.connect();
     }
 
     public void create() throws IOException {
@@ -74,6 +75,11 @@ public class SchemaManager {
 
     private String scrub(String line) {
         return line.replace("\\s+", "").replace("//.*$", "").replace(";.*$", ";");
+    }
+
+    @Override
+    public void close() throws Exception {
+        m_cluster.shutdown();
     }
 
     public static void main(String... args) throws IOException {

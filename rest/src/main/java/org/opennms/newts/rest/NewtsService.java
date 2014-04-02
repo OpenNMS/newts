@@ -19,6 +19,7 @@ public class NewtsService extends Service<Config> {
     @Override
     public void initialize(Bootstrap<Config> bootstrap) {
         bootstrap.setName("newts");
+        bootstrap.addCommand(new InitCommand());
     }
 
     @Override
