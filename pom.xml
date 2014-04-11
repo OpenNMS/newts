@@ -18,6 +18,7 @@
     <module>api</module>
     <module>camel</module>
     <module>cassandra</module>
+    <module>leveldb</module>
     <module>memory</module>
     <module>rest</module>
     <module>examples</module>
