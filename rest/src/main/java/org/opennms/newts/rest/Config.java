@@ -1,6 +1,7 @@
 package org.opennms.newts.rest;
 
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,6 +29,9 @@ public class Config extends Configuration {
     @Valid
     @JsonProperty("reports")
     private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
+    
+    @JsonProperty("leveldb.dir")
+    private File m_leveldbDir = new File("/var/leveldb");
 
     public String getCassandraKeyspace() {
         return m_cassandraKeyspace;
@@ -43,6 +47,10 @@ public class Config extends Configuration {
 
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
+    }
+
+    public File getLeveldbDir() {
+        return m_leveldbDir;
     }
 
 }
