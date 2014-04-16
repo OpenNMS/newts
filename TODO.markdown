@@ -33,7 +33,6 @@ newts-rest
  * Properly handle optional resolution query argument (default to something
    reasonable)
  * Add duration query arg (use in place of start/end)
- * Clean up unused code from Transform
  * Use custom parameters for Timestamps and Duration.  It's tempting to use
    Timestamp and Duration directly, but that would mean introducing
    depenedencies on Dropwizard and Joda to newts-api (so best not to).

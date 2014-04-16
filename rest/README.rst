@@ -42,14 +42,14 @@ Representation::
 
     [
         {
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "resource"  : "localhost",
           "name"      : "temperature",
           "type"      : GAUGE,
           "value"     : 97.5
         },
         {
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "resource"  : "localhost",
           "name"      : "humidity",
           "type"      : GAUGE,
@@ -70,13 +70,13 @@ Representation::
       [
         {
           "name"      : "temperature",
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "type"      : "GAUGE",
           "value"     : 97.5
         },
         {
           "name"      : "humidity",
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "type"      : "GAUGE",
           "value"     : 45.0
         },
@@ -111,12 +111,12 @@ Representation::
       [
         {
           "name"      : "temperature",
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "value"     : 97.5
         },
         {
           "name"      : "humidity",
-          "timestamp" : 900000000,
+          "timestamp" : 900000000000,
           "value"     : 45.0
         },
       ],

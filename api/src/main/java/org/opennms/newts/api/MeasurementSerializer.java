@@ -28,7 +28,7 @@ public class MeasurementSerializer extends JsonSerializer<Measurement> {
     public void serialize(Measurement value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
         jgen.writeStartObject();
         jgen.writeStringField("name", value.getName());
-        jgen.writeNumberField("timestamp", value.getTimestamp().asSeconds());
+        jgen.writeNumberField("timestamp", value.getTimestamp().asMillis());
         jgen.writeNumberField("value", value.getValue());
         jgen.writeEndObject();
     }
