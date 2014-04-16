@@ -13,6 +13,7 @@ TODO
  * Consider removing camel backend module
  * Implement an alternative storage backend
  * Return collated attributes with Measurements
+ * Support metric types: ABSOLUTE, DERIVE
 
 newts-cassandra
 ---------------
