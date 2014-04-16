@@ -8,11 +8,11 @@ TODO
  * Revisit the ValueType classes.  Is this the right way to go about it, (a blob
    that stores a binary encoded value according to the type).  Do we have the
    right set of types?
- * Add licensing
  * Have added to a CI system
  * Consider removing memory backend module
  * Consider removing camel backend module
  * Implement an alternative storage backend
+ * Return collated attributes with Measurements
 
 newts-cassandra
 ---------------
@@ -39,7 +39,6 @@ newts-rest
    *Note: Classes (TimestampParam/DurationParam) have been created, but result
    in Jersey exceptions that cause the resource(s) to not load.  This needs to
    be sussed out.*
- * Add attributes to SampleDTO
 
 newts-gsod
 ----------

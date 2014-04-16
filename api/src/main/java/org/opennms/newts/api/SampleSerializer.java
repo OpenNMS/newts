@@ -31,6 +31,12 @@ public class SampleSerializer extends JsonSerializer<Sample> {
         jgen.writeNumberField("timestamp", value.getTimestamp().asMillis());
         jgen.writeStringField("type", value.getType().toString());
         jgen.writeObjectField("value", value.getValue());
+
+        // Since attributes is optional, be compact and omit from JSON output when unused.
+        if (value.getAttributes() != null && !value.getAttributes().isEmpty()) {
+            jgen.writeObjectField("attributes", value.getAttributes());
+        }
+
         jgen.writeEndObject();
     }
 

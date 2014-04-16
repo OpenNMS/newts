@@ -18,6 +18,8 @@ package org.opennms.newts.rest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Map;
+
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Sample;
 
@@ -37,14 +39,16 @@ public class SampleDTO {
     private final String m_name;
     private final MetricType m_type;
     private final Number m_value;
+    private final Map<String, String> m_attributes;
 
     @JsonCreator
-    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") String resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value) {
+    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") String resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value, @JsonProperty("attributes") Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "m_timestamp argument");
         m_resource = checkNotNull(resource, "m_resource argument");
         m_name = checkNotNull(name, "m_name argument");
         m_type = checkNotNull(type, "m_type argument");
         m_value = checkNotNull(value, "m_value argument");
+        m_attributes = attributes;
     }
 
     public long getTimestamp() {
@@ -65,6 +69,10 @@ public class SampleDTO {
 
     public Number getValue() {
         return m_value;
+    }
+
+    public Map<String, String> getAttributes() {
+        return m_attributes;
     }
 
 }

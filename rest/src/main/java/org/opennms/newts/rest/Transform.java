@@ -45,7 +45,8 @@ class Transform {
                         input.getResource(),
                         input.getName(),
                         input.getType(),
-                        ValueType.compose(input.getValue(), input.getType()));
+                        ValueType.compose(input.getValue(), input.getType()),
+                        input.getAttributes());
             }
         };
     }

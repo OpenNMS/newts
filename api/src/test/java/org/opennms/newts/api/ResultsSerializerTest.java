@@ -19,10 +19,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.opennms.newts.api.MetricType.COUNTER;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 
 
 public class ResultsSerializerTest {
@@ -72,6 +75,10 @@ public class ResultsSerializerTest {
     @Test
     public void testSamples() throws JsonProcessingException {
 
+        // Use the optional attributes map at least once.
+        Map<String, String> attributes = Maps.newHashMap();
+        attributes.put("units", "bytes");
+
         Results<Sample> testData = new Results<>();
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
@@ -84,7 +91,8 @@ public class ResultsSerializerTest {
                 "localhost",
                 "ifOutOctets",
                 COUNTER,
-                ValueType.compose(6000, COUNTER)));
+                ValueType.compose(6000, COUNTER),
+                attributes));
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
                 "localhost",
@@ -104,7 +112,8 @@ public class ResultsSerializerTest {
                 + "      \"name\": \"ifOutOctets\","
                 + "      \"timestamp\":900000000000,"
                 + "      \"type\":\"COUNTER\","
-                + "      \"value\":6000"
+                + "      \"value\":6000,"
+                + "      \"attributes\":{\"units\":\"bytes\"}"
                 + "    },"
                 + "    {"
                 + "      \"name\": \"ifInOctets\","

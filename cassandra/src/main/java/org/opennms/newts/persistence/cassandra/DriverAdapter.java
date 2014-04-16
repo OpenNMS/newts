@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -131,7 +132,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
 
     private static Sample getSample(com.datastax.driver.core.Row row) {
         MetricType type = getMetricType(row);
-        return new Sample(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type));
+        return new Sample(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type), getAttributes(row));
     }
 
     private static ValueType<?> getValue(com.datastax.driver.core.Row row, MetricType type) {
@@ -152,6 +153,10 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
 
     private static String getResource(com.datastax.driver.core.Row row) {
         return row.getString(SchemaConstants.F_RESOURCE);
+    }
+
+    private static Map<String, String> getAttributes(com.datastax.driver.core.Row row) {
+        return row.getMap(SchemaConstants.F_ATTRIBUTES, String.class, String.class);
     }
 
 }

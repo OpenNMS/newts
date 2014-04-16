@@ -4,7 +4,8 @@
     "resource": "localhost.temps",
     "name": "inlet",
     "type": "GAUGE",
-    "value": 100
+    "value": 100,
+    "attributes": { "units": "fahrenheit" }
   },
   {
     "timestamp": 900000300000,
@@ -18,7 +19,8 @@
     "resource": "localhost.temps",
     "name": "inlet",
     "type": "GAUGE",
-    "value": 108
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
   },
   {
     "timestamp": 900000900000,
@@ -32,7 +34,8 @@
     "resource": "localhost.temps",
     "name": "inlet",
     "type": "GAUGE",
-    "value": 116
+    "value": 116,
+    "attributes": { "units": "fahrenheit" }
   },
   {
     "timestamp": 900001500000,
@@ -46,7 +49,8 @@
     "resource": "localhost.temps",
     "name": "inlet",
     "type": "GAUGE",
-    "value": 108
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
   },
   {
     "timestamp": 900002100000,
@@ -60,7 +64,8 @@
     "resource": "localhost.temps",
     "name": "inlet",
     "type": "GAUGE",
-    "value": 108
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
   },
   {
     "timestamp": 900002700000,
