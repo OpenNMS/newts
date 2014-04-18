@@ -12,6 +12,11 @@ Grouped access
 Late aggregation
   Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.
 
+Bugs
+----
+
+http://issues.opennms.org/browse/NEWTS
+  
 Terminology
 -----------
 
