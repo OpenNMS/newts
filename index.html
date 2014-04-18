@@ -31,7 +31,10 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p>Newts is a time-series data store based on <a href="http://cassandra.apache.org">Apache Cassandra</a>, it's features include:</p>
+        <h3>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<p>Newts is a time-series data store based on <a href="http://cassandra.apache.org">Apache Cassandra</a>, it's features include:</p>
 
 <ul>
 <li>
@@ -41,22 +44,10 @@
 </li>
 <li>
 <em>Late aggregation</em> – Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.</li>
-</ul><h2>
-<a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>Bugs</h2>
+</ul><h3>
+<a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>Bugs</h3>
 
 <p><a href="http://issues.opennms.org/browse/NEWTS">http://issues.opennms.org/browse/NEWTS</a></p>
-
-<h2>
-<a name="terminology" class="anchor" href="#terminology"><span class="octicon octicon-link"></span></a>Terminology</h2>
-
-<p>Resource</p>
-
-<pre><code>Resources are unique strings that identify a metric, or group of metrics.
-
-Measurements vs. Samples
-</code></pre>
-
-<p>Samples represent the raw, or <em>sampled</em> data.  Measurements are calculated from the collected samples.</p>
       </section>
     </div>
 
