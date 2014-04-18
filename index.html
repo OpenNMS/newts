@@ -34,13 +34,13 @@
         <p>Newts is a time-series data store based on <a href="http://cassandra.apache.org">Apache Cassandra</a>, it's features include:</p>
 
 <ul>
-<li>High throughput
-Newts is built upon <code>Apache Cassandra</code>_, a write-optimized, fully distributed partioned row store.
-Grouped access</li>
-<li>It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.<br>
+<li>
+<em>High throughput</em> – Newts is built upon <a href="http://cassandra.apache.org">Apache Cassandra</a>, a write-optimized, fully distributed partioned row store.</li>
+<li>
+<em>Grouped access</em> – It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.<br>
 </li>
-<li>Late aggregation
-Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.</li>
+<li>
+<em>Late aggregation</em> – Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.</li>
 </ul><h2>
 <a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>Bugs</h2>
 
