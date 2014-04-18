@@ -31,22 +31,17 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>
-<a name="newts" class="anchor" href="#newts"><span class="octicon octicon-link"></span></a>Newts</h1>
+        <p>Newts is a time-series data store based on <a href="http://cassandra.apache.org">Apache Cassandra</a>, it's features include:</p>
 
-<p>Newts is a time-series data store based on <code>Apache Cassandra</code>_.</p>
-
-<h2>
-<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
-
-<p>High throughput
-  Newts is built upon <code>Apache Cassandra</code>_, a write-optimized, fully distributed partioned row store.
-Grouped access
-  It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.<br>
-Late aggregation
-  Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.</p>
-
-<h2>
+<ul>
+<li>High throughput
+Newts is built upon <code>Apache Cassandra</code>_, a write-optimized, fully distributed partioned row store.
+Grouped access</li>
+<li>It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.<br>
+</li>
+<li>Late aggregation
+Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.</li>
+</ul><h2>
 <a name="bugs" class="anchor" href="#bugs"><span class="octicon octicon-link"></span></a>Bugs</h2>
 
 <p><a href="http://issues.opennms.org/browse/NEWTS">http://issues.opennms.org/browse/NEWTS</a></p>
@@ -62,8 +57,6 @@ Measurements vs. Samples
 </code></pre>
 
 <p>Samples represent the raw, or <em>sampled</em> data.  Measurements are calculated from the collected samples.</p>
-
-<p>.. _Apache Cassandra: <a href="http://cassandra.apache.org">http://cassandra.apache.org</a></p>
       </section>
     </div>
 
