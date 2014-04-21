@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>About &mdash; Newts</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Newts" href="#" />
+    <link rel="next" title="User Manual" href="manual/index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li><a href="#">Newts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="about">
+<h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
+<p>Newts is a time-series data store based on <a class="reference external" href="http://cassandra.apache.org">Apache Cassandra</a>.  It&#8217;s features
+include:</p>
+<dl class="docutils">
+<dt>High throughput</dt>
+<dd>Newts is built upon <a class="reference external" href="http://cassandra.apache.org">Apache Cassandra</a>, a write-optimized, fully
+distributed partioned row store.</dd>
+<dt>Grouped access</dt>
+<dd>It&#8217;s common to collect, store, and retrieve metrics together, (think bytes
+in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for
+similar metrics to be grouped together for more efficient storage and
+retrieval.</dd>
+<dt>Late aggregation</dt>
+<dd>Most time-series solutions perform in-line aggregations for purposes of
+later ploting visualizations, even though the ratio of reads to write is
+staggeringly small.  Newts performs plot aggregations at the time of the
+read.</dd>
+</dl>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="manual/index.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting Started</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/newts-logo.jpg" alt="Logo"/>
+            </a></p>
+<h3>Contents</h3>
+  <ul>
+<li><a class="reference internal" href="#">About</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+
+
+<h3>Project</h3>
+<ul>
+  <li><a href="https://github.com/OpenNMS/newts/">Github repository</a></li>
+  <li><a href="http://issues.opennms.org/browse/NEWTS">Issue tracking</a></li>
+  <li><a href="https://github.com/OpenNMS/newts/wiki">Wiki</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2014, The OpenNMS Group.
+    </div>
+  </body>
+</html>
