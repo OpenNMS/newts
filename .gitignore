@@ -1,2 +1,8 @@
 *~
 *.pyc
+.project
+.settings
+api/
+cassandra/
+rest/
+examples/
