@@ -16,7 +16,6 @@
 
   <modules>
     <module>api</module>
-    <module>camel</module>
     <module>cassandra</module>
     <module>memory</module>
     <module>rest</module>
