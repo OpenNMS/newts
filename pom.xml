@@ -17,7 +17,6 @@
   <modules>
     <module>api</module>
     <module>cassandra</module>
-    <module>memory</module>
     <module>rest</module>
     <module>examples</module>
   </modules>
