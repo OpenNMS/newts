@@ -23,6 +23,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.opennms.newts.api.SampleRepository;
 
+import com.codahale.metrics.MetricRegistry;
+
 
 public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
 
@@ -41,7 +43,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
-        m_repository = new CassandraSampleRepository(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, null);
+        m_repository = new CassandraSampleRepository(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, new MetricRegistry());
     }
 
     @After
