@@ -25,20 +25,20 @@ import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
 
 
-public class NewtsService extends Service<Config> {
+public class NewtsService extends Service<NewtsConfig> {
 
     public static void main(String... args) throws Exception {
         new NewtsService().run(args);
     }
 
     @Override
-    public void initialize(Bootstrap<Config> bootstrap) {
+    public void initialize(Bootstrap<NewtsConfig> bootstrap) {
         bootstrap.setName("newts");
         bootstrap.addCommand(new InitCommand());
     }
 
     @Override
-    public void run(Config configuration, Environment environment) throws Exception {
+    public void run(NewtsConfig configuration, Environment environment) throws Exception {
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 

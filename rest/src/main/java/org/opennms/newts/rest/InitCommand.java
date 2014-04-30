@@ -22,14 +22,14 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import com.yammer.dropwizard.cli.ConfiguredCommand;
 import com.yammer.dropwizard.config.Bootstrap;
 
-public class InitCommand extends ConfiguredCommand<Config> {
+public class InitCommand extends ConfiguredCommand<NewtsConfig> {
 
     protected InitCommand() {
         super("init", "Perform one-time application initialization");
     }
 
     @Override
-    protected void run(Bootstrap<Config> bootstrap, Namespace namespace, Config config) throws Exception {
+    protected void run(Bootstrap<NewtsConfig> bootstrap, Namespace namespace, NewtsConfig config) throws Exception {
         try (SchemaManager manager = new SchemaManager(config.getCassandraHost(), config.getCassandraPort())) {
             manager.create(true);
         }
