@@ -16,13 +16,14 @@
 package org.opennms.newts.api;
 
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.opennms.newts.api.MetricType.GAUGE;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,16 +38,19 @@ public class SampleProcessorServiceTest {
         m_service = new SampleProcessorService(1, Collections.singleton(m_processor));
     }
 
-    @After
-    public void tearDown() throws Exception {
-        m_service.shutdown();
-    }
-
     @Test
     public void test() {
 
         Sample sample = new Sample(Timestamp.now(), "resource", "metric", GAUGE, ValueType.compose(1, GAUGE));
         m_service.submit(Collections.singletonList(sample));
+
+        try {
+            m_service.shutdown();
+            assertTrue("Executor shutdown failed", m_service.awaitShutdown(5, TimeUnit.SECONDS));
+        }
+        catch (InterruptedException e) {
+            // Nada
+        }
 
         verify(m_processor).submit(Collections.singletonList(sample));
 

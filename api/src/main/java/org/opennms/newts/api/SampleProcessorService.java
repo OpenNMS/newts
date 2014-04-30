@@ -36,7 +36,7 @@ public class SampleProcessorService {
 
         LOG.info("Starting sample processor service with pool of {} threads", maxThreads);
 
-        m_executor = new BlockingThreadPoolExecutor(1, maxThreads, 301, TimeUnit.SECONDS);
+        m_executor = new BlockingThreadPoolExecutor(1, maxThreads, 61, TimeUnit.SECONDS);
         m_processors = checkNotNull(processors, "processors argument");
 
     }
@@ -69,10 +69,16 @@ public class SampleProcessorService {
     /**
      * Invokes <code>awaitShutdown()</code> on the underlying thread pool executor.
      *
+     * @param timeout
+     *            the maximum time to wait
+     * @param unit
+     *            the time unit of the timeout argument
+     * @return <tt>true</tt> if this executor terminated and <tt>false</tt> if the timeout elapsed
+     *         before termination
      * @throws InterruptedException
      */
-    public void awaitShutdown() throws InterruptedException {
-        m_executor.awaitTermination(20, TimeUnit.SECONDS);
+    public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
+        return m_executor.awaitTermination(timeout, unit);
     }
 
 }
