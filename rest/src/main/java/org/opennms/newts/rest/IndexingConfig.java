@@ -16,28 +16,34 @@
 package org.opennms.newts.rest;
 
 
-import java.util.Collections;
-import java.util.Map;
-
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yammer.dropwizard.config.Configuration;
 
 
-public class NewtsConfig extends Configuration {
+public class IndexingConfig {
+
+    @JsonProperty("enabled")
+    private boolean m_enabled = false;
+
+    @Min(value = 1)
+    @Max(value = 8192)
+    @JsonProperty("maxThreads")
+    private int m_maxThreads = 64;
 
     @Valid
     @JsonProperty("cassandra")
     private CassandraConfig m_cassandraConfig = new CassandraConfig();
 
-    @Valid
-    @JsonProperty("indexing")
-    private IndexingConfig m_indexingConfig = new IndexingConfig();
+    public boolean isEnabled() {
+        return m_enabled;
+    }
 
-    @Valid
-    @JsonProperty("reports")
-    private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
+    public int getMaxThreads() {
+        return m_maxThreads;
+    }
 
     public String getCassandraKeyspace() {
         return m_cassandraConfig.getKeyspace();
@@ -49,14 +55,6 @@ public class NewtsConfig extends Configuration {
 
     public int getCassandraPort() {
         return m_cassandraConfig.getPort();
-    }
-
-    public Map<String, ResultDescriptorDTO> getReports() {
-        return m_reports;
-    }
-
-    public IndexingConfig getIndexingConfig() {
-        return m_indexingConfig;
     }
 
 }

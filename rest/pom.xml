@@ -37,6 +37,16 @@
       <artifactId>dropwizard-core</artifactId>
       <version>0.6.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>indexing-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>indexing-cassandra</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- Needed for CORS filter -->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>

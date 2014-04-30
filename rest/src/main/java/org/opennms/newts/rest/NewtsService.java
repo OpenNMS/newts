@@ -16,10 +16,18 @@
 package org.opennms.newts.rest;
 
 
+import java.util.Collections;
+
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.opennms.newts.api.SampleProcessor;
+import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.indexing.ResourceIndex;
+import org.opennms.newts.indexing.cassandra.CassandraResourceIndex;
+import org.opennms.newts.indexing.cassandra.ResourceIndexingSampleProcessor;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
+import com.codahale.metrics.MetricRegistry;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
@@ -42,11 +50,30 @@ public class NewtsService extends Service<NewtsConfig> {
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 
+        SampleRepository repository;
+
         String host = configuration.getCassandraHost();
         int port = configuration.getCassandraPort();
         String keyspace = configuration.getCassandraKeyspace();
+        MetricRegistry metricRegistry = new MetricRegistry();
 
-        SampleRepository repository = new CassandraSampleRepository(keyspace, host, port, null);
+        IndexingConfig indexingConf = configuration.getIndexingConfig();
+
+        if (indexingConf.isEnabled()) {
+            ResourceIndex resourceIndex = new CassandraResourceIndex(
+                    indexingConf.getCassandraKeyspace(),
+                    indexingConf.getCassandraHost(),
+                    indexingConf.getCassandraPort(),
+                    metricRegistry);
+            SampleProcessorService processorService = new SampleProcessorService(
+                    indexingConf.getMaxThreads(),
+                    Collections.<SampleProcessor> singleton(new ResourceIndexingSampleProcessor(resourceIndex)));
+
+            repository = new CassandraSampleRepository(keyspace, host, port, metricRegistry, processorService);
+        }
+        else {
+            repository = new CassandraSampleRepository(keyspace, host, port, metricRegistry);
+        }
 
         environment.addResource(new MeasurementsResource(repository, configuration.getReports()));
         environment.addResource(new SamplesResource(repository));

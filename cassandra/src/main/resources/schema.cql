@@ -11,3 +11,15 @@ CREATE TABLE newts.samples (
     attributes map<text, text>,
     PRIMARY KEY(resource, collected_at, metric_name)
 );
+
+CREATE TABLE newts.resource_idx (
+    parent text,
+    child text,
+    PRIMARY KEY(parent, child)
+);
+
+CREATE TABLE newts.metric_idx (
+    resource text,
+    metric_name text,
+    PRIMARY KEY(resource, metric_name)
+);

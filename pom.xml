@@ -19,6 +19,7 @@
     <module>cassandra</module>
     <module>rest</module>
     <module>examples</module>
+    <module>indexing</module>
   </modules>
 
   <properties>
