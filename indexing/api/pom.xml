@@ -6,7 +6,7 @@
 
   <parent>
     <groupId>org.opennms.newts</groupId>
-    <artifactId>newts-parent</artifactId>
+    <artifactId>indexing</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
