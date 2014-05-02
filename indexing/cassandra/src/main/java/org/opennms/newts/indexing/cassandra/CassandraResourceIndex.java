@@ -37,6 +37,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Batch;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -152,7 +153,7 @@ public class CassandraResourceIndex implements ResourceIndex {
     }
 
     private String join(String v1, String v2) {
-        return String.format("%s%s%s", v1, DELIMITER, v2);
+        return Joiner.on(DELIMITER).join(v1, v2);
     }
 
     private boolean needsUpdate(String resource, String metric) {
