@@ -16,9 +16,14 @@
 package org.opennms.newts.indexing.cassandra;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,12 +33,19 @@ import org.opennms.newts.api.indexing.ResourcePath;
 
 import com.codahale.metrics.MetricRegistry;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Batch;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 
 public class CassandraResourceIndex implements ResourceIndex {
+
+    public static final String DELIMITER = ":";
+    static final String ROOT_KEY = "<|> ROOT RESOURCE PATH <|>";
 
     private static final String T_RESOURCE_IDX = "resource_idx";
     private static final String T_METRIC_IDX = "metric_idx";
@@ -41,7 +53,6 @@ public class CassandraResourceIndex implements ResourceIndex {
     private static final String F_CHILD = "child";
     private static final String F_RESOURCE = "resource";
     private static final String F_METRIC_NAME = "metric_name";
-    private static final String DELIMITER = ":";
 
     private Session m_session;
     @SuppressWarnings("unused") private MetricRegistry m_registry;
@@ -56,19 +67,45 @@ public class CassandraResourceIndex implements ResourceIndex {
         m_session = cluster.connect(keyspace);
 
         m_registry = checkNotNull(registry, "metric registry argument");
-        
+
+    }
+
+    Collection<String> getChildren(String parent) {
+
+        List<String> children = Lists.newArrayList();
+        Statement statement = select(F_CHILD).from(T_RESOURCE_IDX).where(eq(F_PARENT, parent));
+
+        for (Row row : m_session.execute(statement)) {
+            children.add(row.getString(F_CHILD));
+        }
+
+        return children;
     }
 
     @Override
     public ResourcePath search(String... path) {
-        // TODO Auto-generated method stub
-        return null;
+
+        String key = (path.length > 0) ? path[0] : ROOT_KEY;
+        CassandraResourcePath root = new CassandraResourcePath(key, this);
+
+        for (int i = 1; i < path.length; i++) {
+            root = new CassandraResourcePath(Optional.<ResourcePath> of(root), path[i], this);
+        }
+
+        return root;
     }
 
     @Override
-    public String[] getMetrics(String resourceName) {
-        // TODO Auto-generated method stub
-        return null;
+    public Collection<String> getMetrics(String resourceName) {
+
+        List<String> metrics = Lists.newArrayList();
+        Statement statement = select(F_METRIC_NAME).from(T_METRIC_IDX).where(eq(F_RESOURCE, resourceName));
+
+        for (Row row : m_session.execute(statement)) {
+            metrics.add(row.getString(F_METRIC_NAME));
+        }
+
+        return metrics;
     }
 
     @Override
@@ -99,10 +136,13 @@ public class CassandraResourceIndex implements ResourceIndex {
                 if (paths.length > 1) {
                     String parent = paths[0];
 
+                    batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, ROOT_KEY).value(F_CHILD, parent));
+
                     for (int i = 1; i < paths.length; i++) {
                         batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, parent).value(F_CHILD, paths[i]));
                         parent = join(parent, paths[i]);
                     }
+
                 }
             }
         }
