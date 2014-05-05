@@ -16,6 +16,8 @@
 package org.opennms.newts.indexing.cassandra;
 
 
+import static org.mockito.Mockito.mock;
+
 import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
 import org.cassandraunit.dataset.CQLDataSet;
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
@@ -42,7 +44,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
-        m_resourceIndex = new CassandraResourceIndex(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, new MetricRegistry());
+        m_resourceIndex = new CassandraResourceIndex(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, mock(IndexState.class), new MetricRegistry());
     }
 
     @After

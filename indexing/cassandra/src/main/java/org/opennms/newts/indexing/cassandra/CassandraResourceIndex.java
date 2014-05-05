@@ -39,6 +39,7 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -56,10 +57,12 @@ public class CassandraResourceIndex implements ResourceIndex {
     private static final String F_METRIC_NAME = "metric_name";
 
     private Session m_session;
+    private IndexState m_indexState;
     @SuppressWarnings("unused") private MetricRegistry m_registry;
 
     @Inject
-    public CassandraResourceIndex(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port, MetricRegistry registry) {
+    public CassandraResourceIndex(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
+            IndexState indexState, MetricRegistry registry) {
         checkNotNull(keyspace, "Cassandra keyspace argument");
         checkNotNull(host, "Cassandra host argument");
         checkArgument(port > 0, "invalid Cassandra port number: %s", port);
@@ -67,6 +70,7 @@ public class CassandraResourceIndex implements ResourceIndex {
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);
 
+        m_indexState = checkNotNull(indexState, "index state argument");
         m_registry = checkNotNull(registry, "metric registry argument");
 
     }
@@ -113,6 +117,7 @@ public class CassandraResourceIndex implements ResourceIndex {
     public void index(Multimap<String, String> metrics) {
 
         Batch batch = batch();
+        Multimap<String, String> needsUpdate = HashMultimap.create();
 
         for (String resource : metrics.keySet()) {
             // Whether the resource index needs updating
@@ -120,11 +125,12 @@ public class CassandraResourceIndex implements ResourceIndex {
 
             // Create (or update), as necessary, each fully-qualified resource name / metric pair.
             for (String metric : metrics.get(resource)) {
-                if (needsUpdate(resource, metric)) {
+                if (!m_indexState.exists(resource, metric)) {
                     batch.add(insertInto(T_METRIC_IDX).value(F_RESOURCE, resource).value(F_METRIC_NAME, metric));
+                    needsUpdate.put(resource, metric);
                 }
                 else {
-                    // If needsUpdate() returns false even once, then there is no need to (re)index
+                    // If exists() returns true even once, then there is no need to (re)index
                     // the resource.
                     indexResource = false;
                 }
@@ -150,14 +156,13 @@ public class CassandraResourceIndex implements ResourceIndex {
 
         m_session.execute(batch);
 
+        // Add index changes to state only after the database update above succeeds
+        m_indexState.putAll(needsUpdate);
+
     }
 
     private String join(String v1, String v2) {
         return Joiner.on(DELIMITER).join(v1, v2);
-    }
-
-    private boolean needsUpdate(String resource, String metric) {
-        return true;
     }
 
 }

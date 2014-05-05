@@ -13,7 +13,9 @@ cassandra:
 # Use this at your own risk.
 indexing:
   enabled: true
-  maxThreads: 32
+  maxThreads: 64
+  # Number of entries to cache in memory (used to avoid redudant writes).
+  maxCacheEntries: 1000000
   cassandra:
     keyspace: newts
     host: localhost
