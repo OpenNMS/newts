@@ -66,4 +66,8 @@ public class IndexingConfig {
         return m_cassandraConfig.getPort();
     }
 
+    public int getCassandraColumnTTL() {
+        return m_cassandraConfig.getColumnTTL();
+    }
+
 }

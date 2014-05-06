@@ -20,6 +20,7 @@ indexing:
     keyspace: newts
     host: localhost
     port: 9042
+    ttl: 31536000
   
 logging:
   level: INFO

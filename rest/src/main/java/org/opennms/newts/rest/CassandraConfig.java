@@ -35,6 +35,10 @@ public class CassandraConfig {
     @JsonProperty("port")
     private int m_port = 9042;
 
+    @Min(value = 0)
+    @JsonProperty("ttl")
+    private int m_columnTTL = 31536000;
+
     public String getKeyspace() {
         return m_keyspace;
     }
@@ -45,6 +49,10 @@ public class CassandraConfig {
 
     public int getPort() {
         return m_port;
+    }
+
+    public int getColumnTTL() {
+        return m_columnTTL;
     }
 
 }

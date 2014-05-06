@@ -37,6 +37,8 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Using;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
@@ -56,20 +58,23 @@ public class CassandraResourceIndex implements ResourceIndex {
     private static final String F_RESOURCE = "resource";
     private static final String F_METRIC_NAME = "metric_name";
 
-    private Session m_session;
+    private final Session m_session;
+    private final int m_columnTTL;
     private IndexState m_indexState;
     @SuppressWarnings("unused") private MetricRegistry m_registry;
 
     @Inject
     public CassandraResourceIndex(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
-            IndexState indexState, MetricRegistry registry) {
+            @Named("cassandra.ttl") int columnTTL, IndexState indexState, MetricRegistry registry) {
         checkNotNull(keyspace, "Cassandra keyspace argument");
         checkNotNull(host, "Cassandra host argument");
-        checkArgument(port > 0, "invalid Cassandra port number: %s", port);
+        checkArgument(port > 0, "Cassandra port number: %s", port);
+        checkArgument(columnTTL >= 0, "Cassandra column TTL: %s", columnTTL);
 
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);
 
+        m_columnTTL = columnTTL;
         m_indexState = checkNotNull(indexState, "index state argument");
         m_registry = checkNotNull(registry, "metric registry argument");
 
@@ -126,7 +131,7 @@ public class CassandraResourceIndex implements ResourceIndex {
             // Create (or update), as necessary, each fully-qualified resource name / metric pair.
             for (String metric : metrics.get(resource)) {
                 if (!m_indexState.exists(resource, metric)) {
-                    batch.add(insertInto(T_METRIC_IDX).value(F_RESOURCE, resource).value(F_METRIC_NAME, metric));
+                    batch.add(insertInto(T_METRIC_IDX).value(F_RESOURCE, resource).value(F_METRIC_NAME, metric).using(ttl()));
                     needsUpdate.put(resource, metric);
                 }
                 else {
@@ -143,10 +148,10 @@ public class CassandraResourceIndex implements ResourceIndex {
                 if (paths.length > 1) {
                     String parent = paths[0];
 
-                    batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, ROOT_KEY).value(F_CHILD, parent));
+                    batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, ROOT_KEY).value(F_CHILD, parent).using(ttl()));
 
                     for (int i = 1; i < paths.length; i++) {
-                        batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, parent).value(F_CHILD, paths[i]));
+                        batch.add(insertInto(T_RESOURCE_IDX).value(F_PARENT, parent).value(F_CHILD, paths[i]).using(ttl()));
                         parent = join(parent, paths[i]);
                     }
 
@@ -163,6 +168,10 @@ public class CassandraResourceIndex implements ResourceIndex {
 
     private String join(String v1, String v2) {
         return Joiner.on(DELIMITER).join(v1, v2);
+    }
+
+    private Using ttl() {
+        return QueryBuilder.ttl(m_columnTTL);
     }
 
 }

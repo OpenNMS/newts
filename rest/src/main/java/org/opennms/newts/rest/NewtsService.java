@@ -68,6 +68,7 @@ public class NewtsService extends Service<NewtsConfig> {
                     indexingConf.getCassandraKeyspace(),
                     indexingConf.getCassandraHost(),
                     indexingConf.getCassandraPort(),
+                    indexingConf.getCassandraColumnTTL(),
                     new GuavaCachingIndexState(indexingConf.getMaxCacheEntries(), metricRegistry),
                     metricRegistry);
             SampleProcessorService processorService = new SampleProcessorService(
