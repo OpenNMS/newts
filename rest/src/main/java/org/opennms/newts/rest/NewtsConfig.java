@@ -20,12 +20,19 @@ import java.util.Collections;
 import java.util.Map;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yammer.dropwizard.config.Configuration;
 
 
 public class NewtsConfig extends Configuration {
+
+    @Min(value = 1)
+    @Max(value = 8192)
+    @JsonProperty("maxSampleProcessorThreads")
+    private int m_maxThreads = 64;
 
     @Valid
     @JsonProperty("cassandra")
@@ -38,6 +45,10 @@ public class NewtsConfig extends Configuration {
     @Valid
     @JsonProperty("reports")
     private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
+
+    public int getMaxSampleProcessorThreads() {
+        return m_maxThreads;
+    }
 
     public String getCassandraKeyspace() {
         return m_cassandraConfig.getKeyspace();

@@ -28,11 +28,6 @@ public class IndexingConfig {
     @JsonProperty("enabled")
     private boolean m_enabled = false;
 
-    @Min(value = 1)
-    @Max(value = 8192)
-    @JsonProperty("maxThreads")
-    private int m_maxThreads = 64;
-
     @Min(value = 10000)
     @Max(value = Integer.MAX_VALUE)
     @JsonProperty("maxCacheEntries")
@@ -44,10 +39,6 @@ public class IndexingConfig {
 
     public boolean isEnabled() {
         return m_enabled;
-    }
-
-    public int getMaxThreads() {
-        return m_maxThreads;
     }
 
     public String getCassandraKeyspace() {

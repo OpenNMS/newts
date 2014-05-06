@@ -64,8 +64,14 @@ public class CassandraResourceIndex implements ResourceIndex {
     @SuppressWarnings("unused") private MetricRegistry m_registry;
 
     @Inject
-    public CassandraResourceIndex(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
-            @Named("cassandra.ttl") int columnTTL, IndexState indexState, MetricRegistry registry) {
+    public CassandraResourceIndex(
+            @Named("index.cassandra.keyspace") String keyspace,
+            @Named("index.cassandra.host") String host,
+            @Named("index.cassandra.port") int port,
+            @Named("index.cassandra.ttl") int columnTTL,
+            IndexState indexState,
+            MetricRegistry registry)
+    {
         checkNotNull(keyspace, "Cassandra keyspace argument");
         checkNotNull(host, "Cassandra host argument");
         checkArgument(port > 0, "Cassandra port number: %s", port);

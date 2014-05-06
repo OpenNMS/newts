@@ -26,7 +26,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <guavaVersion>15.0</guavaVersion>
-    <guiceVersion>4.0-beta</guiceVersion>
+    <guiceVersion>4.0-beta4</guiceVersion>
     <jacksonVersion>2.1.4</jacksonVersion>
     <junitVersion>4.11</junitVersion>
     <logbackVersion>1.0.10</logbackVersion>

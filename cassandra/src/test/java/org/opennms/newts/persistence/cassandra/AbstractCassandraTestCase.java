@@ -16,11 +16,14 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static org.mockito.Mockito.mock;
+
 import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
 import org.cassandraunit.dataset.CQLDataSet;
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
 import org.junit.After;
 import org.junit.Before;
+import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
@@ -28,11 +31,11 @@ import com.codahale.metrics.MetricRegistry;
 
 public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
 
-    public static final String CASSANDRA_CONFIG  = "cassandra.yaml";
-    public static final String CASSANDRA_HOST    = "localhost";
-    public static final int    CASSANDRA_PORT    = 9043;
-    public static final String SCHEMA_FILE       = "schema.cql";
-    public static final String KEYSPACE_NAME     = "newts";
+    public static final String CASSANDRA_CONFIG = "cassandra.yaml";
+    public static final String CASSANDRA_HOST = "localhost";
+    public static final int CASSANDRA_PORT = 9043;
+    public static final String SCHEMA_FILE = "schema.cql";
+    public static final String KEYSPACE_NAME = "newts";
 
     protected SampleRepository m_repository;
 
@@ -43,7 +46,12 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
-        m_repository = new CassandraSampleRepository(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, new MetricRegistry());
+        m_repository = new CassandraSampleRepository(
+                KEYSPACE_NAME,
+                CASSANDRA_HOST,
+                CASSANDRA_PORT,
+                new MetricRegistry(),
+                mock(SampleProcessorService.class));
     }
 
     @After

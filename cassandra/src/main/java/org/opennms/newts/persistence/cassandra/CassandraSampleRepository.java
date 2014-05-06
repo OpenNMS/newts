@@ -60,12 +60,13 @@ public class CassandraSampleRepository implements SampleRepository {
     private SampleProcessorService m_processorService;
 
     @Inject
-    public CassandraSampleRepository(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host,
-            @Named("cassandra.port") int port, MetricRegistry registry) {
-        this(keyspace, host, port, registry, null);
-    }
-
-    public CassandraSampleRepository(String keyspace, String host, int port, MetricRegistry registry, SampleProcessorService processorService) {
+    public CassandraSampleRepository(
+            @Named("samples.cassandra.keyspace") String keyspace,
+            @Named("samples.cassandra.host") String host,
+            @Named("samples.cassandra.port") int port,
+            MetricRegistry registry,
+            SampleProcessorService processorService)
+    {
 
         checkNotNull(keyspace, "Cassandra keyspace argument");
         checkNotNull(host, "Cassandra host argument");

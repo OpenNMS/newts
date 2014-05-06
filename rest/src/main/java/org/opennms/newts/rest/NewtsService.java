@@ -16,20 +16,13 @@
 package org.opennms.newts.rest;
 
 
-import java.util.Collections;
-
 import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.opennms.newts.api.SampleProcessor;
-import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.api.indexing.ResourceIndex;
-import org.opennms.newts.indexing.cassandra.CassandraResourceIndex;
-import org.opennms.newts.indexing.cassandra.GuavaCachingIndexState;
-import org.opennms.newts.indexing.cassandra.ResourceIndexingSampleProcessor;
-import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
@@ -49,37 +42,21 @@ public class NewtsService extends Service<NewtsConfig> {
     }
 
     @Override
-    public void run(NewtsConfig configuration, Environment environment) throws Exception {
+    public void run(NewtsConfig config, Environment environment) throws Exception {
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 
-        SampleRepository repository;
+        Injector injector;
 
-        String host = configuration.getCassandraHost();
-        int port = configuration.getCassandraPort();
-        String keyspace = configuration.getCassandraKeyspace();
-        MetricRegistry metricRegistry = new MetricRegistry();
-
-        IndexingConfig indexingConf = configuration.getIndexingConfig();
-
-        // Create a SampleRepository (conditionally w/ resource indexing)
-        if (indexingConf.isEnabled()) {
-            ResourceIndex resourceIndex = new CassandraResourceIndex(
-                    indexingConf.getCassandraKeyspace(),
-                    indexingConf.getCassandraHost(),
-                    indexingConf.getCassandraPort(),
-                    indexingConf.getCassandraColumnTTL(),
-                    new GuavaCachingIndexState(indexingConf.getMaxCacheEntries(), metricRegistry),
-                    metricRegistry);
-            SampleProcessorService processorService = new SampleProcessorService(
-                    indexingConf.getMaxThreads(),
-                    Collections.<SampleProcessor> singleton(new ResourceIndexingSampleProcessor(resourceIndex)));
-
-            repository = new CassandraSampleRepository(keyspace, host, port, metricRegistry, processorService);
+        if (config.getIndexingConfig().isEnabled()) {
+            injector = Guice.createInjector(new CassandraModule(config), new CassandraResourceIndexModule(config));
         }
         else {
-            repository = new CassandraSampleRepository(keyspace, host, port, metricRegistry);
+            injector = Guice.createInjector(new CassandraModule(config));
         }
+
+        MetricRegistry metricRegistry = injector.getInstance(MetricRegistry.class);
+        SampleRepository repository = injector.getInstance(SampleRepository.class);
 
         // Create/start a JMX reporter for our MetricRegistry
         final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("newts").build();
@@ -98,7 +75,7 @@ public class NewtsService extends Service<NewtsConfig> {
         });
 
         // Add rest resources
-        environment.addResource(new MeasurementsResource(repository, configuration.getReports()));
+        environment.addResource(new MeasurementsResource(repository, config.getReports()));
         environment.addResource(new SamplesResource(repository));
 
         // Health checks

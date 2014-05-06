@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,8 @@ public class SampleProcessorService {
         this(maxThreads, Collections.<SampleProcessor> emptySet());
     }
 
-    public SampleProcessorService(int maxThreads, Set<SampleProcessor> processors) {
+    @Inject
+    public SampleProcessorService(@Named("sampleProcessor.maxThreads") int maxThreads, Set<SampleProcessor> processors) {
         checkArgument(maxThreads > 0, "maxThreads must be non-zero");
 
         LOG.info("Starting sample processor service with pool of {} threads", maxThreads);
