@@ -6,16 +6,16 @@
 
   <parent>
     <groupId>org.opennms.newts</groupId>
-    <artifactId>indexing-parent</artifactId>
+    <artifactId>newts-index-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>indexing-cassandra</artifactId>
+  <artifactId>newts-index-cassandra</artifactId>
   <packaging>jar</packaging>
 
-  <name>New Timeseries Datastore :: Indexing :: Cassandra</name>
+  <name>New Timeseries Datastore :: Index :: Cassandra</name>
 
   <properties>
     <skipITs>true</skipITs>
@@ -30,7 +30,7 @@
     </dependency>
     <dependency>
       <groupId>org.opennms.newts</groupId>
-      <artifactId>indexing-api</artifactId>
+      <artifactId>newts-index-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

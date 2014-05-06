@@ -48,12 +48,12 @@
     </dependency>
     <dependency>
       <groupId>org.opennms.newts</groupId>
-      <artifactId>indexing-api</artifactId>
+      <artifactId>newts-index-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opennms.newts</groupId>
-      <artifactId>indexing-cassandra</artifactId>
+      <artifactId>newts-index-cassandra</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- Needed for CORS filter -->

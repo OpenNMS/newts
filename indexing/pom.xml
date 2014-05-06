@@ -10,10 +10,10 @@
   </parent>
   
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>indexing-parent</artifactId>
+  <artifactId>newts-index-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>New Timeseries Datastore :: Indexing</name>
+  <name>New Timeseries Datastore :: Index</name>
 
   <modules>
     <module>api</module>
