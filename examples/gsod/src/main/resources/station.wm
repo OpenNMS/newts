@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>${location}</title>
+  <meta http-equiv="refresh" content="60" />
   <link href="/style.css" rel="stylesheet" type="text/css">
   <script language="javascript" type="text/javascript" src="/jquery.js"></script>
   <script language="javascript" type="text/javascript" src="/jquery.flot.js"></script>
