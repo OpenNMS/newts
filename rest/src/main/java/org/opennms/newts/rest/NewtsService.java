@@ -77,6 +77,7 @@ public class NewtsService extends Service<NewtsConfig> {
         // Add rest resources
         environment.addResource(new MeasurementsResource(repository, config.getReports()));
         environment.addResource(new SamplesResource(repository));
+        environment.addResource(new ResultDescriptorsResource(config.getReports()));
 
         // Health checks
         environment.addHealthCheck(new RepositoryHealthCheck(repository));
