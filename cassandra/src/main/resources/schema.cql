@@ -1,8 +1,8 @@
 
-CREATE KEYSPACE NEWTS_KEYSPACE
+CREATE KEYSPACE newts
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
-CREATE TABLE NEWTS_KEYSPACE.samples (
+CREATE TABLE newts.samples (
     resource text,
     collected_at timestamp,
     metric_name text,
