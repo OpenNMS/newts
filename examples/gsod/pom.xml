@@ -66,6 +66,42 @@
     </dependency>
     
     <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-core</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-string</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-math</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-async-util</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-apache-http</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-debug</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.netflix.rxjava</groupId>
+      <artifactId>rxjava-computation-expressions</artifactId>
+      <version>0.17.6</version>
+    </dependency>
+    
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
