@@ -15,24 +15,20 @@
  */
 package org.opennms.newts.rest;
 
-import org.opennms.newts.persistence.cassandra.SchemaManager;
+import com.codahale.metrics.MetricRegistry;
+import com.google.inject.AbstractModule;
 
-import net.sourceforge.argparse4j.inf.Namespace;
 
-import com.yammer.dropwizard.cli.ConfiguredCommand;
-import com.yammer.dropwizard.config.Bootstrap;
-
-public class InitCommand extends ConfiguredCommand<NewtsConfig> {
-
-    protected InitCommand() {
-        super("init", "Perform one-time application initialization");
-    }
+/**
+ * Base Guice configuration.
+ * 
+ * @author eevans
+ */
+public class NewtsModule extends AbstractModule {
 
     @Override
-    protected void run(Bootstrap<NewtsConfig> bootstrap, Namespace namespace, NewtsConfig config) throws Exception {
-        try (SchemaManager manager = new SchemaManager(config.getCassandraHost(), config.getCassandraPort())) {
-            manager.create(true);
-        }
+    protected void configure() {
+        bind(MetricRegistry.class).toInstance(new MetricRegistry());
     }
 
 }

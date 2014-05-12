@@ -21,6 +21,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.lte;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 
@@ -31,6 +32,7 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
@@ -54,15 +56,26 @@ public class CassandraSampleRepository implements SampleRepository {
     private static final Logger LOG = LoggerFactory.getLogger(CassandraSampleRepository.class);
 
     private Session m_session;
-    @SuppressWarnings("unused") private MetricRegistry m_registry;
+    @SuppressWarnings("unused") private final MetricRegistry m_registry;
+    private SampleProcessorService m_processorService;
 
     @Inject
-    public CassandraSampleRepository(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port, MetricRegistry registry) {
+    public CassandraSampleRepository(
+            @Named("samples.cassandra.keyspace") String keyspace,
+            @Named("samples.cassandra.host") String host,
+            @Named("samples.cassandra.port") int port,
+            MetricRegistry registry,
+            SampleProcessorService processorService)
+    {
+
+        checkNotNull(keyspace, "Cassandra keyspace argument");
+        checkNotNull(host, "Cassandra host argument");
 
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);
 
-        m_registry = registry;
+        m_registry = checkNotNull(registry, "metric registry argument");
+        m_processorService = processorService;
 
     }
 
@@ -125,6 +138,10 @@ public class CassandraSampleRepository implements SampleRepository {
         }
 
         m_session.execute(batch);
+
+        if (m_processorService != null) {
+            m_processorService.submit(samples);
+        }
 
     }
 

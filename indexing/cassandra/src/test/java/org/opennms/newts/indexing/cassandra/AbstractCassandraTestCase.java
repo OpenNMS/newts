@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.indexing.cassandra;
 
 
 import static org.mockito.Mockito.mock;
@@ -23,21 +23,19 @@ import org.cassandraunit.dataset.CQLDataSet;
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
 import org.junit.After;
 import org.junit.Before;
-import org.opennms.newts.api.SampleProcessorService;
-import org.opennms.newts.api.SampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
 
 
 public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
 
-    public static final String CASSANDRA_CONFIG = "cassandra.yaml";
-    public static final String CASSANDRA_HOST = "localhost";
-    public static final int CASSANDRA_PORT = 9043;
-    public static final String SCHEMA_FILE = "schema.cql";
-    public static final String KEYSPACE_NAME = "newts";
+    public static final String CASSANDRA_CONFIG  = "cassandra.yaml";
+    public static final String CASSANDRA_HOST    = "localhost";
+    public static final int    CASSANDRA_PORT    = 9043;
+    public static final String SCHEMA_FILE       = "schema.cql";
+    public static final String KEYSPACE_NAME     = "newts";
 
-    protected SampleRepository m_repository;
+    protected CassandraResourceIndex m_resourceIndex;
 
     public AbstractCassandraTestCase() {
         super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
@@ -46,12 +44,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
-        m_repository = new CassandraSampleRepository(
-                KEYSPACE_NAME,
-                CASSANDRA_HOST,
-                CASSANDRA_PORT,
-                new MetricRegistry(),
-                mock(SampleProcessorService.class));
+        m_resourceIndex = new CassandraResourceIndex(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, 0, mock(IndexState.class), new MetricRegistry());
     }
 
     @After
@@ -64,8 +57,8 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
         return new ClassPathCQLDataSet(SCHEMA_FILE, false, true, KEYSPACE_NAME);
     }
 
-    public SampleRepository getRepository() {
-        return m_repository;
+    public CassandraResourceIndex getResourceIndex() {
+        return m_resourceIndex;
     }
 
 }

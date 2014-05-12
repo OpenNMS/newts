@@ -33,9 +33,28 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <dependency>
       <groupId>com.yammer.dropwizard</groupId>
       <artifactId>dropwizard-core</artifactId>
       <version>0.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-index-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-index-cassandra</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <!-- Needed for CORS filter -->
     <dependency>
@@ -51,7 +70,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
