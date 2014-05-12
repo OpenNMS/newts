@@ -112,10 +112,16 @@ public class ImportRunner2 {
         m_restUrl = url;
     }
     
-    @Option(name="-p", aliases="--parallelism", metaVar="thread-count", usage="when using direct the size of the thread pool that posts the results")
+    @Option(name="-p", aliases="--parallelism", metaVar="thread-count", usage="when using direct the size of the thread pool that posts the results.  (defaults to 1 ie no parallelism)")
     public void setParallelism(int threadCount) {
-        checkArgument(threadCount > 0, "thread count must be greater than 1.");
+        checkArgument(threadCount > 0, "thread count must be at least 1.");
         m_threadCount = threadCount;
+    }
+    
+    @Option(name="-q", aliases="--max-work-queue-size", metaVar="batch-count", usage="when using direct the max size of the work-queue (defaults to thread-count * 3)")
+    public void setMaxThreadQueueSize(int maxThreadQueueSize) {
+        checkArgument(maxThreadQueueSize > 0, "max thread queue size must be at least 1.");
+        m_maxThreadQueueSize = maxThreadQueueSize;
     }
     
     @Argument(metaVar="sourceDir", required=true, usage="the source directory that contains gsod data to import. These must be gzip'd files")
