@@ -29,12 +29,17 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,6 +79,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.Timer.Context;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -84,6 +92,8 @@ public class ImportRunner2 {
     private File m_source;
     private String m_restUrl = null;
     private SampleRepository m_repository;
+    private int m_threadCount = 1;
+    private int m_maxThreadQueueSize = 0;
     
     private void checkArgument(boolean check, String failureMessage) {
         if (!check) throw new IllegalArgumentException(failureMessage);
@@ -100,6 +110,12 @@ public class ImportRunner2 {
     public void setURL(String url) {
         checkArgument(url != null && !url.isEmpty(), "the url must not be empty");
         m_restUrl = url;
+    }
+    
+    @Option(name="-p", aliases="--parallelism", metaVar="thread-count", usage="when using direct the size of the thread pool that posts the results")
+    public void setParallelism(int threadCount) {
+        checkArgument(threadCount > 0, "thread count must be greater than 1.");
+        m_threadCount = threadCount;
     }
     
     @Argument(metaVar="sourceDir", required=true, usage="the source directory that contains gsod data to import. These must be gzip'd files")
@@ -283,24 +299,160 @@ public class ImportRunner2 {
         };
         
         
-        //Observable<Boolean> parallel = parallelMap(samples, 10, metrics, insert);
-        
-        Observable<Boolean> sequential = samples.map(insert);
-        
-        return sequential
-               .all(Functions.<Boolean>identity());
+        return (m_threadCount == 1 ? samples.map(insert) : parMap(samples, metrics, insert)).all(Functions.<Boolean>identity());
         
         
     }
+
+
+    private Observable<Boolean> parMap(Observable<List<Sample>> samples, MetricRegistry metrics, Func1<List<Sample>, Boolean> insert) {
+        
+        final Timer waitTime = metrics.timer("wait-time");
     
-    private Observable<Boolean> restPoster(Observable<List<Sample>> samples,
-            MetricRegistry metrics) {
-        Observable<Boolean> doImport;
+        final BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(m_maxThreadQueueSize == 0 ? m_threadCount * 3 : m_maxThreadQueueSize) {
+
+            @Override
+            public boolean offer(Runnable r) {
+                try (Context time = waitTime.time()) {
+                    this.put(r);
+                    return true;
+                } catch (InterruptedException e) {
+                    throw Exceptions.propagate(e);
+                }
+            }
+
+            @Override
+            public boolean add(Runnable r) {
+                try (Context time = waitTime.time()) {
+                    this.put(r);
+                    return true;
+                } catch (InterruptedException e) {
+                    throw Exceptions.propagate(e);
+                }
+            }
+
+            
+        };
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(m_threadCount, m_threadCount,
+                                                                   0L, TimeUnit.MILLISECONDS,
+                                                                   workQueue);
+        
+        metrics.register("active-threads", new Gauge<Integer>() {
+
+            @Override
+            public Integer getValue() {
+                return executor.getActiveCount();
+            }
+            
+        });
+        
+        metrics.register("pool-size", new Gauge<Integer>() {
+
+            @Override
+            public Integer getValue() {
+                return executor.getPoolSize();
+            }
+            
+        });
+        metrics.register("largest-pool-size", new Gauge<Integer>() {
+
+            @Override
+            public Integer getValue() {
+                return executor.getLargestPoolSize();
+            }
+            
+        });
+        
+        metrics.register("work-queue-size", new Gauge<Integer>() {
+
+            @Override
+            public Integer getValue() {
+                return workQueue.size();
+            }
+            
+        });
+        
+        
+        return parMap(samples, executor, metrics, insert);
+    }
+    
+    private Observable<Boolean> parMap(Observable<List<Sample>> samples, ExecutorService executorSvc, final MetricRegistry metrics, final Func1<List<Sample>, Boolean> insert) {
+        final ListeningExecutorService executor = MoreExecutors.listeningDecorator(executorSvc);
+        
+        Observable<Boolean> o = samples
+                .lift(new Operator<ListenableFuture<Boolean>, List<Sample>>() {
+
+            @Override
+            public Subscriber<? super List<Sample>> call(final Subscriber<? super ListenableFuture<Boolean>> s) {
+                return new Subscriber<List<Sample>>() {
+
+                    @Override
+                    public void onCompleted() {
+                        if (!s.isUnsubscribed()) {
+                            s.onCompleted();
+                        }
+                        executor.shutdown();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        if (!s.isUnsubscribed()) {
+                            s.onError(e);
+                        }
+                    }
+
+                    @Override
+                    public void onNext(final List<Sample> t) {
+                        if (!s.isUnsubscribed()) {
+                            try {
+                                ListenableFuture<Boolean> f = executor.submit(new Callable<Boolean>() {
+
+                                    @Override
+                                    public Boolean call() throws Exception {
+                                        return insert.call(t);
+                                    }
+
+                                });
+                                s.onNext(f);
+                            } catch (Throwable ex) {
+                                onError(ex);
+                            }
+
+                        
+                        }
+                    }
+                };
+            }
+                
+        })
+        .observeOn(Schedulers.io())
+        .map(new Func1<ListenableFuture<Boolean>, Boolean>() {
+
+            @Override
+            public Boolean call(ListenableFuture<Boolean> f) {
+                try {
+                    return f.get();
+                } catch (Throwable e) {
+                    throw Exceptions.propagate(e);
+                }
+            }
+            
+        });
+
+        return o;
+    }
+    
+
+    
+
+
+    private Observable<Boolean> restPoster(Observable<List<Sample>> samples,  MetricRegistry metrics) {
+
         final CloseableHttpAsyncClient httpClient = HttpAsyncClients.createDefault();
         httpClient.start();
 
 
-        doImport = samples
+        return samples
 
                 // turn each batch into json
                 .map(toJSON())
@@ -333,7 +485,6 @@ public class ImportRunner2 {
                     }
                     
                 });
-        return doImport;
     }
 
     private static Func1<? super Path, ? extends Path> reportFile() {
@@ -424,128 +575,6 @@ public class ImportRunner2 {
         };
     }
     
-    private static final class OperatorParMap<T, R> implements Operator<R, T> {
-
-        private final Func1<? super T, ? extends R> m_transformer;
-        private final int m_threadCount; 
-        private final MetricRegistry m_metrics;
-
-        public OperatorParMap(int threadCount, MetricRegistry metrics, Func1<? super T, ? extends R> transformer) {
-            m_transformer = transformer;
-            m_threadCount = threadCount;
-            m_metrics = metrics;
-        }
-
-        @Override
-        public Subscriber<? super T> call(final Subscriber<? super R> o) {
-            final ExecutorService executor = Executors.newFixedThreadPool(m_threadCount);
-            final ExecutorCompletionService<R> completions = new ExecutorCompletionService<>(executor);
-            final AtomicBoolean completed = new AtomicBoolean(false);
-            final AtomicInteger inQueue = new AtomicInteger(0);
-            final AtomicReference<Throwable> error = new AtomicReference<Throwable>(null);
-
-            m_metrics.register("in-queue", new Gauge<Integer>() {
-
-                @Override
-                public Integer getValue() {
-                    return inQueue.get();
-                }
-                
-            });
-            
-            Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-
-                        while(true) {
-                            if (error.get() != null) {
-                                if (!o.isUnsubscribed()) {
-                                    o.onError(error.get());
-                                }
-                                // we've got an error so bail
-                                return;
-                            }
-                            if (completed.get() && inQueue.get() == 0) {
-                                if (!o.isUnsubscribed()) {
-                                    o.onCompleted();
-                                }
-                                // we've been completed and the queue is empty to we're done
-                                System.err.println("SHUTING DOWN PARMAP EXECUTOR!");
-                                executor.shutdown();
-                                return;
-                            }
-
-                            Future<R> future = completions.poll(1, TimeUnit.SECONDS);
-                            if (future != null) {
-                                // received the next item... decrement the queue count
-                                inQueue.decrementAndGet();
-                                
-                                // now notifiery the subscriber
-                                if (o.isUnsubscribed()) return;
-                                o.onNext(future.get());
-                            }
-                        }
-                        
-
-                    } catch(Exception e) {
-                        // an exception occurred so notify subscriber and bail
-                        if (o.isUnsubscribed()) return;
-                        o.onError(e);
-                    } finally {
-                        System.err.println("EXITTING PARMAP THREAD!");
-                    }
-                }
-                
-            };
-            
-            Thread t = new Thread(r);
-            t.setDaemon(true);
-            t.start();
-            
-            return new Subscriber<T>(o) {
-
-                @Override
-                public void onCompleted() {
-                    completed.set(true);
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    System.err.println("ERROR! " + e.getMessage());
-                    e.printStackTrace();
-                    error.set(e);
-                }
-
-                @Override
-                public void onNext(final T t) {
-                    if (o.isUnsubscribed()) return;
-                    try {
-                        inQueue.incrementAndGet();
-                        completions.submit(new Callable<R>() {
-
-                            @Override
-                            public R call() throws Exception {
-                                return m_transformer.call(t);
-                            }
-                        });
-                    } catch (Throwable e) {
-                        onError(OnErrorThrowable.addValueAsLastCause(e, t));
-                    }
-                }
-
-            };
-            
-            
-            
-        }
-
-    }    
-    public static <R, T> Observable<R> parallelMap(Observable<T> o, int threadCount, MetricRegistry metrics, Func1<? super T, ? extends R> func) {
-        return o.lift(new OperatorParMap<T, R>(threadCount, metrics, func));
-    }
-        
     public static Func1<String, Boolean> exclude(final String pattern) {
         return new Func1<String, Boolean>() {
 
