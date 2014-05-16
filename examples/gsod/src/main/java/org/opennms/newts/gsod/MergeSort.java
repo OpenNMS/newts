@@ -180,12 +180,14 @@ public class MergeSort {
     private CmdLineParser createCmdLineParser() {
         CmdLineParser parser = new CmdLineParser(this) {
 
+            @SuppressWarnings("rawtypes")
             @Override
             public void addArgument(final Setter setter, Argument a) {
                 Setter newSetter = setter; 
                 if (setter instanceof MethodSetter) {
                     newSetter = new Setter() {
 
+                        @SuppressWarnings("unchecked")
                         @Override
                         public void addValue(Object value) throws CmdLineException {
                             setter.addValue(value);
