@@ -18,9 +18,13 @@ public class FileIterableTest {
 
     @Test
     public void testWalk() {
-        Path root = new File("ftp.ncdc.noaa.gov/pub/data/gsod/1989").toPath();
+        Path root = new File("ftp.ncdc.noaa.gov/pub/data/gsod/1988").toPath();
         
         Iterable<Path> paths = FileIterable.fileTreeWalker(root);
+        
+        for(Path p : paths) {
+            System.err.println(p);
+        }
         
         
         List<Path> results = Lists.newArrayList();
@@ -43,7 +47,7 @@ public class FileIterableTest {
     
     @Test
     public void testCombine() {
-        Path root = new File("ftp.ncdc.noaa.gov/pub/data/gsod/1989").toPath();
+        Path root = new File("ftp.ncdc.noaa.gov/pub/data/gsod/1988").toPath();
     
         FluentIterable<KeyedIterable<Path,Path>> iterables = FileIterable.groupFilesByDir(root);
         
