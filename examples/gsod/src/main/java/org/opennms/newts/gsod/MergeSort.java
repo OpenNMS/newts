@@ -18,7 +18,6 @@ package org.opennms.newts.gsod;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.opennms.newts.gsod.FileIterable.*;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,11 +27,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.AnnotatedElement;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
 
 import org.kohsuke.args4j.Argument;
@@ -49,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Slf4jReporter;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -69,20 +64,13 @@ public class MergeSort {
     }
 
     private File m_source;
-    private File m_target;
-    private File m_workDir;
+    private File m_targetDir;
     private int m_mergeCount = 1000;
     
     private void checkArgument(boolean check, String failureMessage) {
         if (!check) throw new IllegalArgumentException(failureMessage);
     }
 
-    @Option(name="-w", aliases="--work-dir", usage="directory to use for temporary files")
-    public void setWorkDir(File workDir) {
-        checkArgument(!workDir.exists(), "the work directory should not exist");
-        m_workDir = workDir;
-    }
-    
     @Option(name="-c", aliases="--merge-count", usage="the number of files to include in a single merge")
     public void setMergeCount(int mergeCount) {
         checkArgument(mergeCount > 1, "the merge count must be a number greater than 1.");
@@ -97,9 +85,10 @@ public class MergeSort {
         m_source = source;
     }
 
-    @Argument(index=1, metaVar="targetFile", required=true, usage="the target file for the sourted output")
+    @Argument(index=1, metaVar="targetDir", required=true, usage="the target directory for the sourted output")
     public void setTarget(File target) {
-        m_target = target;
+        m_targetDir = target;
+        target.mkdirs();
     }
     
     
@@ -132,18 +121,12 @@ public class MergeSort {
         Meter batchMeter = metrics.meter("batches");
         Path root = m_source.toPath();
         
-        if (m_workDir == null) {
-            m_workDir = Files.createTempDir();
-            System.err.println("Working Directory: " + m_workDir);
+        if (m_targetDir == null) {
+            m_targetDir = Files.createTempDir();
+            System.err.println("Working Directory: " + m_targetDir);
         }
         
         LOG.debug("Scanning {} for GSOD data files...", root);
-
-//        FluentIterable<Iterable<String>> iterables = FileIterable
-//                .groupFilesByDir(root)
-//                .transform(lift(lines("YEARMODA")))
-//                .transform(mergeSorter());
-        
 
         FluentIterable<KeyedIterable<Path, Path>> dirs = FileIterable.groupFilesByDir(root);
 
@@ -152,14 +135,14 @@ public class MergeSort {
             String dirName = subdir.getFileName().toString();
             
             System.err.println("Sorted dir: " + subdir);
-            FluentIterable<Iterable<String>> contentIterables = FluentIterable.from(filesInDir)
+            FluentIterable<Iterable<String>> contentIterables = filesInDir
                     .transform(this.<Path>meter(filesMeter))
                     .transform(lines("YEARMODA"))
                     ;
             FluentIterable<List<Iterable<String>>> batches = FluentIterable.from(Iterables.partition(contentIterables, m_mergeCount));
             FluentIterable<Iterable<GSODLine>> sortedBatches = batches.transform(lift2GsodLines()).transform(mergeSorter());
 
-            Path sortedDir = m_workDir.toPath().resolve(subdir);
+            Path sortedDir = m_targetDir.toPath().resolve(subdir);
             sortedDir.toFile().mkdirs();
             
             int count = 1;
@@ -374,16 +357,6 @@ public class MergeSort {
         
         public long getDate() {
             return m_date;
-        }
-    }
-
-    private static void dumpThreads() {
-        for(Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
-            Thread t = entry.getKey();
-            System.err.println(t.getName() + ": Deamon? " + t.isDaemon());
-            for(StackTraceElement e : entry.getValue()) {
-                System.err.println("\t"+e);
-            }
         }
     }
 

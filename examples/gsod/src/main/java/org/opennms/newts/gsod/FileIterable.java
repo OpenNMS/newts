@@ -11,18 +11,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
 
 import com.google.common.base.Function;
@@ -33,107 +26,8 @@ import com.google.common.collect.Iterables;
 
 public class FileIterable {
 
-    private static class PathHolder {
-        Path m_path;
-        Exception m_exception;
-        
-        PathHolder(Path p) {
-            m_path = p;
-        }
-        
-        PathHolder(Exception e) {
-            m_exception = e;
-        }
-        
-        void checkException() {
-            if (m_exception != null) {
-                throw Throwables.propagate(m_exception);
-            }
-        }
-        
-        Path getPath() {
-            return m_path;
-        }
-        
-        public String toString() {
-            if (m_exception != null) {
-                return m_exception.toString();
-            } else {
-                return ""+m_path;
-            }
-        }
-    }
-    
-    private static final PathHolder END_OF_WALK = new PathHolder((Path)null);
-    
-    public static class WalkingPathIterator extends SimpleFileVisitor<Path> implements Iterator<Path> {
-        private BlockingQueue<PathHolder> m_queue = new ArrayBlockingQueue<>(1);
-        private PathHolder m_next;
-        
-        WalkingPathIterator(final Path root) {
-            new Thread() {
-                public void run() {
-                    try {
-                        Files.walkFileTree(root, WalkingPathIterator.this);
-                    } catch (IOException e) {
-                        m_queue.offer( new PathHolder(e) );
-                    } finally {
-                        m_queue.offer( END_OF_WALK );
-                    }
-                }
-            }.start();
-            
-            m_next = take();
-        }
-        
-        
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            m_queue.offer( new PathHolder( file ) );
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public boolean hasNext() {
-           return m_next != END_OF_WALK;
-        }
-
-
-
-        PathHolder take() {
-            try {
-                return m_queue.take();
-            } catch (InterruptedException e) {
-                throw Throwables.propagate(e);
-            }
-        }
-
-        @Override
-        public Path next() {
-            PathHolder p = m_next;
-            if (p == END_OF_WALK) throw new NoSuchElementException();
-            p.checkException();
-            m_next = take();
-            return p.getPath();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-        
-    }
-    
     public static FluentIterable<Path> fileTreeWalker(final Path root) {
-        return new FluentIterable<Path>() {
-
-            @Override
-            public Iterator<Path> iterator() {
-                return new WalkingPathIterator(root);
-            }
-
-        };
+        return FluentIterable.from(Iterables.concat(groupFilesByDir(root)));
     }
     
     public static class KeyedIterable<K, T> extends FluentIterable<T> {
