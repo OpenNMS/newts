@@ -16,7 +16,7 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
@@ -123,7 +123,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public void insert(Collection<Sample> samples) {
 
-        Batch batch = batch();
+        Batch batch = unloggedBatch();
 
         for (Sample m : samples) {
             batch.add(
