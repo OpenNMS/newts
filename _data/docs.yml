@@ -1,0 +1,16 @@
+- title: Getting Started
+  docs:
+  - home
+  - quickstart
+
+- title: Components
+  docs:
+  - rest
+
+- title: Examples
+  docs:
+  - gsod
+
+- title: Meta
+  docs:
+  - history

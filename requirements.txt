@@ -1,0 +1,2 @@
+pip install docutils pygments
+gem install RbST

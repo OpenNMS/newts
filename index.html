@@ -1,0 +1,44 @@
+---
+layout: default
+overview: true
+---
+
+<style lang="text/css">
+    .voffset  { margin-top: 25px; }
+    .loffset  { margin-left: 25px; }
+</style>
+
+<div class="jumbotron">
+    <div class="container">
+        <div class="row voffset ">
+            <div class="col-lg-2 col-md-3 col-sm-3 text-center">
+                <img src="images/newts-logo.jpg" alt="Newts logo" class="img-rounded">
+            </div>
+            <div class="col-lg-8 col-md-7 col-sm-8 loffset">
+                <h1>Newts</h1>
+                <p>A time-series data store based on <a href="http://cassandra.apache.org">Apache Cassandra</a>.</p>
+                <p><a class="btn btn-primary btn-lg" role="button">How Newts works &raquo;</a></p>
+            </div>
+        </div>
+     </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4">
+            <h2>High throughput</h2>
+            <p>Newts is built upon <a href="http://cassandra.apache.org">Apache Cassandra</a>, a write-optimized, fully distributed partitioned row store.</p>
+            <p><a class="btn btn-primary" href="#" role="button">Performance Metrics &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-sm-4">
+            <h2>Grouped access</h2>
+            <p>It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.</p>
+            <p><a class="btn btn-primary" href="#" role="button">Learn more &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-sm-4">
+            <h2>Late aggregation</h2>
+            <p>Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small. Newts performs plot aggregations at the time of the read.</p>
+            <p><a class="btn btn-primary" href="#" role="button">View details &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+    </div><!-- /.row -->
+</div>

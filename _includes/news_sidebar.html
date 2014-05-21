@@ -1,0 +1,21 @@
+<ul class="nav nav-sidebar">
+    <li class="{% if page.title == 'News' %}active{% endif %}">
+        <a href="/news/">All News</a>
+    </li>
+    <li class="{% if page.title == 'Releases' %}active{% endif %}">
+        <a href="/news/releases/">Newts Releases</a>
+    </li>
+</ul>
+
+<h4>Recent Releases</h4>
+
+<ul class="nav nav-sidebar">
+    {% for post in site.posts limit:5 %}
+    <li class="{% if page.title == post.title %}active{% endif %}">
+        <a href="{{ post.url }}">Version {{ post.version }}</a>
+    </li>
+    {% endfor %}
+    <li>
+        <a href="/docs/history/">History »</a>
+    </li>
+</ul>
