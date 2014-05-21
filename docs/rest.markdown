@@ -33,11 +33,10 @@ To get started reading/writing data, try::
 
 API
 ---
-Samples
-~~~~~~~
-Writing
-+++++++
-::
+
+### Samples
+
+#### Writing
 
     POST /samples
 
@@ -78,9 +77,7 @@ The request body is composed of a JSON array of sample objects.  Sample objects 
     Abitrary key/values pairs to associate with the sample.
 
 
-Reading
-+++++++
-::
+#### Reading
 
     GET /samples/<resource>?start=<start>&end=<end>
 
@@ -88,10 +85,10 @@ Query arguments:
 
   start
     Query start time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.  *Optional; defaults to 24 hours less than end.*
+    [ISO 8601] timestamp.  *Optional; defaults to 24 hours less than end.*
   end
     Query end time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.  *Optional; defaults to the current time.*
+    [ISO 8601] timestamp.  *Optional; defaults to the current time.*
 
 Representation::
 
@@ -117,11 +114,9 @@ Representation::
     ]
 
 
-Measurements
-~~~~~~~~~~~~
-Reading
-+++++++
-::
+### Measurements
+
+#### Reading
 
     GET /measurements/<report>/<resource>?start=<start>&end=<end>&resolution=<resolution>
 
@@ -129,10 +124,10 @@ Query arguments:
 
   start
     Query start time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.  *Optional; defaults to 24 hours less than end.*
+    [ISO 8601] timestamp.  *Optional; defaults to 24 hours less than end.*
   end
     Query end time.  Specified as seconds since the Unix epoch, or as an
-    `ISO 8601`_ timestamp.  *Optional; defaults to the current time.*
+    [ISO 8601] timestamp.  *Optional; defaults to the current time.*
   resolution
     The resolution of measurements returned, specified as an integer value,
     followed by a resolution unit specifier character.  Valid unit specifiers
@@ -163,4 +158,4 @@ Representation::
     ]
 
 
-.. _ISO 8601: http://en.wikipedia.org/wiki/Iso8601
+[ISO 8601]: http://en.wikipedia.org/wiki/Iso8601

@@ -4,7 +4,7 @@ title: GSOD Example
 permalink: /docs/gsod/
 ---
 
-The `Global Surface Summary of Day`_ (GSOD) is a dataset produced by the
+The [Global Surface Summary of Day] (GSOD) is a dataset produced by the
 National Climatic Data Center (NCDC) in Asheville NC, using daily summaries
 of weather conditions compiled by the USAF Climatology Center.  Elements
 available from each station include min, mean, and max temperatures, dew
@@ -18,9 +18,9 @@ Prerequisites
 -------------
 
 Before attempting to start this demo, you should have a running Cassandra
-cluster, and a Newts `REST endpoint`_.  Setting up Cassandra is beyond the
-scope of this document, so have a look at the `Cassandra Wiki`_ if you need
-help with that.  Directions on setting up a `REST endpoint`_ can be found
+cluster, and a Newts [REST endpoint].  Setting up Cassandra is beyond the
+scope of this document, so have a look at the [Cassandra Wiki] if you need
+help with that.  Directions on setting up a [REST endpoint] can be found
 in the README for that module.
 
 Building
@@ -30,8 +30,7 @@ To build the GSOD example code, run::
 
    mvn install
 
-Importing Data
-~~~~~~~~~~~~~~
+### Importing Data
 
 To import the included data, run::
 
@@ -56,8 +55,7 @@ properties.  For example::
 		org.opennms.newts.gsod.ImportRunner -p 100 \
 		ftp.ncdc.noaa.gov/pub/data/gsod/1988
 
-Usage for Importer
-~~~~~~~~~~~~~~~~~~
+### Usage for Importer
 
 java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.newts.gsod.ImportRunner2 [options] sourceDir
 
@@ -78,24 +76,24 @@ java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.
                                           access via Newts API)
 
 
-Starting Demo Webserver
-~~~~~~~~~~~~~~~~~~~~~~~
+### Starting Demo Webserver
+
 Issue the following to start the web server::
 
    java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.newts.gsod.Web
 
-View Examples
-~~~~~~~~~~~~~
-You can either view individual graphs of the `6 Texas stations`_, or see a
-report of all 6 for the `Summer of 1988`_.
+### View Examples
+
+You can either view individual graphs of the [6 Texas stations], or see a
+report of all 6 for the [Summer of 1988].
 
 
-.. _Global Surface Summary of Day: https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00516
+[Global Surface Summary of Day]: https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00516
 
-.. _REST endpoint: /docs/rest
+[REST endpoint]: {{ site.baseurl }}/docs/rest
 
-.. _6 Texas stations: http://localhost:4567/stations
+[6 Texas stations]: http://localhost:4567/stations
 
-.. _Summer of 1988: http://localhost:4567/summer88
+[Summer of 1988]: http://localhost:4567/summer88
 
-.. _Cassandra Wiki: https://wiki.apache.org/cassandra/GettingStarted
+[Cassandra Wiki]: https://wiki.apache.org/cassandra/GettingStarted

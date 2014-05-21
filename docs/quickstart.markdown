@@ -12,7 +12,6 @@ You need: Java 7 (OpenJDK 7, etc), and Maven 3
 
 Cassandra
 ---------
-::
 
     # Terminal 1
     wget -O http://www.apache.org/dist/cassandra/2.0.7/apache-cassandra-2.0.7-bin.tar.gz
@@ -62,6 +61,6 @@ Testing
 
 Next Steps
 ----------
-Why not try the `Global Summary of Day (weather data) demo`_?
+Why not try the [Global Summary of Day (weather data) demo]?
 
-.. _Global Summary of Day (weather data) demo: /docs/gsod
+[Global Summary of Day (weather data) demo]: {{ site.baseurl }}/docs/gsod
