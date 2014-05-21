@@ -4,3 +4,4 @@ markdown: kramdown
 highlighter: pygments
 permalink: pretty
 timezone: America/Montreal
+baseurl: /newts
