@@ -2,3 +2,7 @@ _site
 .idea
 .pygments-cache
 Gemfile.lock
+*~
+.project
+.classpath
+**/.settings
