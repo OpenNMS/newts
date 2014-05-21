@@ -1,14 +1,14 @@
 <ul class="nav navbar-nav">
     <li class="{% if page.overview %}active{% endif %}">
-        <a href="/">Home</a>
+        <a href="{{ site.baseurl }}/">Home</a>
     </li>
     <li class="{% if page.url contains '/docs/' %}active{% endif %}">
-        <a href="/docs/home/">Documentation</a>
+        <a href="{{ site.baseurl }}/docs/home/">Documentation</a>
     </li>
     <li class="{% if page.url contains '/news/' %}active{% endif %}">
-        <a href="/news/">News</a>
+        <a href="{{ site.baseurl }}/news/">News</a>
     </li>
     <li class="{% if page.url contains '/about/' %}active{% endif %}">
-        <a href="/about/">About</a>
+        <a href="{{ site.baseurl }}/about/">About</a>
     </li>
 </ul>
