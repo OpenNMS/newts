@@ -1,9 +1,9 @@
 <ul class="nav nav-sidebar">
     <li class="{% if page.title == 'News' %}active{% endif %}">
-        <a href="/news/">All News</a>
+        <a href="{{ site.baseurl }}/news/">All News</a>
     </li>
     <li class="{% if page.title == 'Releases' %}active{% endif %}">
-        <a href="/news/releases/">Newts Releases</a>
+        <a href="{{ site.baseurl }}/news/releases/">Newts Releases</a>
     </li>
 </ul>
 
@@ -12,10 +12,10 @@
 <ul class="nav nav-sidebar">
     {% for post in site.posts limit:5 %}
     <li class="{% if page.title == post.title %}active{% endif %}">
-        <a href="{{ post.url }}">Version {{ post.version }}</a>
+        <a href="{{ site.baseurl }}/{{ post.url }}">Version {{ post.version }}</a>
     </li>
     {% endfor %}
     <li>
-        <a href="/docs/history/">History »</a>
+        <a href="{{ site.baseurl }}/docs/history/">History »</a>
     </li>
 </ul>
