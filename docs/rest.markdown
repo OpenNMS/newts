@@ -6,7 +6,7 @@ permalink: /docs/rest/
 
 Quickstart
 ----------
-Building::
+Building
 
     $ mvn clean package
 
