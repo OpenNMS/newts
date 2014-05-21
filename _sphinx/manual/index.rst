@@ -1,4 +1,0 @@
-User Manual
-===========
-
-Nothing yet!
