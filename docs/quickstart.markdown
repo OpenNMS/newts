@@ -1,13 +1,24 @@
 ---
 layout: docs
-title: Quick-start guide
+title: Quickstart Guide
 prev_section: home
 permalink: /docs/quickstart/
 ---
 
-You need: A Unix'ish environment w/ git, wget, tar, sed, etc
+This guide will walk you through the steps to setup a simple instance of
+Newts running on a single node.
 
-You need: Java 7 (OpenJDK 7, etc), and Maven 3
+Requirements
+------------
+To complete the steps in this guide, you will need a Unix-like environment with:
+
+ * Git
+ * wget
+ * tar
+ * sed
+ * Maven (>= 3)
+ * Java 7 (OpenJDK, Oracle, etc)
+
 
 Cassandra
 ---------
