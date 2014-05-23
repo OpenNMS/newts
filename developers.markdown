@@ -1,11 +1,11 @@
 ---
 layout: page
-title: About
-permalink: /about/
+title: Developers
+permalink: /developers/
 ---
 
-Github repository
------------------
+Github
+------
 
 [https://github.com/OpenNMS/newts/](https://github.com/OpenNMS/newts/)
 
