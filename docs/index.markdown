@@ -8,21 +8,22 @@ permalink: /docs/home/
 Newts is a time-series data store based on [Apache Cassandra].
 
 Features
---------
-High throughput
-  Newts is built upon [Apache Cassandra], a write-optimized, fully distributed partioned row store.
-Grouped access
-  It's common to collect, store, and retrieve metrics together, (think bytes in and bytes out, or 1, 5, and 15 minute load averages.); Newts allows for similar metrics to be grouped together for more efficient storage and retrieval.
-Late aggregation
-  Most time-series solutions perform in-line aggregations for purposes of later ploting visualizations, even though the ratio of reads to write is staggeringly small.  Newts performs plot aggregations at the time of the read.
+========
+
+### High throughput
+Newts is built upon [Apache Cassandra], a linearly scalable, write-optimized,
+distributed database.
+
+### Grouped access
+It's common to collect, store, and retrieve groups of similar or related metrics,
+(think bytes in and bytes out, or 1, 5, and 15 minute load averages); Newts
+allows you to group metrics for more efficient storage and retrieval.
+
+### Late aggregation
+Many time-series solutions perform in-line, or batch computed aggregations of the
+entire dataset, even when the ratio of reads to writes is staggeringly small.
+Newts removes aggregation as a bottleneck to storage, and eliminates the wasted
+computation resources caused by unused aggregate values.
   
-Terminology
------------
-
-### Resource
-Resources are unique strings that identify a metric, or group of metrics.
-
-### Measurements vs. Samples
-Samples represent the raw, or *sampled* data.  Measurements are calculated from the collected samples.
 
 [Apache Cassandra]: http://cassandra.apache.org "Apache Cassandra"
