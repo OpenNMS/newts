@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: REST
+title: REST Endpoint
 permalink: /docs/rest/
 ---
 
