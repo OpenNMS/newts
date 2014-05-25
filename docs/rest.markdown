@@ -10,15 +10,15 @@ Building
 
     $ mvn clean package
 
-Initialize the database (Cassandra must be running)::
+Initialize the database (Cassandra must be running):
 
     $ java -jar target/newts-rest-<version>-SNAPSHOT.jar init config.yaml
 
-Starting the REST server from the build directory::
+Starting the REST server from the build directory:
 
     $ java -jar target/newts-rest-<version>-SNAPSHOT.jar server config.yaml
 
-To get started reading/writing data, try::
+To get started reading/writing data, try:
 
     $ curl \
         -D - \
@@ -40,7 +40,7 @@ API
 
     POST /samples
 
-Representation::
+Representation:
 
     [
         {
@@ -62,18 +62,29 @@ Representation::
 
 The request body is composed of a JSON array of sample objects.  Sample objects have 5 mandatory, and 1 optional fields:
 
-  timestamp
+  * timestamp
+    
     The time this sample was taken; A numeric value representing the number
     of milliseconds since the Unix epoch.
-  resource
+    
+  * resource
+
     The unique name for a grouping of metrics.
-  name
+
+  * name
+    
     Metric name.
-  type
+    
+  * type
+    
     The metric type (one of ``GAUGE``, ``COUNTER``, ``ABSOLUTE``, ``DERIVE``).
-  value
+    
+  * value
+    
     Numeric value of the sample
-  attributes (optional)
+    
+  * attributes (optional)
+    
     Abitrary key/values pairs to associate with the sample.
 
 
@@ -83,14 +94,17 @@ The request body is composed of a JSON array of sample objects.  Sample objects 
 
 Query arguments:
 
-  start
+  * start
+    
     Query start time.  Specified as seconds since the Unix epoch, or as an
     [ISO 8601] timestamp.  *Optional; defaults to 24 hours less than end.*
-  end
+    
+  * end
+    
     Query end time.  Specified as seconds since the Unix epoch, or as an
     [ISO 8601] timestamp.  *Optional; defaults to the current time.*
 
-Representation::
+Representation:
 
     [
       [
@@ -122,21 +136,26 @@ Representation::
 
 Query arguments:
 
-  start
+  * start
+    
     Query start time.  Specified as seconds since the Unix epoch, or as an
     [ISO 8601] timestamp.  *Optional; defaults to 24 hours less than end.*
-  end
+    
+  * end
+    
     Query end time.  Specified as seconds since the Unix epoch, or as an
     [ISO 8601] timestamp.  *Optional; defaults to the current time.*
-  resolution
+    
+  * resolution
+    
     The resolution of measurements returned, specified as an integer value,
     followed by a resolution unit specifier character.  Valid unit specifiers
     are ``s``, ``m``, ``h``, ``d``, and ``w``.  *Required*.
-
+    
     Examples: ``15m``, ``1d``, ``1w`` (for 15 minutes, 1 day, and 1 week
     respectively).
 
-Representation::
+Representation:
 
     [
       [
