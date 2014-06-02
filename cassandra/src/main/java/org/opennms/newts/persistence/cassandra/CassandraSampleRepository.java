@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import javax.inject.Named;
 
+import org.opennms.newts.aggregate.ResultProcessor;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;

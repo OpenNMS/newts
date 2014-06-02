@@ -13,43 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.aggregate;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.api.query.Calculation;
 
 
-/**
- * Filter results to a specified set of exports.
- *
- * @author eevans
- *
- */
-class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
+class Compute implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
-    private final Set<String> m_exports;
+    private final ResultDescriptor m_resultDescriptor;
     private final Iterator<Row<Measurement>> m_input;
 
-    private Row<Measurement> m_current;
-
-    Export(Set<String> exports, Iterator<Row<Measurement>> input) {
-        m_exports = checkNotNull(exports, "exports argument");
+    Compute(ResultDescriptor resultDescriptor, Iterator<Row<Measurement>> input) {
+        m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_input = checkNotNull(input, "input argument");
-
-        m_current = m_input.hasNext() ? m_input.next() : null;
-
     }
 
     @Override
     public boolean hasNext() {
-        return m_current != null;
+        return m_input.hasNext();
     }
 
     @Override
@@ -57,27 +47,24 @@ class Export implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
         if (!hasNext()) throw new NoSuchElementException();
 
-        Row<Measurement> result = new Row<>(m_current.getTimestamp(), m_current.getResource());
+        Row<Measurement> row = m_input.next();
 
-        for (String export : m_exports) {
-            result.addElement(getMeasurement(export));
+        for (Calculation calc : m_resultDescriptor.getCalculations().values()) {
+            double v = calc.getCalculationFunction().apply(getValues(row, calc.getArgs()));
+            row.addElement(new Measurement(row.getTimestamp(), row.getResource(), calc.getLabel(), v));
         }
 
-        try {
-            return result;
-        }
-        finally {
-            m_current = m_input.hasNext() ? m_input.next() : null;
-        }
+        return row;
     }
 
-    private Measurement getMeasurement(String name) {
-        Measurement measurement = m_current.getElement(name);
-        return (measurement != null) ? measurement : getNan(name);
-    }
+    private double[] getValues(Row<Measurement> row, String[] names) {
+        double[] values = new double[names.length];
 
-    private Measurement getNan(String name) {
-        return new Measurement(m_current.getTimestamp(), m_current.getResource(), name, Double.NaN);
+        for (int i = 0; i < names.length; i++) {
+            values[i] = checkNotNull(row.getElement(names[i]), "Missing measurement; Upstream iterator is bugged").getValue();
+        }
+
+        return values;
     }
 
     @Override

@@ -15,6 +15,7 @@
   <name>New Timeseries Datastore</name>
 
   <modules>
+    <module>aggregate</module>
     <module>api</module>
     <module>cassandra</module>
     <module>rest</module>

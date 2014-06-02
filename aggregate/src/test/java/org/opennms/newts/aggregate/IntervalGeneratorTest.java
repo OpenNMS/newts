@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.aggregate;
 
 
 import static org.junit.Assert.assertEquals;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Timestamp;
 

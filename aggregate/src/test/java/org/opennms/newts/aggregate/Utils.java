@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.aggregate;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,20 +36,20 @@ import org.opennms.newts.api.ValueType;
 import com.google.common.collect.Lists;
 
 
-class Utils {
+public class Utils {
 
-    static abstract class AbstractRowsBuilder<T extends Element<?>> {
+    public static abstract class AbstractRowsBuilder<T extends Element<?>> {
 
         private final List<Row<T>> m_results = Lists.newArrayList();
         private final String m_resource;
 
         private Row<T> m_current;
 
-        AbstractRowsBuilder(String resource) {
+        public AbstractRowsBuilder(String resource) {
             m_resource = checkNotNull(resource, "resource argument");
         }
 
-        AbstractRowsBuilder<T> row(Timestamp timestamp) {
+        public AbstractRowsBuilder<T> row(Timestamp timestamp) {
             if (m_current != null && (!timestamp.gt(m_current.getTimestamp()))) {
                 throw new IllegalArgumentException("rows must be added in sort order");
             }
@@ -58,7 +58,7 @@ class Utils {
             return this;
         }
 
-        AbstractRowsBuilder<T> row(int epochSeconds) {
+        public AbstractRowsBuilder<T> row(int epochSeconds) {
             return row(Timestamp.fromEpochSeconds(epochSeconds));
         }
 
@@ -74,40 +74,40 @@ class Utils {
             m_current.addElement(element);
         }
 
-        abstract AbstractRowsBuilder<T> element(String name, double value);
+        public abstract AbstractRowsBuilder<T> element(String name, double value);
 
-        Iterator<Row<T>> build() {
+        public Iterator<Row<T>> build() {
             return m_results.iterator();
         }
 
     }
 
-    static class MeasurementRowsBuilder extends AbstractRowsBuilder<Measurement> {
+    public static class MeasurementRowsBuilder extends AbstractRowsBuilder<Measurement> {
 
-        MeasurementRowsBuilder(String resource) {
+        public MeasurementRowsBuilder(String resource) {
             super(resource);
         }
 
         @Override
-        MeasurementRowsBuilder element(String name, double value) {
+        public MeasurementRowsBuilder element(String name, double value) {
             addElement(new Measurement(getCurrentTimestamp(), getResource(), name, value));
             return this;
         }
 
     }
 
-    static class SampleRowsBuilder extends AbstractRowsBuilder<Sample> {
+    public static class SampleRowsBuilder extends AbstractRowsBuilder<Sample> {
 
         private final MetricType m_type;
 
-        SampleRowsBuilder(String resource, MetricType type) {
+        public SampleRowsBuilder(String resource, MetricType type) {
             super(resource);
 
             m_type = checkNotNull(type, "type argument");
         }
 
         @Override
-        SampleRowsBuilder element(String name, double value) {
+        public SampleRowsBuilder element(String name, double value) {
             addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type)));
             return this;
         }
@@ -122,7 +122,7 @@ class Utils {
      * @param actualRows
      *            actual value
      */
-    static void assertRowsEqual(Iterator<Row<Measurement>> expectedRows, Iterator<Row<Measurement>> actualRows) {
+    public static void assertRowsEqual(Iterator<Row<Measurement>> expectedRows, Iterator<Row<Measurement>> actualRows) {
 
         while (actualRows.hasNext()) {
             Row<Measurement> actual = actualRows.next();

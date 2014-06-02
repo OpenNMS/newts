@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.aggregate;
 
 
-import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
+import static org.opennms.newts.aggregate.Utils.assertRowsEqual;
 
 import java.util.Iterator;
 
 import org.junit.Test;
+import org.opennms.newts.aggregate.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
-import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
 
 public class ExportTest {
 

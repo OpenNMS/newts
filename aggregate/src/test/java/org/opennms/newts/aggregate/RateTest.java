@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.aggregate;
 
 
 import static org.junit.Assert.assertEquals;
@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Test;
+import org.opennms.newts.aggregate.Rate;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
