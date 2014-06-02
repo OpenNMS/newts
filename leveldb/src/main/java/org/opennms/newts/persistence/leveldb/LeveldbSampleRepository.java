@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.inject.Named;
+
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
@@ -43,6 +45,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 
 
 public class LeveldbSampleRepository implements SampleRepository {
@@ -61,7 +64,11 @@ public class LeveldbSampleRepository implements SampleRepository {
     private final Histogram m_queryResults;
     private final DB m_db;
 
-    public LeveldbSampleRepository(File databaseDir, String separator, MetricRegistry registry) throws IOException {
+    @Inject
+    public LeveldbSampleRepository(
+            @Named("leveldb.dir")File databaseDir, 
+            @Named("samples.leveldb.separator")String separator, 
+            MetricRegistry registry) throws IOException {
         m_databaseDir = databaseDir;
         m_joiner = Joiner.on(separator);
         m_splitter = Splitter.on(separator);
