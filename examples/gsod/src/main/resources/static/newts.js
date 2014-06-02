@@ -46,7 +46,7 @@ transform = function(data) {
             }
             
             transformed[labels[column.name]].data.push([
-                column.timestamp * 1000,
+                column.timestamp,
                 column.value
             ]);
         }

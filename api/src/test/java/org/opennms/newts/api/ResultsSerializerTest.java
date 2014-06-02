@@ -1,13 +1,31 @@
+/*
+ * Copyright 2014, The OpenNMS Group
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.opennms.newts.api;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.opennms.newts.api.MetricType.COUNTER;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 
 
 public class ResultsSerializerTest {
@@ -25,24 +43,24 @@ public class ResultsSerializerTest {
                 + "  ["
                 + "    {"
                 + "      \"name\": \"ifOutOctets\","
-                + "      \"timestamp\":900000000,"
+                + "      \"timestamp\":900000000000,"
                 + "      \"value\":6000.0"
                 + "    },"
                 + "    {"
                 + "      \"name\": \"ifInOctets\","
-                + "      \"timestamp\":900000000,"
+                + "      \"timestamp\":900000000000,"
                 + "      \"value\":5000.0"
                 + "    }"
                 + "  ],"
                 + "  ["
                 + "    {"
                 + "      \"name\": \"ifOutOctets\","
-                + "      \"timestamp\":900000300,"
+                + "      \"timestamp\":900000300000,"
                 + "      \"value\":7000.0"
                 + "    },"
                 + "    {"
                 + "      \"name\": \"ifInOctets\","
-                + "      \"timestamp\":900000300,"
+                + "      \"timestamp\":900000300000,"
                 + "      \"value\":6000.0"
                 + "    }"
                 + "  ]"
@@ -57,6 +75,10 @@ public class ResultsSerializerTest {
     @Test
     public void testSamples() throws JsonProcessingException {
 
+        // Use the optional attributes map at least once.
+        Map<String, String> attributes = Maps.newHashMap();
+        attributes.put("units", "bytes");
+
         Results<Sample> testData = new Results<>();
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
@@ -69,7 +91,8 @@ public class ResultsSerializerTest {
                 "localhost",
                 "ifOutOctets",
                 COUNTER,
-                ValueType.compose(6000, COUNTER)));
+                ValueType.compose(6000, COUNTER),
+                attributes));
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
                 "localhost",
@@ -87,13 +110,14 @@ public class ResultsSerializerTest {
                 + "  ["
                 + "    {"
                 + "      \"name\": \"ifOutOctets\","
-                + "      \"timestamp\":900000000,"
+                + "      \"timestamp\":900000000000,"
                 + "      \"type\":\"COUNTER\","
-                + "      \"value\":6000"
+                + "      \"value\":6000,"
+                + "      \"attributes\":{\"units\":\"bytes\"}"
                 + "    },"
                 + "    {"
                 + "      \"name\": \"ifInOctets\","
-                + "      \"timestamp\":900000000,"
+                + "      \"timestamp\":900000000000,"
                 + "      \"type\":\"COUNTER\","
                 + "      \"value\":5000"
                 + "    }"
@@ -101,13 +125,13 @@ public class ResultsSerializerTest {
                 + "  ["
                 + "    {"
                 + "      \"name\": \"ifOutOctets\","
-                + "      \"timestamp\":900000300,"
+                + "      \"timestamp\":900000300000,"
                 + "      \"type\":\"COUNTER\","
                 + "      \"value\":7000"
                 + "    },"
                 + "    {"
                 + "      \"name\": \"ifInOctets\","
-                + "      \"timestamp\":900000300,"
+                + "      \"timestamp\":900000300000,"
                 + "      \"type\":\"COUNTER\","
                 + "      \"value\":6000"
                 + "    }"
