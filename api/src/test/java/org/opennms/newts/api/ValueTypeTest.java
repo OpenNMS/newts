@@ -49,7 +49,7 @@ public class ValueTypeTest {
     @Test
     public void testAbsoluteSerialization() {
         Absolute c0 = new Absolute(UnsignedLong.fromLongBits(50L));
-        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0), c0.getType());
+        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0));
         assertTrue(c1 instanceof Absolute);
         assertEquals(c0, c1);
     }
@@ -57,7 +57,7 @@ public class ValueTypeTest {
     @Test
     public void testCounterSerialization() {
         Counter c0 = new Counter(UnsignedLong.fromLongBits(50L));
-        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0), c0.getType());
+        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0));
         assertTrue(c1 instanceof Counter);
         assertEquals(c0, c1);
     }
@@ -65,7 +65,7 @@ public class ValueTypeTest {
     @Test
     public void testDeriveSerialization() {
         Derive c0 = new Derive(UnsignedLong.fromLongBits(50L));
-        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0), c0.getType());
+        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0));
         assertTrue(c1 instanceof Derive);
         assertEquals(c0, c1);
     }
@@ -73,7 +73,7 @@ public class ValueTypeTest {
     @Test
     public void testGaugeSerialization() {
         Gauge c0 = new Gauge(3.1416d);
-        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0), c0.getType());
+        ValueType<?> c1 = ValueType.compose(ValueType.decompose(c0));
         assertTrue(c1 instanceof Gauge);
         assertEquals(c0, c1);
     }

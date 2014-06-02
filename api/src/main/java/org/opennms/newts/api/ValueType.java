@@ -81,36 +81,46 @@ public abstract class ValueType<T extends Number> extends Number {
         }
     }
 
-    public static ValueType<?> compose(ByteBuffer data, MetricType type) {
+    public static ValueType<?> compose(ByteBuffer data) {
 
-        ByteBuffer buf = data.duplicate();
+        ByteBuffer buffer = data.duplicate();
+        MetricType type = MetricType.fromCode(buffer.get());
 
         switch (type) {
             case ABSOLUTE:
-                return new Absolute(UnsignedLong.fromLongBits(buf.getLong()));
+                return new Absolute(UnsignedLong.fromLongBits(buffer.getLong()));
             case COUNTER:
-                return new Counter(UnsignedLong.fromLongBits(buf.getLong()));
+                return new Counter(UnsignedLong.fromLongBits(buffer.getLong()));
             case DERIVE:
-                return new Derive(UnsignedLong.fromLongBits(buf.getLong()));
+                return new Derive(UnsignedLong.fromLongBits(buffer.getLong()));
             case GAUGE:
-                return new Gauge(buf.getDouble());
+                return new Gauge(buffer.getDouble());
             default:
                 throw new IllegalArgumentException(String.format("Unknown metric type: %s", type));
         }
     }
 
     public static ByteBuffer decompose(ValueType<?> value) {
+        ByteBuffer buffer;
+
         switch (value.getType()) {
             case ABSOLUTE:
             case COUNTER:
             case DERIVE:
-                return (ByteBuffer) ByteBuffer.allocate(8).putLong(0, value.longValue()).rewind();
+                buffer = ByteBuffer.allocate(9);
+                buffer.put(0, value.getType().getCode());
+                buffer.putLong(1, value.longValue());
+                buffer.rewind();
+                return buffer;
             case GAUGE:
-                return (ByteBuffer) ByteBuffer.allocate(8).putDouble(0, value.doubleValue()).rewind();
+                buffer = ByteBuffer.allocate(9);
+                buffer.put(0, value.getType().getCode());
+                buffer.putDouble(1, value.doubleValue());
+                buffer.rewind();
+                return buffer;
             default:
                 throw new IllegalArgumentException(String.format("Unknown metric type: %s", value.getType()));
         }
     }
-    
 
 }

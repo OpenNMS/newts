@@ -15,6 +15,28 @@
  */
 package org.opennms.newts.api;
 
+
 public enum MetricType {
-    COUNTER, ABSOLUTE, DERIVE, GAUGE;
+
+    COUNTER(1), ABSOLUTE(2), DERIVE(3), GAUGE(4);
+
+    private byte m_code;
+
+    private MetricType(int code) {
+        m_code = (byte) code;
+    }
+
+    public byte getCode() {
+        return m_code;
+    }
+
+    public static MetricType fromCode(byte code) {
+        for (MetricType type : values()) {
+            if (type.getCode() == code) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException(String.format("No such type for 0x%x", code));
+    }
+
 }
