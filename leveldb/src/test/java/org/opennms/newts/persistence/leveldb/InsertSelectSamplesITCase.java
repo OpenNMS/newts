@@ -74,7 +74,7 @@ public class InsertSelectSamplesITCase extends AbstractLeveldbTestCase {
     
     @Test
     public void testSize( ) {
-        int rows = 12*24*1, cols = 10, resources=100000;
+        int rows = 12*24*1, cols = 10, resources=1000;
         String resourcePrefix = "r";
         
         
