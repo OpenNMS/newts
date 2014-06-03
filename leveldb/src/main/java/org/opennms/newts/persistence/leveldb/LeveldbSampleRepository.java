@@ -216,7 +216,7 @@ public class LeveldbSampleRepository implements SampleRepository {
         MetricType type = MetricType.valueOf(MetricType.class, sampleInfo.get(4));
         
         // parse the value into a ValueType
-        ValueType<?> val = ValueType.compose(ByteBuffer.wrap(value), type);
+        ValueType<?> val = ValueType.compose(ByteBuffer.wrap(value));
 
         // return a filled in sample
         return new Sample(ts, resource, name, type, val);
