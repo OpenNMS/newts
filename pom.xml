@@ -35,6 +35,7 @@
     <metricsVersion>3.0.1</metricsVersion>
     <mockitoVersion>1.9.5</mockitoVersion>
     <slf4jVersion>1.7.3</slf4jVersion>
+    <jexlVersion>2.1.1</jexlVersion>
   </properties>
 
   <dependencyManagement>
@@ -73,6 +74,23 @@
         <groupId>com.datastax.cassandra</groupId>
         <artifactId>cassandra-driver-core</artifactId>
         <version>${cassandraVersion}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-jexl</artifactId>
+        <version>${jexlVersion}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${slf4jVersion}</version>
       </dependency>
             
       <dependency>

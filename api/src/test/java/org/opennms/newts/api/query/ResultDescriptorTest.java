@@ -77,6 +77,7 @@ public class ResultDescriptorTest {
 
     }
 
+
     @Test
     public void testStep() {
         assertEquals(400000, new ResultDescriptor(400000).getInterval().asMillis());

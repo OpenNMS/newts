@@ -23,6 +23,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.JexlContext;
+import org.apache.commons.jexl2.JexlEngine;
+import org.apache.commons.jexl2.MapContext;
 import org.opennms.newts.api.Duration;
 
 import com.google.common.base.Function;
@@ -237,6 +241,25 @@ public class ResultDescriptor {
         };
         return calculate(label, calculationFunction, arg);
 
+    }
+    
+    public ResultDescriptor expression(String label, String expression) {
+        final JexlEngine je = new JexlEngine();
+        final Expression expr = je.createExpression(expression);
+        final String[] labels = getLabels().toArray(new String[0]);
+        CalculationFunction evaluate = new CalculationFunction() {
+            
+            @Override
+            public double apply(double... ds) {
+                JexlContext jc = new MapContext();
+                for(int i = 0; i < labels.length; i++) {
+                    jc.set(labels[i], ds[i]);
+                }
+                return ((Number)expr.evaluate(jc)).doubleValue();
+                
+            }
+        };
+        return calculate(label, evaluate, labels);
     }
 
     @Override

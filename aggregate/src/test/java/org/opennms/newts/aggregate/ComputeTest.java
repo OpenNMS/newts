@@ -16,7 +16,9 @@
 package org.opennms.newts.aggregate;
 
 
+import static org.junit.Assert.assertEquals;
 import static org.opennms.newts.aggregate.Utils.assertRowsEqual;
+import static org.opennms.newts.api.Duration.seconds;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 
 import java.util.Iterator;
@@ -27,6 +29,8 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
+
+import com.google.common.collect.Sets;
 
 
 public class ComputeTest {
@@ -101,4 +105,29 @@ public class ComputeTest {
 
     }
 
+    @Test
+    public void testExpressions() {
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+            .row(300).element("in", 20).element("out", 20)
+            .row(600).element("in", 60).element("out", 40)
+            .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor()
+            .datasource("in", "ifInOctets", seconds(600), AVERAGE)
+            .datasource("out", "ifOutOctets", seconds(600), AVERAGE)
+            .expression("sum", "in + out")
+            .expression("diff", "in - out")
+            .expression("ratio", "diff/sum")
+            .export("ratio");
+
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+            .row(300).element("in", 20).element("out", 20).element("sum", 40).element("diff", 0).element("ratio", 0)
+            .row(600).element("in", 60).element("out", 40).element("sum", 100).element("diff", 20).element("ratio", 0.2)
+            .build();
+    
+        Compute compute = new Compute(rDescriptor, testData);
+
+        assertRowsEqual(expected, compute);
+
+    }
 }
