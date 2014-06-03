@@ -132,7 +132,6 @@ public class CassandraSampleRepository implements SampleRepository {
                         .value(SchemaConstants.F_RESOURCE, m.getResource())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
-                        .value(SchemaConstants.F_METRIC_TYPE, m.getType().toString())
                         .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()))
                         .value(SchemaConstants.F_ATTRIBUTES, m.getAttributes())
             );

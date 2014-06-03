@@ -12,7 +12,7 @@ cassandra:
 # completely incompatible ways, or be removed entirely in a future release.
 # Use this at your own risk.
 indexing:
-  enabled: true
+  enabled: false
   # Number of entries to cache in memory (used to avoid redudant writes).
   maxCacheEntries: 1000000
   cassandra:

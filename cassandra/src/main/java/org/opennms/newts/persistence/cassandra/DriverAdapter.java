@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -131,16 +130,12 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     }
 
     private static Sample getSample(com.datastax.driver.core.Row row) {
-        MetricType type = getMetricType(row);
-        return new Sample(getTimestamp(row), getResource(row), getMetricName(row), type, getValue(row, type), getAttributes(row));
+        ValueType<?> value = getValue(row);
+        return new Sample(getTimestamp(row), getResource(row), getMetricName(row), value.getType(), value, getAttributes(row));
     }
 
-    private static ValueType<?> getValue(com.datastax.driver.core.Row row, MetricType type) {
-        return ValueType.compose(row.getBytes(SchemaConstants.F_VALUE), type);
-    }
-
-    private static MetricType getMetricType(com.datastax.driver.core.Row row) {
-        return MetricType.valueOf(row.getString(SchemaConstants.F_METRIC_TYPE));
+    private static ValueType<?> getValue(com.datastax.driver.core.Row row) {
+        return ValueType.compose(row.getBytes(SchemaConstants.F_VALUE));
     }
 
     private static String getMetricName(com.datastax.driver.core.Row row) {
