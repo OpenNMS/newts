@@ -94,7 +94,7 @@ public class SchemaManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        m_cluster.close();
+        m_cluster.shutdown();
     }
 
     public static void main(String... args) throws IOException {
