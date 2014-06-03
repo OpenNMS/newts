@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Map;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -55,11 +56,11 @@ public class MeasurementsResource {
         m_reports = checkNotNull(reports, "reports argument");
     }
 
-    @GET
-    @Path("/{report}/{resource}")
+    @POST
+    @Path("/{resource}")
     @Timed
     public Results<Measurement> getMeasurements(
-            @PathParam("report") String report,
+            ResultDescriptorDTO descriptorDTO,
             @PathParam("resource") String resource,
             @QueryParam("start") Optional<String> start,
             @QueryParam("end") Optional<String> end,
@@ -91,12 +92,27 @@ public class MeasurementsResource {
         DurationParam resolution = new DurationParam(resolutionParam.get());
 
         LOG.debug(
-                "Retrieving measurements for report {}, resource {}, from {} to {} w/ resolution {}",
-                report,
+                "Retrieving measurements for resource {}, from {} to {} w/ resolution {} and w/ report {}",
                 resource,
                 lower,
                 upper,
-                resolution.get());
+                resolution.get(),
+                descriptorDTO);
+
+        ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
+
+        return m_repository.select(resource, lower, upper, rDescriptor, resolution.get());
+    }
+
+    @GET
+    @Path("/{report}/{resource}")
+    @Timed
+    public Results<Measurement> getMeasurements(
+            @PathParam("report") String report,
+            @PathParam("resource") String resource,
+            @QueryParam("start") Optional<String> start,
+            @QueryParam("end") Optional<String> end,
+            @QueryParam("resolution") Optional<String> resolutionParam) {
 
         ResultDescriptorDTO descriptorDTO = m_reports.get(report);
 
@@ -105,9 +121,7 @@ public class MeasurementsResource {
             return null;
         }
 
-        ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
-
-        return m_repository.select(resource, lower, upper, rDescriptor, resolution.get());
+        return getMeasurements(descriptorDTO, resource, start, end, resolutionParam);
     }
 
 }

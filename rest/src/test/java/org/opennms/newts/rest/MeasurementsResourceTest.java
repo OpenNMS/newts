@@ -70,9 +70,20 @@ public class MeasurementsResourceTest {
                         eq(Duration.seconds(900)))
         ).thenReturn(results);
 
+        // Reference the report by name
         assertThat(
                 m_resource.getMeasurements(
                         "temps",
+                        "localhost",
+                        Optional.of("1998-07-09T11:00:00-0500"),
+                        Optional.of("1998-07-09T12:00:00-0500"),
+                        Optional.of("15m")),
+                CoreMatchers.is(results));
+
+        // Include the report in the request
+        assertThat(
+                m_resource.getMeasurements(
+                        getResultDescriptorDTO(),
                         "localhost",
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500"),
