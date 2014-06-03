@@ -16,8 +16,11 @@
 package org.opennms.newts.rest;
 
 
+import java.io.File;
+
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
+
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -43,6 +46,8 @@ public class NewtsService extends Service<NewtsConfig> {
 
     @Override
     public void run(NewtsConfig config, Environment environment) throws Exception {
+
+	MetricRegistry registry = new MetricRegistry();
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 

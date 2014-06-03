@@ -16,13 +16,17 @@
 package org.opennms.newts.gsod;
 
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Properties;
+
+import javax.inject.Named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
+import org.opennms.newts.persistence.leveldb.LeveldbSampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
@@ -35,18 +39,26 @@ public class Config extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(SampleRepository.class).to(CassandraSampleRepository.class);
+        bind(SampleRepository.class).to(LeveldbSampleRepository.class);
 
         Properties properties = new Properties();
         properties.put("samples.cassandra.keyspace", System.getProperty("cassandra.keyspace", "newts"));
         properties.put("samples.cassandra.host", System.getProperty("cassandra.host", "localhost"));
         properties.put("samples.cassandra.port", System.getProperty("cassandra.port", "9042"));
+        properties.put("samples.leveldb.dir", System.getProperty("leveldb.dir", "target/leveldb"));
+        properties.put("samples.leveldb.separator", System.getProperty("leveldb.separator", "##"));
         Names.bindProperties(binder(), properties);
 
         bind(MetricRegistry.class).toInstance(new MetricRegistry());
 
     }
-
+    
+    @Provides
+    @Named("leveldb.dir")
+    File getLevelDbDir(@Named("samples.leveldb.dir") String leveldbDir) {
+        return new File(leveldbDir);
+    }
+    
     @Provides
     SampleProcessorService getSampleProcessorService() {
         return new SampleProcessorService(1, Collections.<SampleProcessor>emptySet());
