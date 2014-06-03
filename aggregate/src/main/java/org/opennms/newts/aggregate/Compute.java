@@ -26,6 +26,8 @@ import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.Calculation;
 
+import com.google.common.base.Optional;
+
 
 class Compute implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
@@ -61,10 +63,20 @@ class Compute implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> 
         double[] values = new double[names.length];
 
         for (int i = 0; i < names.length; i++) {
-            values[i] = checkNotNull(row.getElement(names[i]), "Missing measurement; Upstream iterator is bugged").getValue();
+            String name = names[i];
+            Optional<Double> d = parseDouble(name);
+            values[i] = d.isPresent() ? d.get() : checkNotNull(row.getElement(name), "Missing measurement; Upstream iterator is bugged").getValue();
         }
 
         return values;
+    }
+    
+    Optional<Double> parseDouble(String maybeNum) {
+        try {
+            return Optional.of(Double.parseDouble(maybeNum));
+        } catch (NumberFormatException e) {
+            return Optional.absent();
+        }
     }
 
     @Override
