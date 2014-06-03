@@ -9,6 +9,8 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.opennms.newts.api.SampleRepository;
 
+import com.codahale.metrics.MetricRegistry;
+
 
 public class AbstractLeveldbTestCase {
     
@@ -22,10 +24,11 @@ public class AbstractLeveldbTestCase {
 
     @Before
     public void setUp() throws Exception {
+        MetricRegistry registry = new MetricRegistry();
         File testDir = new File(LEVEL_DB_BASENAME, name.getMethodName());
         testDir.mkdirs();
         testDir.deleteOnExit();
-        m_repository = new LeveldbSampleRepository(testDir, null);
+        m_repository = new LeveldbSampleRepository(testDir, registry);
     }
 
     @After
