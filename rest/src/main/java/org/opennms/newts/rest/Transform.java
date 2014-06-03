@@ -70,6 +70,10 @@ class Transform {
                 rDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getFunction());
             }
         }
+        
+        for (ResultDescriptorDTO.Expression expr : rDescriptorDTO.getExpressions()) {
+            rDescriptor.expression(expr.getLabel(), expr.getExpression());
+        }
 
         rDescriptor.export(rDescriptorDTO.getExports());
 

@@ -76,8 +76,31 @@ public class ResultDescriptorDTO {
 
     }
 
-    public static class Calculation {
+    public static class Expression {
 
+        @NotEmpty
+        @JsonProperty("label")
+        private String m_label;
+
+        @NotEmpty
+        @JsonProperty("expression")
+        private String m_expression;
+
+        public String getLabel() {
+            return m_label;
+        }
+
+        public String getExpression() {
+            return m_expression;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "%s[label=%s, expression=%s]",
+                    getClass().getSimpleName(),
+                    getLabel());
+        }
     }
 
     @Min(value = 1)
@@ -86,7 +109,11 @@ public class ResultDescriptorDTO {
 
     @Valid
     @JsonProperty("datasources")
-    private Datasource[] m_datasources;
+    private Datasource[] m_datasources = {};
+    
+    @Valid
+    @JsonProperty("expressions")
+    private Expression[] m_expressions = {};
 
     @NotEmpty
     @JsonProperty("exports")
@@ -99,6 +126,10 @@ public class ResultDescriptorDTO {
     public Datasource[] getDatasources() {
         return m_datasources;
     }
+    
+    public Expression[] getExpressions() {
+        return m_expressions;
+    }
 
     public String[] getExports() {
         return m_exports;
@@ -107,10 +138,11 @@ public class ResultDescriptorDTO {
     @Override
     public String toString() {
         return String.format(
-                "%s[interval=%d, datasources=%s, exports=%s]",
+                "%s[interval=%d, datasources=%s, expressions=%s, exports=%s]",
                 getClass().getSimpleName(),
                 getInterval(),
                 Arrays.asList(getDatasources()),
+                Arrays.asList(getExpressions()),
                 Arrays.asList(getExports()));
     }
 

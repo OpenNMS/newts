@@ -52,8 +52,12 @@ reports:
         source: inlet
         function: AVERAGE
         heartbeat: 600
+    expressions:
+      - label: sum
+        expression: inlet * 100
     exports:
       - inlet
+      - sum
 
   octets:
     interval: 300
