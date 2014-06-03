@@ -31,14 +31,22 @@ import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
 
 public class ComputeTest {
 
-    private static final BinaryFunction ADD;
+    private static final BinaryFunction PLUS;
+    private static final BinaryFunction DIVIDE;
 
     static {
-        ADD = new BinaryFunction() {
+        PLUS = new BinaryFunction() {
 
             @Override
             public double apply(double a, double b) {
                 return a + b;
+            }
+        };
+        
+        DIVIDE = new BinaryFunction() {
+            @Override
+            public double apply(double a, double b) {
+                return a / b;
             }
         };
     }
@@ -54,13 +62,39 @@ public class ComputeTest {
         ResultDescriptor rDescriptor = new ResultDescriptor()
                 .datasource("in",  AVERAGE)
                 .datasource("out", AVERAGE)
-                .calculate("total", ADD, "in", "out");
+                .calculate("total", PLUS, "in", "out");
 
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
                 .row(300).element("in", 2).element("out", 2).element("total", 4)
                 .row(600).element("in", 6).element("out", 4).element("total", 10)
                 .build();
 
+        Compute compute = new Compute(rDescriptor, testData);
+
+        assertRowsEqual(expected, compute);
+
+    }
+    
+    @Test
+    public void testCalcOfCalc() {
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+            .row(300).element("in", 20).element("out", 20)
+            .row(600).element("in", 60).element("out", 40)
+            .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor()
+            .datasource("in", AVERAGE)
+            .datasource("out", AVERAGE)
+            .calculate("sum", PLUS, "in", "out")
+            .calculate("tens", DIVIDE, "sum", "10")
+            .export("tens")
+        ;
+
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+            .row(300).element("in", 20).element("out", 20).element("sum", 40).element("tens", 4)
+            .row(600).element("in", 60).element("out", 40).element("sum", 100).element("tens", 10)
+            .build();
+        
         Compute compute = new Compute(rDescriptor, testData);
 
         assertRowsEqual(expected, compute);

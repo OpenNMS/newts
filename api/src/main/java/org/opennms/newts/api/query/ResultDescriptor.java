@@ -58,7 +58,8 @@ public class ResultDescriptor {
 
     private Duration m_interval;
     private final Map<String, Datasource> m_datasources = Maps.newHashMap();
-    private final Map<String, Calculation> m_calculations = Maps.newHashMap();
+    // use linkedHashMap so creation order is preserved. calculations can only depend on earlier not later calculations
+    private final Map<String, Calculation> m_calculations = Maps.newLinkedHashMap();
 
     private final Set<String> m_exports = Sets.newHashSet();
 
@@ -181,9 +182,26 @@ public class ResultDescriptor {
             throw new IllegalArgumentException(String.format("No such labels(s): %s", missing));
         }
     }
+    
+    private boolean isNumber(String number) {
+        try {
+            Double.parseDouble(number);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+     
+    private void checkValues(String... values) {
+        for(String value : values) {
+            if (!isNumber(value)) {
+                checkLabels(value);
+            }
+        }
+    }
 
     public ResultDescriptor calculate(Calculation calculation) {
-        checkLabels(calculation.getArgs());
+        checkValues(calculation.getArgs());
         checkArgument(!getLabels().contains(calculation.getLabel()), "label \"%s\" already in use", calculation.getLabel());
         m_calculations.put(calculation.getLabel(), calculation);
         return this;
