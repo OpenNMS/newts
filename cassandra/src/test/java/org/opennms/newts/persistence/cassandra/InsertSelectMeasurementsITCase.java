@@ -46,7 +46,11 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
             writeSamples.addAll(samples.next().getElements());
         }
 
+        // Override the shard period to ensure we test query concurrency
+        getRepository().setResourceShard(Duration.seconds(600));
+
         getRepository().insert(writeSamples);
+
     }
 
     @Test

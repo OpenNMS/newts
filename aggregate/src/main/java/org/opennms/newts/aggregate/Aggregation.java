@@ -62,7 +62,7 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
         Duration interval = resultDescriptor.getInterval();
         checkArgument(resolution.isMultiple(interval), "resolution must be a multiple of interval");
 
-        m_timestamps = new IntervalGenerator(start, end, m_resolution);
+        m_timestamps = new IntervalGenerator(start.stepFloor(m_resolution), end.stepCeiling(m_resolution), m_resolution);
         m_intervalsPer = (double) resolution.divideBy(interval);
 
         m_working = m_input.hasNext() ? m_input.next() : null;

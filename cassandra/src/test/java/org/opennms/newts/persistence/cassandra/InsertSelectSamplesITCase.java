@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
@@ -50,6 +51,9 @@ public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
                 samples.add(new Sample(ts, resource, "m" + j, GAUGE, new Gauge((i + 1) * j)));
             }
         }
+
+        // Override the shard period to ensure we test query concurrency
+        getRepository().setResourceShard(Duration.seconds(1));
 
         getRepository().insert(samples);
 

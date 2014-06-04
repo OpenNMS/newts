@@ -27,7 +27,6 @@ import org.cassandraunit.dataset.cql.FileCQLDataSet;
 import org.junit.After;
 import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
-import org.opennms.newts.api.SampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
@@ -46,7 +45,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
     protected static final String SCHEMA_RESOURCE = "/schema.cql";
 
-    protected SampleRepository m_repository;
+    protected CassandraSampleRepository m_repository;
 
     public AbstractCassandraTestCase() {
         super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
@@ -84,7 +83,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
         
     }
 
-    public SampleRepository getRepository() {
+    public CassandraSampleRepository getRepository() {
         return m_repository;
     }
 

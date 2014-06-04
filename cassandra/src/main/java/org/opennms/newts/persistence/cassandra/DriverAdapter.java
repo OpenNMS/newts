@@ -45,7 +45,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     private Results.Row<Sample> m_next = null;
     private int m_count = 0;
 
-    DriverAdapter(ResultSet input) {
+    DriverAdapter(Iterator<com.datastax.driver.core.Row> input) {
         this(input, Collections.<String> emptySet());
     }
 
@@ -58,11 +58,9 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
      *            the set of result metrics to include; an empty set indicates that all metrics
      *            should be included
      */
-    DriverAdapter(ResultSet input, Set<String> metrics) {
-        checkNotNull(input, "input argument");
+    DriverAdapter(Iterator<com.datastax.driver.core.Row> input, Set<String> metrics) {
+        m_results = checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
-
-        m_results = input.iterator();
 
         if (m_results.hasNext()) {
             Sample m = getNextSample();

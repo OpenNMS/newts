@@ -17,6 +17,7 @@ package org.opennms.newts.aggregate;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.opennms.newts.api.Timestamp.fromEpochSeconds;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +57,10 @@ public class IntervalGeneratorTest {
     }
 
     private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs, Duration duration) {
-        return new IntervalGenerator(Timestamp.fromEpochSeconds(startSecs), Timestamp.fromEpochSeconds(endSecs), duration);
+        return new IntervalGenerator(
+                fromEpochSeconds(startSecs).stepFloor(duration),
+                fromEpochSeconds(endSecs).stepCeiling(duration),
+                duration);
     }
 
 }

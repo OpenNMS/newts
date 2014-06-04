@@ -16,17 +16,22 @@
 package org.opennms.newts.persistence.cassandra;
 
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.lte;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.inject.Named;
 
+import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
@@ -42,13 +47,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 
@@ -59,6 +67,8 @@ public class CassandraSampleRepository implements SampleRepository {
     private Session m_session;
     @SuppressWarnings("unused") private final MetricRegistry m_registry;
     private SampleProcessorService m_processorService;
+    private Duration m_resourceShard = Duration.seconds(600000);
+    private PreparedStatement m_selectStatement;
 
     @Inject
     public CassandraSampleRepository(
@@ -77,6 +87,15 @@ public class CassandraSampleRepository implements SampleRepository {
 
         m_registry = checkNotNull(registry, "metric registry argument");
         m_processorService = processorService;
+
+        Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
+        select.where(eq(SchemaConstants.F_PARTITION, bindMarker(SchemaConstants.F_PARTITION)));
+        select.where(eq(SchemaConstants.F_RESOURCE, bindMarker(SchemaConstants.F_RESOURCE)));
+
+        select.where(gte(SchemaConstants.F_COLLECTED, bindMarker("start")));
+        select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
+
+        m_selectStatement = m_session.prepare(select);
 
     }
 
@@ -129,6 +148,7 @@ public class CassandraSampleRepository implements SampleRepository {
         for (Sample m : samples) {
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
+                        .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
                         .value(SchemaConstants.F_RESOURCE, m.getResource())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
@@ -145,22 +165,34 @@ public class CassandraSampleRepository implements SampleRepository {
 
     }
 
-    // FIXME: Use a prepared statement for this.
-    private ResultSet cassandraSelect(String resource, Timestamp start, Timestamp end) {
+    private Iterator<com.datastax.driver.core.Row> cassandraSelect(String resource, Timestamp start, Timestamp end) {
 
-        Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
-        select.where(eq(SchemaConstants.F_RESOURCE, resource));
+        List<Future<ResultSet>> futures = Lists.newArrayList();
 
-        select.where(gte(SchemaConstants.F_COLLECTED, start.asDate()));
-        select.where(lte(SchemaConstants.F_COLLECTED, end.asDate()));
+        Timestamp lower = start.stepFloor(m_resourceShard);
+        Timestamp upper = end.stepFloor(m_resourceShard);
 
-        return m_session.execute(select);
+        for (Timestamp partition : new IntervalGenerator(lower, upper, m_resourceShard)) {
+            BoundStatement bindStatement = m_selectStatement.bind();
+            bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
+            bindStatement.setString(SchemaConstants.F_RESOURCE, resource);
+            bindStatement.setDate("start", start.asDate());
+            bindStatement.setDate("end", end.asDate());
+
+            futures.add(m_session.executeAsync(bindStatement));
+        }
+
+        return new ConcurrentResultWrapper(futures);
     }
 
     private void validateSelect(Optional<Timestamp> start, Optional<Timestamp> end) {
         if ((start.isPresent() && end.isPresent()) && start.get().gt(end.get())) {
             throw new IllegalArgumentException("start time must be less than end time");
         }
+    }
+
+    void setResourceShard(Duration resourceShard) {
+        m_resourceShard = resourceShard;
     }
 
 }

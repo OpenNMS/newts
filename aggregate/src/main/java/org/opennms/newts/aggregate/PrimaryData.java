@@ -106,7 +106,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
         m_interval = resultDescriptor.getInterval();
 
-        m_timestamps = new IntervalGenerator(start, end, m_interval);
+        m_timestamps = new IntervalGenerator(start.stepFloor(m_interval), end.stepCeiling(m_interval), m_interval);
 
         if (m_input.hasNext()) m_current = m_input.next();
 
