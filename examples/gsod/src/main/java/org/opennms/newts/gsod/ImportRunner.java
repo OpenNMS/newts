@@ -50,6 +50,7 @@ import org.kohsuke.args4j.Option;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,8 @@ public class ImportRunner {
     private SampleRepository m_repository;
     private int m_threadCount = 1;
     private int m_maxThreadQueueSize = 0;
+    private double m_timescaleFactor = 1.0;
+    private long m_timeoffset = 0;
     
     private void checkArgument(boolean check, String failureMessage) {
         if (!check) throw new IllegalArgumentException(failureMessage);
@@ -115,6 +118,20 @@ public class ImportRunner {
     public void setMaxThreadQueueSize(int maxThreadQueueSize) {
         checkArgument(maxThreadQueueSize > 0, "max thread queue size must be at least 1.");
         m_maxThreadQueueSize = maxThreadQueueSize;
+    }
+    
+    @Option(name="-f", aliases="--time-scale-factor", metaVar="long", usage="to scale down the date we compress time dividing time by this factor")
+    public void setTimescaleFactor(double factor) {
+        m_timescaleFactor = factor;
+    }
+    
+    @Option(name="-o", aliases="--time-offset", metaVar="timestamp", usage="adjust epoch time in seconds to be <time-offset>. defaults to no offset.  'now' is allowed.")
+    public void setTimeoffset(String offset) {
+        if (offset.equals("now")) {
+           m_timeoffset = System.currentTimeMillis();
+        } else {
+            m_timeoffset = Long.valueOf(offset)*1000;
+        }
     }
     
     @Argument(metaVar="sourceDir", required=true, usage="the source directory that contains gsod data to import. These must be gzip'd files")
@@ -186,6 +203,9 @@ public class ImportRunner {
             // turn each line into a list of samples
             .mergeMap(samples())
             
+            // adjust time on samples according to arguments
+            .map(adjustTime())
+            
             // meter the samples
             .map(meter(metrics.meter("samples"), Sample.class))            
             ;
@@ -254,6 +274,20 @@ public class ImportRunner {
 
     }
     
+    private Func1<? super Sample, ? extends Sample> adjustTime() {
+        return new Func1<Sample, Sample>() {
+
+            @Override
+            public Sample call(Sample s) {
+                Timestamp oldTs = s.getTimestamp();
+                Timestamp newTs = Timestamp.fromEpochMillis(m_timeoffset + Math.round(oldTs.asMillis()/m_timescaleFactor));
+                return new Sample(newTs, s.getResource(), s.getName(), s.getType(), s.getValue());
+            }
+            
+        };
+    }
+
+
     private SampleRepository repository() {
         if (m_repository == null) {
             Injector injector = Guice.createInjector(new Config());
