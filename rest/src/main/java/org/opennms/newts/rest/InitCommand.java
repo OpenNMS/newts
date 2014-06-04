@@ -30,7 +30,7 @@ public class InitCommand extends ConfiguredCommand<NewtsConfig> {
 
     @Override
     protected void run(Bootstrap<NewtsConfig> bootstrap, Namespace namespace, NewtsConfig config) throws Exception {
-        try (SchemaManager manager = new SchemaManager(config.getCassandraHost(), config.getCassandraPort())) {
+        try (SchemaManager manager = new SchemaManager(config.getCassandraKeyspace(), config.getCassandraHost(), config.getCassandraPort())) {
             manager.create(true);
         }
     }

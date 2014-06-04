@@ -31,13 +31,16 @@ import com.google.inject.Inject;
 
 public class SchemaManager implements AutoCloseable {
 
+    private static final String KEYSPACE = "$KEYSPACE$";
     private static final String SCHEMA_FILE = "schema.cql";
 
+    private String m_keyspace;
     private Cluster m_cluster;
     private Session m_session;
 
     @Inject
-    public SchemaManager(@Named("cassandraHost") String host, @Named("cassandraPort") int port) {
+    public SchemaManager(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port) {
+        m_keyspace = keyspace;
         m_cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = m_cluster.connect();
     }
@@ -72,7 +75,7 @@ public class SchemaManager implements AutoCloseable {
 
             if (scrubbed.endsWith(";")) {
                 try {
-                    m_session.execute(statement.toString());
+                    m_session.execute(statement.toString().replace(KEYSPACE, m_keyspace));
                 }
                 catch (AlreadyExistsException e) {
                     if (ifNotExists) {
@@ -99,6 +102,7 @@ public class SchemaManager implements AutoCloseable {
 
     public static void main(String... args) throws IOException {
 
+        String keyspace = System.getProperty("cassandraKeyspace", "newts");
         String hostname = System.getProperty("cassandraHost", "localhost");
         String port = System.getProperty("cassandraPort", "9042");
         boolean ifSchemaNotExists = Boolean.valueOf(System.getProperty("ifSchemaNotExists", "true"));
@@ -114,7 +118,7 @@ public class SchemaManager implements AutoCloseable {
         }
 
         try {
-            new SchemaManager(hostname, portNumber).create(ifSchemaNotExists);
+            new SchemaManager(keyspace, hostname, portNumber).create(ifSchemaNotExists);
         }
         finally {
             System.exit(0);

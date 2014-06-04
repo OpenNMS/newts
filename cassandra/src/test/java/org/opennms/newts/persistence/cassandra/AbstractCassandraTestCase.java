@@ -18,15 +18,22 @@ package org.opennms.newts.persistence.cassandra;
 
 import static org.mockito.Mockito.mock;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
 import org.cassandraunit.dataset.CQLDataSet;
-import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
+import org.cassandraunit.dataset.cql.FileCQLDataSet;
 import org.junit.After;
 import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 
 
 public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
@@ -34,8 +41,10 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     public static final String CASSANDRA_CONFIG = "cassandra.yaml";
     public static final String CASSANDRA_HOST = "localhost";
     public static final int CASSANDRA_PORT = 9043;
-    public static final String SCHEMA_FILE = "schema.cql";
     public static final String KEYSPACE_NAME = "newts";
+
+    protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
+    protected static final String SCHEMA_RESOURCE = "/schema.cql";
 
     protected SampleRepository m_repository;
 
@@ -61,7 +70,18 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
 
     @Override
     public CQLDataSet getDataSet() {
-        return new ClassPathCQLDataSet(SCHEMA_FILE, false, true, KEYSPACE_NAME);
+        try {
+            String schema = Resources.toString(getClass().getResource(SCHEMA_RESOURCE), Charsets.UTF_8);
+            schema = schema.replace(KEYSPACE_PLACEHOLDER, KEYSPACE_NAME);
+            File schemaFile = File.createTempFile("schema-", ".cql", new File("target"));
+            Files.write(schema, schemaFile, Charsets.UTF_8);
+            
+            return new FileCQLDataSet(schemaFile.getAbsolutePath(), false, true, KEYSPACE_NAME);
+            
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
+        
     }
 
     public SampleRepository getRepository() {
