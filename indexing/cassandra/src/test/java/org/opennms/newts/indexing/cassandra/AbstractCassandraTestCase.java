@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
 import org.cassandraunit.dataset.CQLDataSet;
-import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
 import org.cassandraunit.dataset.cql.FileCQLDataSet;
 import org.junit.After;
 import org.junit.Before;

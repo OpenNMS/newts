@@ -16,7 +16,6 @@
 package org.opennms.newts.aggregate;
 
 
-import static org.junit.Assert.assertEquals;
 import static org.opennms.newts.aggregate.Utils.assertRowsEqual;
 import static org.opennms.newts.api.Duration.seconds;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
@@ -29,8 +28,6 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
-
-import com.google.common.collect.Sets;
 
 
 public class ComputeTest {
