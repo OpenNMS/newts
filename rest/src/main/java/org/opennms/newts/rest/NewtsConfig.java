@@ -62,6 +62,10 @@ public class NewtsConfig extends Configuration {
         return m_cassandraConfig.getPort();
     }
 
+    public int getCassandraColumnTTL() {
+        return m_cassandraConfig.getColumnTTL();
+    }
+
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
     }

@@ -7,6 +7,7 @@ cassandra:
   keyspace: newts
   host: localhost
   port: 9042
+  time-to-live: 31536000
 
 # This is an experimental feature.  It may change drastically, and in
 # completely incompatible ways, or be removed entirely in a future release.
@@ -19,7 +20,7 @@ indexing:
     keyspace: newts
     host: localhost
     port: 9042
-    ttl: 31536000
+    time-to-live: 31536000
   
 logging:
   level: INFO

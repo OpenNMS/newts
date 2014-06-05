@@ -21,7 +21,9 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.lte;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -69,18 +71,23 @@ public class CassandraSampleRepository implements SampleRepository {
     private SampleProcessorService m_processorService;
     private Duration m_resourceShard = Duration.seconds(600000);
     private PreparedStatement m_selectStatement;
+    private int m_ttl;
 
     @Inject
     public CassandraSampleRepository(
             @Named("samples.cassandra.keyspace") String keyspace,
             @Named("samples.cassandra.host") String host,
             @Named("samples.cassandra.port") int port,
+            @Named("samples.cassandra.time-to-live") int ttl,
             MetricRegistry registry,
             SampleProcessorService processorService)
     {
 
         checkNotNull(keyspace, "Cassandra keyspace argument");
         checkNotNull(host, "Cassandra host argument");
+        checkArgument(ttl >= 0, "Negative Cassandra column TTL");
+
+        m_ttl = ttl;
 
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = cluster.connect(keyspace);
@@ -154,6 +161,7 @@ public class CassandraSampleRepository implements SampleRepository {
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
                         .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()))
                         .value(SchemaConstants.F_ATTRIBUTES, m.getAttributes())
+                        .using(ttl(m_ttl))
             );
         }
 
@@ -191,6 +199,7 @@ public class CassandraSampleRepository implements SampleRepository {
         }
     }
 
+    // Use only in tests!
     void setResourceShard(Duration resourceShard) {
         m_resourceShard = resourceShard;
     }

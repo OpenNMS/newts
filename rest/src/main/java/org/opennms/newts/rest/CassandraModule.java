@@ -46,6 +46,7 @@ public class CassandraModule extends AbstractModule {
         bind(String.class).annotatedWith(named("samples.cassandra.keyspace")).toInstance(m_newtsConf.getCassandraKeyspace());
         bind(String.class).annotatedWith(named("samples.cassandra.host")).toInstance(m_newtsConf.getCassandraHost());
         bind(Integer.class).annotatedWith(named("samples.cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
+        bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
 
         bind(SampleRepository.class).to(CassandraSampleRepository.class);

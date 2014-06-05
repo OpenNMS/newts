@@ -40,6 +40,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     public static final String CASSANDRA_CONFIG = "cassandra.yaml";
     public static final String CASSANDRA_HOST = "localhost";
     public static final int CASSANDRA_PORT = 9043;
+    public static final int CASSANDRA_TTL = 86400;
     public static final String KEYSPACE_NAME = "newts";
 
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
@@ -58,6 +59,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
                 KEYSPACE_NAME,
                 CASSANDRA_HOST,
                 CASSANDRA_PORT,
+                CASSANDRA_TTL,
                 new MetricRegistry(),
                 mock(SampleProcessorService.class));
     }

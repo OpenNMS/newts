@@ -36,7 +36,7 @@ public class CassandraConfig {
     private int m_port = 9042;
 
     @Min(value = 0)
-    @JsonProperty("ttl")
+    @JsonProperty("time-to-live")
     private int m_columnTTL = 31536000;
 
     public String getKeyspace() {
