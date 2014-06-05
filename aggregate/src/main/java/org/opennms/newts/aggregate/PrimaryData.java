@@ -152,6 +152,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
+
                 accumulation.reset();
 
                 Sample sample = m_current.getElement(ds.getSource());
@@ -160,11 +161,16 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                     continue;
                 }
 
+                //accumulation.reset();
+
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
+                    System.err.printf("2: ts: %s acc %s  with value %s for ds: %s\n", m_current.getTimestamp(), elapsed, sample.getValue(), ds.getSource());
                     accumulation.accumulate(elapsed, ds.getHeartbeat(), sample.getValue());
                 }
 
+            } else {
+                accumulation.reset();
             }
         }
 
@@ -196,13 +202,14 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
             Duration elapsed;
 
-            if (row.getTimestamp().gt(intervalCeiling)) {
+            if (current.getTimestamp().gt(intervalCeiling)) {
                 elapsed = intervalCeiling.minus(last.getTimestamp());
             }
             else {
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
+            System.err.printf("1: ts %s acc %s  with value %s for ds: %s\n", current.getTimestamp(), elapsed, current.getValue(), ds.getSource());
             getOrCreateAccumulation(current.getName()).accumulate(elapsed, ds.getHeartbeat(), current.getValue());
 
             // Postpone storing as lastUpdate, we'll need this sample again...

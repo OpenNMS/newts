@@ -101,6 +101,44 @@ public class PrimaryDataTest {
     }
 
     @Test
+    public void testVeryShortSamples() {
+
+        // Samples occur prior to the nearest step interval boundary.
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+                .row(000).element("m0", 0).element("m1", 1)
+                .row(250).element("m0", 1).element("m1", 2)
+                .row(550).element("m0", 2).element("m1", 3)
+                .row(850).element("m0", 3).element("m1", 4)
+                .build();
+
+        // Minimal result descriptor
+        ResultDescriptor rDescriptor = new ResultDescriptor().step(Duration.seconds(300))
+                .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
+
+        // Expected results
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+                .row(300).element("m0", 1.16666667).element("m1", 2.16666667)
+                .row(600).element("m0", 2.16666667).element("m1", 3.16666667)
+                .row(900).element("m0", 3.0).element("m1", 4.0)
+                .row(1200).element("m0", Double.NaN).element("m1", Double.NaN)
+                .row(1500).element("m0", Double.NaN).element("m1", Double.NaN)
+                .build();
+
+        PrimaryData primaryData = new PrimaryData(
+                "localhost",
+                Timestamp.fromEpochSeconds(300),
+                Timestamp.fromEpochSeconds(1500),
+                rDescriptor,
+                testData);
+
+        
+
+        assertRowsEqual(expected, primaryData);
+
+    }
+
+
+    @Test
     public void testSkippedSample() {
 
         // Sample m0 is missing at timestamp 550, (but interval does not exceed heartbeat).
@@ -117,9 +155,9 @@ public class PrimaryDataTest {
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
-                .row(300).element("m0", 1.000).element("m1", 2.16666667)
-                .row(600).element("m0", 3.000).element("m1", 3.16666667)
-                .row(900).element("m0", 3.000).element("m1", 4.000)
+                .row(300).element("m0", 1.00000000).element("m1", 2.16666667)
+                .row(600).element("m0", 3.00000000).element("m1", 3.16666667)
+                .row(900).element("m0", 3.00000000).element("m1", 4.00000000)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
@@ -271,25 +309,27 @@ public class PrimaryDataTest {
     }
 
     @Test
-    public void testHeartbeat() {
+    public void testHeartbeatOneSample() {
 
         // Sample interval of 600 seconds (m1) exceeds heartbeat of 601
         Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
-                .row(  0).element("m0", 0).element("m1", 1)
-                .row(300).element("m0", 1).element("m1", 2)
-                .row(600).element("m0", 2)
-                .row(900).element("m0", 3).element("m1", 4)
+                .row(  0).element("m1", 1)
+                .row(300).element("m1", 2)
+                .row(900).element("m1", 4)
                 .build();
 
         // Minimal result descriptor
         ResultDescriptor rDescriptor = new ResultDescriptor().step(Duration.seconds(300))
-                .datasource("m0", "m0", Duration.seconds(601), null).datasource("m1", "m1", Duration.seconds(601), null);
+                .datasource("m1", "m1", Duration.seconds(601), null);
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
-                .row( 300).element("m0", 1).element("m1", 2)
-                .row( 600).element("m0", 2).element("m1", Double.NaN)
-                .row( 900).element("m0", 3).element("m1", 4)
+                .row( 300)
+                    .element("m1", 2)
+                .row( 600)
+                    .element("m1", 4)
+                .row( 900)
+                    .element("m1", 4)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
@@ -302,5 +342,74 @@ public class PrimaryDataTest {
         assertRowsEqual(expected, primaryData);
 
     }
+    
+    @Test
+    public void testHeartbeatTwoSamples() {
+
+        // Sample interval of 600 seconds (m1) exceeds heartbeat of 601
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+                .row(  0)
+                    .element("m0", 0)
+                    .element("m1", 1)
+                .row(300)
+                    .element("m0", 1)
+                    .element("m1", 2)
+                .row(600)
+                    .element("m0", 2)
+                    // missing entry for m1
+                .row(900)
+                    .element("m0", 3)
+                    .element("m1", 4)
+                .build();
+
+        // Minimal result descriptor
+        ResultDescriptor rDescriptor = new ResultDescriptor().step(Duration.seconds(300))
+                .datasource("m0", "m0", Duration.seconds(601), null)
+                .datasource("m1", "m1", Duration.seconds(601), null);
+
+        // Expected results
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+                .row( 300)
+                    .element("m0", 1)
+                    .element("m1", 2)
+                .row( 600)
+                    .element("m0", 2)
+                    .element("m1", Double.NaN) // FIXMEL this is wrong!!!! should be 4.0 as in the oneSample test above
+                .row( 900)
+                    .element("m0", 3)
+                    .element("m1", 4)
+                .build();
+
+        PrimaryData primaryData = new PrimaryData(
+                "localhost",
+                Timestamp.fromEpochSeconds(300),
+                Timestamp.fromEpochSeconds(900),
+                rDescriptor,
+                testData);
+
+        assertRowsEqual(expected, primaryData);
+
+    }
+    /*
+     *
+     * 
+with m0
+1: acc Duration[300, SECONDS]  with value 2.0 for ds: m1
+1: acc Duration[300, SECONDS]  with value 1.0 for ds: m0
+1: acc Duration[0, SECONDS]  with value 2.0 for ds: m1
+1: acc Duration[0, SECONDS]  with value 1.0 for ds: m0
+1: acc Duration[300, SECONDS]  with value 2.0 for ds: m0
+
+
+without m0
+1: acc Duration[300, SECONDS]  with value 2.0 for ds: m1
+1: acc Duration[0, SECONDS]  with value 2.0 for ds: m1
+1: acc Duration[300, SECONDS]  with value 4.0 for ds: m1
+2: acc Duration[300, SECONDS]  with value 4.0 for ds: m1
+1: acc Duration[0, SECONDS]  with value 4.0 for ds: m1
+
+
+*/
+     
 
 }
