@@ -51,6 +51,7 @@ import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.reporter.metrics.NewtsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,6 +182,16 @@ public class ImportRunner {
 
         reporter.start(10, SECONDS);
 
+        if (m_restUrl == null) {
+            // we are using a direct importer so use a NewtsReporter for storing metrics
+            NewtsReporter newtsReporter = NewtsReporter.forRegistry(metrics)
+                    .name("importer")
+                    .convertRatesTo(SECONDS)
+                    .convertDurationsTo(MILLISECONDS)
+                    .build(repository());
+            
+            newtsReporter.start(1, SECONDS);
+        }
 
 
         LOG.debug("Scanning {} for GSOD data files...", m_source);
@@ -217,6 +228,8 @@ public class ImportRunner {
             ;
         
         Observable<Boolean> doImport = m_restUrl != null ? restPoster(batches, metrics) : directPoster(batches, metrics);
+        
+        
         
         System.err.println("doImport = " + doImport);
 

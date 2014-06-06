@@ -21,6 +21,7 @@
     <module>rest</module>
     <module>examples</module>
     <module>indexing</module>
+    <module>metrics-reporter</module>
   </modules>
 
   <properties>
