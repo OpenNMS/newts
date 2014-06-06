@@ -26,6 +26,196 @@ logging:
   level: INFO
 
 reports:
+  gauge:
+    interval: 10
+    datasources:
+      - label: value
+        source: value
+        function: AVERAGE
+        heartbeat: 10
+    exports:
+      - value
+
+  counter:
+    interval: 10
+    datasources:
+      - label: count
+        source: count
+        function: AVERAGE
+        heartbeat: 10
+    exports:
+      - count
+
+  meter:
+    interval: 10
+    datasources:
+      - label: count
+        source: count
+        function: AVERAGE
+        heartbeat: 20
+      - label: mean_rate
+        source: mean_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m1_rate
+        source: m1_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m5_rate
+        source: m5_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m15_rate
+        source: m15_rate
+        function: AVERAGE
+        heartbeat: 20
+    exports:
+      - count
+      - mean_rate
+      - m1_rate
+      - m5_rate
+      - m15_rate    
+
+  historgram:
+    interval: 10
+    datasources:
+      - label: count
+        source: count
+        function: AVERAGE
+        heartbeat: 20
+      - label: max
+        source: max
+        function: AVERAGE
+        heartbeat: 20
+      - label: mean 
+        source: mean 
+        function: AVERAGE
+        heartbeat: 20
+      - label: min 
+        source: min 
+        function: AVERAGE
+        heartbeat: 20
+      - label: stddev 
+        source: stddev 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p50 
+        source: p50 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p75 
+        source: p75 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p95 
+        source: p95 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p98 
+        source: p98 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p99
+        source: p99
+        function: AVERAGE
+        heartbeat: 20
+      - label: p999
+        source: p999
+        function: AVERAGE
+        heartbeat: 20
+    exports:
+      - count
+      - max
+      - mean
+      - min
+      - stddev
+      - p50
+      - p75
+      - p95
+      - p98
+      - p99
+      - p999
+
+  timer:
+    interval: 10
+    datasources:
+      - label: count
+        source: count
+        function: AVERAGE
+        heartbeat: 20
+      - label: max
+        source: max
+        function: AVERAGE
+        heartbeat: 20
+      - label: mean 
+        source: mean 
+        function: AVERAGE
+        heartbeat: 20
+      - label: min 
+        source: min 
+        function: AVERAGE
+        heartbeat: 20
+      - label: stddev 
+        source: stddev 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p50 
+        source: p50 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p75 
+        source: p75 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p95 
+        source: p95 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p98 
+        source: p98 
+        function: AVERAGE
+        heartbeat: 20
+      - label: p99
+        source: p99
+        function: AVERAGE
+        heartbeat: 20
+      - label: p999
+        source: p999
+        function: AVERAGE
+        heartbeat: 20
+      - label: mean_rate
+        source: mean_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m1_rate
+        source: m1_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m5_rate
+        source: m5_rate
+        function: AVERAGE
+        heartbeat: 20
+      - label: m15_rate
+        source: m15_rate
+        function: AVERAGE
+        heartbeat: 20
+    exports:
+      - count
+      - max
+      - mean
+      - min
+      - stddev
+      - p50
+      - p75
+      - p95
+      - p98
+      - p99
+      - p999
+      - mean_rate
+      - m1_rate
+      - m5_rate
+      - m15_rate
+  
   gsod:
     interval: 3600
     datasources:
