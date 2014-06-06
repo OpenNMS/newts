@@ -165,7 +165,6 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
-                    System.err.printf("2: ts: %s acc %s  with value %s for ds: %s\n", m_current.getTimestamp(), elapsed, sample.getValue(), ds.getSource());
                     accumulation.accumulate(elapsed, ds.getHeartbeat(), sample.getValue());
                 }
 
@@ -209,7 +208,6 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
-            System.err.printf("1: ts %s acc %s  with value %s for ds: %s\n", current.getTimestamp(), elapsed, current.getValue(), ds.getSource());
             getOrCreateAccumulation(current.getName()).accumulate(elapsed, ds.getHeartbeat(), current.getValue());
 
             // Postpone storing as lastUpdate, we'll need this sample again...
