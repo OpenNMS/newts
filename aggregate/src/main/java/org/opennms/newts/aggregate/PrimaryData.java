@@ -45,12 +45,13 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
     private class Accumulation {
         private long m_known, m_unknown;
         private ValueType<?> m_value;
+        private Map<String, String> m_attributes = Maps.newHashMap();
 
         private Accumulation() {
             reset();
         }
 
-        private void accumulate(Duration elapsed, Duration heartbeat, ValueType<?> value) {
+        private Accumulation accumulateValue(Duration elapsed, Duration heartbeat, ValueType<?> value) {
             if (elapsed.lt(heartbeat)) {
                 m_known += elapsed.asMillis();
                 m_value = m_value.plus(value.times(elapsed.asMillis()));
@@ -58,6 +59,12 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
             else {
                 m_unknown += elapsed.asMillis();
             }
+            return this;
+        }
+
+        private Accumulation accumlateAttrs(Map<String, String> attributes) {
+            if (attributes != null) m_attributes.putAll(attributes);
+            return this;
         }
 
         private Double getAverage() {
@@ -83,6 +90,11 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
         private void reset() {
             m_known = m_unknown = 0;
             m_value = ValueType.compose(0, MetricType.GAUGE);
+            m_attributes = Maps.newHashMap();
+        }
+
+        private Map<String, String> getAttributes() {
+            return m_attributes;
         }
 
     }
@@ -148,7 +160,8 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                     output.getTimestamp(),
                     output.getResource(),
                     ds.getSource(),
-                    accumulation.getAverage()));
+                    accumulation.getAverage(),
+                    accumulation.getAttributes()));
 
             // If input is greater than row, accumulate remainder for next row
             if (m_current != null) {
@@ -161,11 +174,10 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                     continue;
                 }
 
-                //accumulation.reset();
-
                 if (m_current.getTimestamp().gt(output.getTimestamp())) {
                     Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
-                    accumulation.accumulate(elapsed, ds.getHeartbeat(), sample.getValue());
+                    accumulation.accumulateValue(elapsed, ds.getHeartbeat(), sample.getValue());
+                    accumulation.accumlateAttrs(sample.getAttributes());
                 }
 
             } else {
@@ -208,7 +220,9 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                 elapsed = current.getTimestamp().minus(last.getTimestamp());
             }
 
-            getOrCreateAccumulation(current.getName()).accumulate(elapsed, ds.getHeartbeat(), current.getValue());
+            getOrCreateAccumulation(current.getName())
+                    .accumulateValue(elapsed, ds.getHeartbeat(), current.getValue())
+                    .accumlateAttrs(current.getAttributes());
 
             // Postpone storing as lastUpdate, we'll need this sample again...
             if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval))) {

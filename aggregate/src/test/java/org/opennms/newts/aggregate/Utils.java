@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.opennms.newts.api.Element;
 import org.opennms.newts.api.Measurement;
@@ -75,6 +76,7 @@ class Utils {
         }
 
         abstract AbstractRowsBuilder<T> element(String name, double value);
+        abstract AbstractRowsBuilder<T> element(String name, double value, Map<String, String> attrs);
 
         Iterator<Row<T>> build() {
             return m_results.iterator();
@@ -94,6 +96,12 @@ class Utils {
             return this;
         }
 
+        @Override
+        AbstractRowsBuilder<Measurement> element(String name, double value, Map<String, String> attrs) {
+            addElement(new Measurement(getCurrentTimestamp(), getResource(), name, value, attrs));
+            return this;
+        }
+
     }
 
     static class SampleRowsBuilder extends AbstractRowsBuilder<Sample> {
@@ -109,6 +117,12 @@ class Utils {
         @Override
         SampleRowsBuilder element(String name, double value) {
             addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type)));
+            return this;
+        }
+
+        @Override
+        AbstractRowsBuilder<Sample> element(String name, double value, Map<String, String> attrs) {
+            addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type), attrs));
             return this;
         }
 
