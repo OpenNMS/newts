@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Map;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
@@ -31,6 +32,7 @@ import org.opennms.newts.api.query.Datasource;
 import org.opennms.newts.api.query.ResultDescriptor;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 
@@ -88,12 +90,24 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
         if (!hasNext()) throw new NoSuchElementException();
 
         Multimap<String, Double> values = ArrayListMultimap.create();
+        Map<String, Map<String, String>> aggregatedAttrs = Maps.newHashMap();
 
         while (inRange()) {
             // accumulate
             for (Datasource ds : getDatasources()) {
-                Measurement m = m_working.getElement(ds.getSource());
-                values.put(ds.getLabel(), m != null ? m.getValue() : Double.NaN);
+                Measurement metric = m_working.getElement(ds.getSource());
+                values.put(ds.getLabel(), metric != null ? metric.getValue() : Double.NaN);
+
+                Map<String, String> metricAttrs = aggregatedAttrs.get(ds.getLabel());
+                if (metricAttrs == null) {
+                    metricAttrs = Maps.newHashMap();
+                    aggregatedAttrs.put(ds.getLabel(), metricAttrs);
+                }
+
+                if (metric.getAttributes() != null) {
+                    metricAttrs.putAll(metric.getAttributes());
+                }
+
             }
 
             m_working = nextWorking();
@@ -101,7 +115,8 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
 
         for (Datasource ds : getDatasources()) {
             Double v = aggregate(ds, values.get(ds.getLabel()));
-            m_nextOut.addElement(new Measurement(m_nextOut.getTimestamp(), m_resource, ds.getLabel(), v));
+            Map<String, String> attrs = aggregatedAttrs.get(ds.getLabel());
+            m_nextOut.addElement(new Measurement(m_nextOut.getTimestamp(), m_resource, ds.getLabel(), v, attrs));
         }
 
         try {
