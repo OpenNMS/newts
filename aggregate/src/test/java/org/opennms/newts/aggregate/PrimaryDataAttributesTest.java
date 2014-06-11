@@ -1,13 +1,12 @@
 package org.opennms.newts.aggregate;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.opennms.newts.aggregate.Utils.assertAttributes;
+import static org.opennms.newts.aggregate.Utils.mapFor;
 import static org.opennms.newts.api.Timestamp.fromEpochSeconds;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.junit.Test;
 import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
@@ -18,8 +17,6 @@ import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
-
-import com.google.common.collect.Maps;
 
 public class PrimaryDataAttributesTest {
 
@@ -160,24 +157,6 @@ public class PrimaryDataAttributesTest {
         assertAttributes(row.getElement("m0"), mapFor());
         assertAttributes(row.getElement("m1"), mapFor());
         
-    }
-
-    static Map<String, String> mapFor(String... attributes) {
-        checkArgument((attributes.length % 2) == 0, "not an even sequence of k/v pairs");
-
-        Map<String, String> r = Maps.newHashMap();
-
-        for (int i = 0; i < attributes.length; i += 2) {
-            r.put(attributes[i], attributes[i + 1]);
-        }
-
-        return r;
-    }
-
-    static void assertAttributes(Measurement measurement, Map<String, String> expected) {
-        assertThat("Missing measurement", measurement, notNullValue());
-        assertThat("Missing measurement attributes", measurement.getAttributes(), notNullValue());
-        assertThat(measurement.getAttributes(), equalTo(expected));
     }
 
 }
