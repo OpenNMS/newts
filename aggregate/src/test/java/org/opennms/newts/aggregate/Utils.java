@@ -16,14 +16,19 @@
 package org.opennms.newts.aggregate;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.opennms.newts.api.Element;
 import org.opennms.newts.api.Measurement;
@@ -34,6 +39,7 @@ import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 
 class Utils {
@@ -75,6 +81,7 @@ class Utils {
         }
 
         abstract AbstractRowsBuilder<T> element(String name, double value);
+        abstract AbstractRowsBuilder<T> element(String name, double value, Map<String, String> attrs);
 
         Iterator<Row<T>> build() {
             return m_results.iterator();
@@ -94,6 +101,12 @@ class Utils {
             return this;
         }
 
+        @Override
+        AbstractRowsBuilder<Measurement> element(String name, double value, Map<String, String> attrs) {
+            addElement(new Measurement(getCurrentTimestamp(), getResource(), name, value, attrs));
+            return this;
+        }
+
     }
 
     static class SampleRowsBuilder extends AbstractRowsBuilder<Sample> {
@@ -109,6 +122,12 @@ class Utils {
         @Override
         SampleRowsBuilder element(String name, double value) {
             addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type)));
+            return this;
+        }
+
+        @Override
+        AbstractRowsBuilder<Sample> element(String name, double value, Map<String, String> attrs) {
+            addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type), attrs));
             return this;
         }
 
@@ -161,6 +180,40 @@ class Utils {
         assertEquals("Unexpected measurement resource", expected.getResource(), actual.getResource());
         assertEquals("Unexpected measurement timestamp", expected.getTimestamp(), actual.getTimestamp());
         assertEquals("Incorrect value", expected.getValue().doubleValue(), actual.getValue().doubleValue(), 0.00000001d);
+    }
+
+
+    /**
+     * Return a {@link Map} given an even numbered sequence of {@link String}s.
+     *
+     * @param attributes
+     *            sequence of strings, (k0, v0, k1, v1, ...)
+     * @return map representation of supplied strings
+     */
+    static Map<String, String> mapFor(String... attributes) {
+        checkArgument((attributes.length % 2) == 0, "not an even sequence of k/v pairs");
+
+        Map<String, String> r = Maps.newHashMap();
+
+        for (int i = 0; i < attributes.length; i += 2) {
+            r.put(attributes[i], attributes[i + 1]);
+        }
+
+        return r;
+    }
+
+    /**
+     * Assert that the attributes of a {@link Measurement} match the expected {@link Map}.
+     * 
+     * @param measurement
+     *            measurement to test
+     * @param expected
+     *            map that the measurements attributes should match
+     */
+    static void assertAttributes(Measurement measurement, Map<String, String> expected) {
+        assertThat("Missing measurement", measurement, notNullValue());
+        assertThat("Missing measurement attributes", measurement.getAttributes(), notNullValue());
+        assertThat(measurement.getAttributes(), equalTo(expected));
     }
 
 }

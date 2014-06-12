@@ -16,7 +16,9 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static org.opennms.newts.persistence.cassandra.Utils.assertAttributes;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
+import static org.opennms.newts.persistence.cassandra.Utils.mapFor;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 
 import java.util.Iterator;
@@ -63,9 +65,9 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
                 .row(900000900).element("m0", 1)
                 .row(900001200).element("m0", 1)
                 .row(900001500).element("m0", 1)
-                .row(900001800).element("m0", 1)
+                .row(900001800).element("m0", 1, mapFor("a", "1"))
                 .row(900002100).element("m0", 3)
-                .row(900002400).element("m0", 3)
+                .row(900002400).element("m0", 3, mapFor("b", "2"))
                 .row(900002700).element("m0", 3)
                 .row(900003000).element("m0", 3)
                 .row(900003300).element("m0", 3)
@@ -74,9 +76,9 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
                 .row(900004200).element("m0", 1)
                 .row(900004500).element("m0", 1)
                 .row(900004800).element("m0", 1)
-                .row(900005100).element("m0", 1)
+                .row(900005100).element("m0", 1, mapFor("c", "3"))
                 .row(900005400).element("m0", 1)
-                .row(900005700).element("m0", 3)
+                .row(900005700).element("m0", 3, mapFor("d", "4"))
                 .row(900006000).element("m0", 3)
                 .row(900006300).element("m0", 3)
                 .row(900006600).element("m0", 3)
@@ -101,7 +103,13 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
                 rDescriptor,
                 Duration.minutes(60));
 
+        // Validate results
         assertRowsEqual(expected, results.iterator());
+
+        // Validate merged attributes
+        Iterator<Row<Measurement>> rows = results.iterator();
+        assertAttributes(rows.next().getElement("m0-avg"), mapFor("a", "1", "b", "2"));
+        assertAttributes(rows.next().getElement("m0-avg"), mapFor("c", "3", "d", "4"));
 
     }
 

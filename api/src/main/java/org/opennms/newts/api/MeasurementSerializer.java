@@ -30,6 +30,12 @@ public class MeasurementSerializer extends JsonSerializer<Measurement> {
         jgen.writeStringField("name", value.getName());
         jgen.writeNumberField("timestamp", value.getTimestamp().asMillis());
         jgen.writeNumberField("value", value.getValue());
+
+        // Since attributes is optional, be compact and omit from JSON output when unused.
+        if (value.getAttributes() != null && !value.getAttributes().isEmpty()) {
+            jgen.writeObjectField("attributes", value.getAttributes());
+        }
+
         jgen.writeEndObject();
     }
 
