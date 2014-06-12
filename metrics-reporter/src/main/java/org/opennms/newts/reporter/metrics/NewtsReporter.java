@@ -8,7 +8,6 @@ import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
 import com.codahale.metrics.Clock;
-import com.codahale.metrics.ConsoleReporter.Builder;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
