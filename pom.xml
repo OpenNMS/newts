@@ -22,6 +22,7 @@
     <module>examples</module>
     <module>indexing</module>
     <module>metrics-reporter</module>
+    <module>karaf</module>
   </modules>
 
   <properties>

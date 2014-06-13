@@ -22,11 +22,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.inject.Named;
+import javax.inject.Inject;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AlreadyExistsException;
-import com.google.inject.Inject;
 
 
 public class SchemaManager implements AutoCloseable {
