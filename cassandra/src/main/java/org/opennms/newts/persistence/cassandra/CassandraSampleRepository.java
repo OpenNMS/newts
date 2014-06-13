@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.inject.Named;
+import javax.inject.Inject;
 
 import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
@@ -59,7 +60,6 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 
 
 public class CassandraSampleRepository implements SampleRepository {

@@ -1,0 +1,51 @@
+<blueprint
+	xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+	xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0 
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+
+		http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
+		http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+
+		http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
+		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
+">
+
+  <!-- Configuration properties -->
+  <cm:property-placeholder id="properties" persistent-id="org.opennms.newts.persistence.cassandra" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="cassandra.keyspace"     value="newts"/>
+      <cm:property name="cassandra.hostname"     value="localhost"/>
+      <cm:property name="cassandra.port"         value="9042"/>
+      <cm:property name="cassandra.time-to-live" value="31536000"/>
+      <cm:property name="processor.threadCount"  value="10" />
+    </cm:default-properties>
+  </cm:property-placeholder>
+  
+  <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry" />
+  
+  <bean id="sampleProcessorService" class="org.opennms.newts.api.SampleProcessorService" >
+    <argument value="${processor.threadCount}" />
+  </bean>
+
+
+  <!-- Create the RRD repository -->
+  <bean id="cassandraSampleRepository" class="org.opennms.newts.persistence.cassandra.CassandraSampleRepository">
+	<argument index="0" value="${cassandra.keyspace}" />
+	<argument index="1" value="${cassandra.hostname}" />
+	<argument index="2" value="${cassandra.port}" />
+	<argument index="3" value="${cassandra.time-to-live}" />
+	<argument index="4" ref="metricRegistry" />
+	<argument index="5" ref="sampleProcessorService" />
+  </bean>
+
+  <service ref="cassandraSampleRepository" interface="org.opennms.newts.api.SampleRepository">
+    <service-properties>
+      <entry key="newts.backend" value="cassandra"/>
+    </service-properties>
+  </service>
+
+</blueprint>
