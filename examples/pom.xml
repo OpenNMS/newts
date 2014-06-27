@@ -17,6 +17,21 @@
 
   <modules>
     <module>gsod</module>
+    <module>stress</module>
   </modules>
 
+  <properties>
+    <args4jVersion>2.0.25</args4jVersion>
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>args4j</groupId>
+        <artifactId>args4j</artifactId>
+        <version>${args4jVersion}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
 </project>
