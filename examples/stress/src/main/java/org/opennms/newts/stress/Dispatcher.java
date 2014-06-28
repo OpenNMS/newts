@@ -8,6 +8,8 @@ import java.util.concurrent.BlockingQueue;
 
 import org.opennms.newts.api.Sample;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Queues;
 
 
@@ -16,6 +18,7 @@ abstract class Dispatcher {
     protected final Config m_config;
     protected final BlockingQueue<Collection<Sample>> m_samplesQueue;
     protected final Worker[] m_threads;
+    protected final MetricRegistry m_metricRegistry = new MetricRegistry();
 
     Dispatcher(Config config) {
         m_config = checkNotNull(config, "config argument");
@@ -35,6 +38,10 @@ abstract class Dispatcher {
             w.join();
         }
 
+    }
+
+    void printReport() {
+        ConsoleReporter.forRegistry(m_metricRegistry).build().report();
     }
 
 }
