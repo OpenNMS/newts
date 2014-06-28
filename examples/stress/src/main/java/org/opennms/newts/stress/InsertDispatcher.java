@@ -10,6 +10,7 @@ import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -72,13 +73,17 @@ class InsertDispatcher extends Dispatcher {
 
         List<Sample> samples = Lists.newArrayList();
         boolean isExhausted = false;
+        Meter meter = m_metricRegistry.meter(MetricRegistry.name(getClass(), "samples"));
 
         outer: while (true) {
 
             inner: for (int i = 0; i < generators.length; i++) {
                 if (generators[i].hasNext()) {
                     Optional<Sample> s = generators[i].next();
-                    if (s.isPresent()) samples.add(s.get());
+                    if (s.isPresent()) {
+                        samples.add(s.get());
+                        meter.mark();
+                    }
                 }
                 else {
                     // All the iterators yield the same number, when one is exhausted, all are.

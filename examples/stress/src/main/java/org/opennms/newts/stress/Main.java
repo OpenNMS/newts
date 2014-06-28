@@ -40,6 +40,7 @@ public class Main {
         }
 
         dispatcher.go();
+        dispatcher.printReport();
 
         System.exit(0);
 
