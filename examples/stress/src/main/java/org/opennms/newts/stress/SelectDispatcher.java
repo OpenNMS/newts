@@ -57,7 +57,7 @@ public class SelectDispatcher extends Dispatcher {
 
     private void createThreads() {
         for (int i = 0; i < m_config.getThreads(); i++) {
-            m_threads[i] = new Selecter(i, m_repository, getResultDescriptor(), m_queryQueue);
+            m_threads[i] = new Selecter(i, m_repository, getResultDescriptor(), m_queryQueue, m_metricRegistry);
         }
     }
 
