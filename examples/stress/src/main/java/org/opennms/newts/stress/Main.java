@@ -1,15 +1,31 @@
 package org.opennms.newts.stress;
 
 
+import java.io.PrintStream;
+
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+
+import com.google.common.base.Joiner;
 
 
 public class Main {
 
-    private static Config getConfig(String... args) {
+    private static void printSynopsis(PrintStream stream) {
+        stream.printf("%njava %s <command> [options...]%n%n", Main.class.getCanonicalName());
+    }
 
-        Config config = new Config();
+    private static void printUsage(PrintStream stream, CmdLineParser parser) {
+        printSynopsis(stream);
+        parser.printUsage(stream);
+    }
+
+    private static void printCmdUsage(PrintStream stream) {
+        printSynopsis(stream);
+        stream.printf("Available commands: %s%n%n", Joiner.on(", ").join(Config.Command.values()));
+    }
+
+    private static void parseArguments(Config config, String... args) {
         CmdLineParser parser = new CmdLineParser(config);
 
         try {
@@ -18,25 +34,49 @@ public class Main {
         catch (CmdLineException e) {
             // handling of wrong arguments
             System.err.println(e.getMessage());
-            System.err.printf("%njava %s [options] <command>%n%n", Main.class.getCanonicalName());
-            parser.printUsage(System.err);
+            printUsage(System.err, parser);
             System.exit(1);
         }
 
-        return config;
+        if (config.needHelp()) {
+            printUsage(System.out, parser);
+            System.exit(0);
+        }
     }
 
     public static void main(String... args) throws InterruptedException {
 
-        Config config = getConfig(args);
+        // Manually grok the command argument in order to conditionally apply different options.
+        if (args.length < 1) {
+            System.err.println("Missing command argument.");
+            printCmdUsage(System.err);
+            System.exit(1);
+        }
+
+        Config.Command command = null;
+
+        try {
+            command = Config.Command.valueOf(args[0].toUpperCase());
+        }
+        catch (IllegalArgumentException ex) {
+            System.err.println("Unknown command: " + args[0]);
+            printCmdUsage(System.err);
+            System.exit(1);
+        }
+
+        Config config;
         Dispatcher dispatcher;
 
-        switch (config.getCommand()) {
+        switch (command) {
             case INSERT:
-                dispatcher = new InsertDispatcher(config);
+                config = new InsertConfig();
+                parseArguments(config, args);
+                dispatcher = new InsertDispatcher((InsertConfig) config);
                 break;
             case SELECT:
-                dispatcher = new SelectDispatcher(config);
+                config = new SelectConfig();
+                parseArguments(config, args);
+                dispatcher = new SelectDispatcher((SelectConfig) config);
                 break;
             default:
                 throw new RuntimeException("Unknown command enum; Report as bug!!");

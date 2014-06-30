@@ -23,12 +23,14 @@ import com.google.common.collect.Queues;
  */
 public class SelectDispatcher extends Dispatcher {
 
+    private final SelectConfig m_config;
     private final SampleRepository m_repository;
     private final BlockingQueue<Query> m_queryQueue;
 
-    SelectDispatcher(Config config) {
+    SelectDispatcher(SelectConfig config) {
         super(config);
 
+        m_config = config;
         m_repository = new CassandraSampleRepository(
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
