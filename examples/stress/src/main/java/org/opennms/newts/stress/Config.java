@@ -1,5 +1,6 @@
 package org.opennms.newts.stress;
 
+
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -11,13 +12,16 @@ import org.opennms.newts.api.Timestamp;
 class Config {
 
     enum Command {
-        INSERT;
+        INSERT, SELECT;
     }
 
     static {
         CmdLineParser.registerHandler(Timestamp.class, TimestampOptionHandler.class);
         CmdLineParser.registerHandler(Duration.class, DurationOptionHandler.class);
     }
+
+    /** Number of seconds to keep Cassandra-stored samples. */
+    static int CASSANDRA_TTL = 86400;
 
     private int m_threads = 4;
     private String m_cassandraHost = "localhost";
@@ -26,6 +30,8 @@ class Config {
     private Timestamp m_start = Timestamp.fromEpochSeconds(900000000);
     private Timestamp m_end = Timestamp.fromEpochSeconds(931536000);
     private Duration m_interval = Duration.seconds(300);
+    private Duration m_resolution = Duration.seconds(3600);
+    private Duration m_selectLength = Duration.seconds(86400);
     private int m_numResources = 1;
     private int m_numMetrics = 1;
     private int m_batchSize = 100;
@@ -103,6 +109,18 @@ class Config {
         m_batchSize = batchSize;
     }
 
+    // XXX: selectLength should be validated; selectLength should be greater than resolution
+    @Option(name = "-sl", aliases = "--select-length", metaVar = "<length>", usage = "Length of select in seconds.")
+    void setSelectLength(Duration selectLength) {
+        m_selectLength = selectLength;
+    }
+
+    // XXX: resolution should be validated; resolution should be greater than interval
+    @Option(name = "-R", aliases = "--resolution", metaVar = "<resolution>", usage = "Aggregate resolution in seconds.")
+    void setResolution(Duration resolution) {
+        m_resolution = resolution;
+    }
+
     int getBatchSize() {
         return m_batchSize;
     }
@@ -143,8 +161,37 @@ class Config {
         return m_numMetrics;
     }
 
+    Duration getSelectLength() {
+        return m_selectLength;
+    }
+
+    Duration getResolution() {
+        return m_resolution;
+    }
+
     int getThreads() {
         return m_threads;
+    }
+
+    // There is (presently )no command option to assign this; Hard-coded to 2x the sample interval.
+    Duration getHeartbeat() {
+        return m_interval.times(2);
+    }
+
+    String[] getResources() {
+        String[] resources = new String[getNumResources()];
+        for (int i = 0; i < getNumResources(); i++) {
+            resources[i] = String.format("r%d", i);
+        }
+        return resources;
+    }
+
+    String[] getMetrics() {
+        String[] metrics = new String[getNumMetrics()];
+        for (int i = 0; i < getNumMetrics(); i++) {
+            metrics[i] = String.format("m%d", i);
+        }
+        return metrics;
     }
 
 }

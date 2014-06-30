@@ -35,6 +35,9 @@ public class Main {
             case INSERT:
                 dispatcher = new InsertDispatcher(config);
                 break;
+            case SELECT:
+                dispatcher = new SelectDispatcher(config);
+                break;
             default:
                 throw new RuntimeException("Unknown command enum; Report as bug!!");
         }
