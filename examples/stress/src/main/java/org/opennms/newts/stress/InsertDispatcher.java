@@ -1,7 +1,9 @@
 package org.opennms.newts.stress;
 
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessorService;
@@ -14,6 +16,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 
 
 /**
@@ -23,12 +26,10 @@ import com.google.common.collect.Lists;
  */
 class InsertDispatcher extends Dispatcher {
 
-    /** Number of seconds to keep Cassandra-stored samples. */
-    static int CASSANDRA_TTL = 86400;
-
     private static final Logger LOG = LoggerFactory.getLogger(InsertDispatcher.class);
 
     private final SampleRepository m_repository;
+    private final BlockingQueue<Collection<Sample>> m_samplesQueue;
 
     InsertDispatcher(Config config) throws InterruptedException {
         super(config);
@@ -37,9 +38,12 @@ class InsertDispatcher extends Dispatcher {
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),
-                CASSANDRA_TTL,
+                Config.CASSANDRA_TTL,
                 new MetricRegistry(),
                 new SampleProcessorService(1));
+
+        m_samplesQueue = Queues.newArrayBlockingQueue(config.getThreads() * 10);
+
     }
 
     private void createThreads() {
