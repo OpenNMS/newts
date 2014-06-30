@@ -52,15 +52,38 @@ public class IntervalGeneratorTest {
 
     }
 
-    private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs) {
-        return getTimestamps(startSecs, endSecs, DEFAULT_INTERVAL);
+    @Test
+    public void testReversed() {
+
+        List<Timestamp> timestamps = Lists.newArrayList(getTimestamps(150, 3500, true));
+
+        assertEquals(13, timestamps.size());
+        assertEquals(new Timestamp(0, TimeUnit.SECONDS), timestamps.get(12));
+        assertEquals(new Timestamp(3300, TimeUnit.SECONDS), timestamps.get(1));
+        assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(0));
+
+        timestamps = Lists.newArrayList(getTimestamps(0, 3600, true));
+
+        assertEquals(13, timestamps.size());
+        assertEquals(new Timestamp(0, TimeUnit.SECONDS), timestamps.get(12));
+        assertEquals(new Timestamp(3600, TimeUnit.SECONDS), timestamps.get(0));
+
     }
 
-    private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs, Duration duration) {
+    private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs) {
+        return getTimestamps(startSecs, endSecs, DEFAULT_INTERVAL, false);
+    }
+
+    private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs, boolean reversed) {
+        return getTimestamps(startSecs, endSecs, DEFAULT_INTERVAL, reversed);
+    }
+
+    private Iterable<Timestamp> getTimestamps(long startSecs, long endSecs, Duration duration, boolean reversed) {
         return new IntervalGenerator(
                 fromEpochSeconds(startSecs).stepFloor(duration),
                 fromEpochSeconds(endSecs).stepCeiling(duration),
-                duration);
+                duration,
+                reversed);
     }
 
 }
