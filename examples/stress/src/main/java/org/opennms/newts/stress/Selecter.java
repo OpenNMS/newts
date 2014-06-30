@@ -3,6 +3,7 @@ package org.opennms.newts.stress;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.nio.channels.Selector;
 import java.util.concurrent.BlockingQueue;
 
 import org.opennms.newts.api.Measurement;
@@ -11,6 +12,9 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 
 
 /**
@@ -24,13 +28,15 @@ public class Selecter extends Worker {
     private final SampleRepository m_repository;
     private final ResultDescriptor m_rDescriptor;
     private final BlockingQueue<Query> m_queue;
+    private final MetricRegistry m_metricRegistry;
 
-    public Selecter(int sequence, SampleRepository repository, ResultDescriptor rDescriptor, BlockingQueue<Query> queue) {
+    public Selecter(int sequence, SampleRepository repository, ResultDescriptor rDescriptor, BlockingQueue<Query> queue, MetricRegistry registry) {
         super(String.format("SELECTER-%d", sequence));
 
         m_repository = checkNotNull(repository, "repository argument");
         m_rDescriptor = checkNotNull(rDescriptor, "rDescriptor argument");
         m_queue = checkNotNull(queue, "queue argument");
+        m_metricRegistry = checkNotNull(registry, "registry argument");
 
         setDaemon(true);
         start();
@@ -39,6 +45,8 @@ public class Selecter extends Worker {
 
     @Override
     public void run() {
+
+        Meter meter = m_metricRegistry.meter(MetricRegistry.name(Selector.class, "queries"));
         Query query;
 
         try {
@@ -65,7 +73,10 @@ public class Selecter extends Worker {
                         query.getEnd(),
                         m_rDescriptor,
                         query.getResolution());
-                LOG.debug("Select returned {} rows.", results.getRows().size());
+
+                int numRows = results.getRows().size();
+                LOG.debug("Select returned {} rows.", numRows);
+                meter.mark(numRows);
 
             }
         }
