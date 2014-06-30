@@ -82,8 +82,7 @@ class InsertDispatcher extends Dispatcher {
         Meter meter = m_metricRegistry.meter(MetricRegistry.name(getClass(), "samples"));
 
         outer: while (true) {
-
-            inner: for (int i = 0; i < generators.length; i++) {
+            for (int i = 0; i < generators.length; i++) {
                 if (generators[i].hasNext()) {
                     Optional<Sample> s = generators[i].next();
                     if (s.isPresent()) {
@@ -94,21 +93,21 @@ class InsertDispatcher extends Dispatcher {
                 else {
                     // All the iterators yield the same number, when one is exhausted, all are.
                     isExhausted = true;
-                    break inner;
                 }
-            }
 
-            // Final queue insertion before shutdown
-            if (isExhausted) {
-                LOG.debug("Queuing {} samples for insert", samples.size());
-                m_samplesQueue.put(samples);
-                break outer;
-            }
+                // Final queue insertion before shutdown
+                if (isExhausted) {
+                    LOG.debug("Queuing {} samples for insert", samples.size());
+                    m_samplesQueue.put(samples);
+                    break outer;
+                }
 
-            if (samples.size() >= m_config.getBatchSize()) {
-                LOG.debug("Queuing {} samples for insert", samples.size());
-                m_samplesQueue.put(samples);
-                samples = Lists.newArrayList();
+                if (samples.size() >= m_config.getBatchSize()) {
+                    LOG.debug("Queuing {} samples for insert", samples.size());
+                    m_samplesQueue.put(samples);
+                    samples = Lists.newArrayList();
+                }
+
             }
         }
 
