@@ -34,17 +34,27 @@ public class IntervalGenerator implements Iterator<Timestamp>, Iterable<Timestam
 
     private final Duration m_interval;
     private final Timestamp m_final;
+    private final boolean m_reversed;
     private Timestamp m_current;
 
     public IntervalGenerator(Timestamp start, Timestamp finish, Duration interval) {
+        this(start, finish, interval, false);
+    }
+    
+    public IntervalGenerator(Timestamp start, Timestamp finish, Duration interval, boolean reversed) {
         m_interval = checkNotNull(interval, "interval argument");
-        m_current = checkNotNull(start, "start argument");
-        m_final = checkNotNull(finish, "finish argument");
+        checkNotNull(start, "start argument");
+        checkNotNull(finish, "finish argument");
+
+        m_current = reversed ? finish : start;
+        m_final = reversed ? start : finish;
+        m_reversed = reversed;
+
     }
 
     @Override
     public boolean hasNext() {
-        return m_current.lte(m_final);
+        return  m_reversed ? m_current.gte(m_final) : m_current.lte(m_final);
     }
 
     @Override
@@ -58,7 +68,7 @@ public class IntervalGenerator implements Iterator<Timestamp>, Iterable<Timestam
             return m_current;
         }
         finally {
-            m_current = m_current.plus(m_interval);
+            m_current = m_reversed ? m_current.minus(m_interval) : m_current.plus(m_interval);
         }
     }
 
