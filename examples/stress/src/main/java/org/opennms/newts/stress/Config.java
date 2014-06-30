@@ -23,6 +23,7 @@ class Config {
     /** Number of seconds to keep Cassandra-stored samples. */
     static int CASSANDRA_TTL = 86400;
 
+    private boolean m_needHelp = false;
     private int m_threads = 4;
     private String m_cassandraHost = "localhost";
     private int m_cassandraPort = 9042;
@@ -30,14 +31,11 @@ class Config {
     private Timestamp m_start = Timestamp.fromEpochSeconds(900000000);
     private Timestamp m_end = Timestamp.fromEpochSeconds(931536000);
     private Duration m_interval = Duration.seconds(300);
-    private Duration m_resolution = Duration.seconds(3600);
-    private Duration m_selectLength = Duration.seconds(86400);
     private int m_numResources = 1;
     private int m_numMetrics = 1;
-    private int m_batchSize = 100;
     private Command m_command;
 
-    private void checkArgument(boolean condition, String msg, Object... msgArgs) throws CmdLineException {
+    protected void checkArgument(boolean condition, String msg, Object... msgArgs) throws CmdLineException {
         if (!condition) {
             throw new CmdLineException(null, String.format(msg, msgArgs));
 
@@ -52,6 +50,11 @@ class Config {
         catch (IllegalArgumentException ex) {
             throw new CmdLineException(null, String.format("Unknown command: %s", command));
         }
+    }
+
+    @Option(name="-h", aliases="--help", usage="Print usage informations.")
+    void setHelp(boolean help) {
+        m_needHelp = help;
     }
 
     @Option(name = "-n", aliases = "--num-threads", metaVar = "<threads>", usage = "Concurrency level.")
@@ -103,28 +106,6 @@ class Config {
         m_numMetrics = numMetrics;
     }
 
-    @Option(name = "-B", aliases = "--batch-size", metaVar = "<size>", usage = "Number of samples per batch.")
-    void setBatchSize(int batchSize) throws CmdLineException {
-        checkArgument(batchSize > 0, "Batch size must be greater than zero.");
-        m_batchSize = batchSize;
-    }
-
-    // XXX: selectLength should be validated; selectLength should be greater than resolution
-    @Option(name = "-sl", aliases = "--select-length", metaVar = "<length>", usage = "Length of select in seconds.")
-    void setSelectLength(Duration selectLength) {
-        m_selectLength = selectLength;
-    }
-
-    // XXX: resolution should be validated; resolution should be greater than interval
-    @Option(name = "-R", aliases = "--resolution", metaVar = "<resolution>", usage = "Aggregate resolution in seconds.")
-    void setResolution(Duration resolution) {
-        m_resolution = resolution;
-    }
-
-    int getBatchSize() {
-        return m_batchSize;
-    }
-
     String getCassandraHost() {
         return m_cassandraHost;
     }
@@ -139,6 +120,10 @@ class Config {
 
     Command getCommand() {
         return m_command;
+    }
+
+    boolean needHelp() {
+        return m_needHelp;
     }
 
     Timestamp getStart() {
@@ -159,14 +144,6 @@ class Config {
 
     int getNumMetrics() {
         return m_numMetrics;
-    }
-
-    Duration getSelectLength() {
-        return m_selectLength;
-    }
-
-    Duration getResolution() {
-        return m_resolution;
     }
 
     int getThreads() {

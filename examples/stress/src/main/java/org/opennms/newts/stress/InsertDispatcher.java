@@ -28,12 +28,14 @@ class InsertDispatcher extends Dispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(InsertDispatcher.class);
 
+    private final InsertConfig m_config;
     private final SampleRepository m_repository;
     private final BlockingQueue<Collection<Sample>> m_samplesQueue;
 
-    InsertDispatcher(Config config) throws InterruptedException {
+    InsertDispatcher(InsertConfig config) throws InterruptedException {
         super(config);
 
+        m_config = config;
         m_repository = new CassandraSampleRepository(
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),

@@ -9,14 +9,12 @@ import com.codahale.metrics.MetricRegistry;
 
 abstract class Dispatcher {
 
-    protected final Config m_config;
-    
     protected final Worker[] m_threads;
     protected final MetricRegistry m_metricRegistry = new MetricRegistry();
 
     Dispatcher(Config config) {
-        m_config = checkNotNull(config, "config argument");
-        m_threads = new Worker[m_config.getThreads()];
+        checkNotNull(config, "config argument");
+        m_threads = new Worker[config.getThreads()];
     }
 
     abstract void go() throws InterruptedException;
