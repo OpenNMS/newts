@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
@@ -62,14 +63,14 @@ public class SamplesResourceTest {
 
         when(
                 m_repository.select(
-                        eq("localhost"),
+                        eq(new Resource("localhost")),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900003600))))
         ).thenReturn(results);
 
         assertThat(
                 m_resource.getSamples(
-                        "localhost",
+                        new Resource("localhost"),
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500")),
                 CoreMatchers.is(results));

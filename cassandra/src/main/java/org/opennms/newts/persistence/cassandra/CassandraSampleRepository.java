@@ -37,6 +37,7 @@ import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -107,7 +108,7 @@ public class CassandraSampleRepository implements SampleRepository {
     }
 
     @Override
-    public Results<Measurement> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
+    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
 
         validateSelect(start, end);
 
@@ -126,7 +127,7 @@ public class CassandraSampleRepository implements SampleRepository {
     }
 
     @Override
-    public Results<Sample> select(String resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+    public Results<Sample> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
         validateSelect(start, end);
 
@@ -156,7 +157,7 @@ public class CassandraSampleRepository implements SampleRepository {
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
                         .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
-                        .value(SchemaConstants.F_RESOURCE, m.getResource())
+                        .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
                         .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()))
@@ -173,7 +174,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
     }
 
-    private Iterator<com.datastax.driver.core.Row> cassandraSelect(String resource, Timestamp start, Timestamp end) {
+    private Iterator<com.datastax.driver.core.Row> cassandraSelect(Resource resource, Timestamp start, Timestamp end) {
 
         List<Future<ResultSet>> futures = Lists.newArrayList();
 
@@ -183,7 +184,7 @@ public class CassandraSampleRepository implements SampleRepository {
         for (Timestamp partition : new IntervalGenerator(lower, upper, m_resourceShard)) {
             BoundStatement bindStatement = m_selectStatement.bind();
             bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
-            bindStatement.setString(SchemaConstants.F_RESOURCE, resource);
+            bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
             bindStatement.setDate("start", start.asDate());
             bindStatement.setDate("end", end.asDate());
 

@@ -41,7 +41,7 @@ public class SampleProcessorServiceTest {
     @Test
     public void test() {
 
-        Sample sample = new Sample(Timestamp.now(), "resource", "metric", GAUGE, ValueType.compose(1, GAUGE));
+        Sample sample = new Sample(Timestamp.now(), new Resource("resource"), "metric", GAUGE, ValueType.compose(1, GAUGE));
         m_service.submit(Collections.singletonList(sample));
 
         try {

@@ -13,6 +13,7 @@ import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -24,7 +25,7 @@ public class PrimaryDataAttributesTest {
     public void testOverlappingAttributes() {
 
         // This set has samples with attributes that fall strictly within sample intervals.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 // Part of interval 900000300 (Row 1)
                 .row(900000297).element("m0", 1, mapFor("a", "1"))
                 .row(900000298).element("m0", 1, mapFor("a", "2", "c", "5"))
@@ -42,7 +43,7 @@ public class PrimaryDataAttributesTest {
                 .datasource("m0", "m0", Duration.seconds(600), null);
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900000300),
                 Timestamp.fromEpochSeconds(900000900),
                 rDescriptor,
@@ -69,7 +70,7 @@ public class PrimaryDataAttributesTest {
     public void testAttributesWithinInterval() {
 
         // This set has samples with attributes that fall strictly within sample intervals.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 // Part of interval 900000300
                 .row(900000297).element("m0", 1, mapFor("a", "1"))
                 .row(900000298).element("m0", 1, mapFor("a", "2", "c", "5"))
@@ -87,7 +88,7 @@ public class PrimaryDataAttributesTest {
                 .datasource("m0", "m0", Duration.seconds(600), null);
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900000300),
                 Timestamp.fromEpochSeconds(900000900),
                 rDescriptor,
@@ -114,7 +115,7 @@ public class PrimaryDataAttributesTest {
     public void testMultipleSamples() {
 
         // This set has samples with attributes that fall strictly within sample intervals.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 // Part of interval 900000300 (Row 1)
                 .row(900000297).element("m0", 1, mapFor("a", "1")).element("m1", 2, mapFor("aa", "11"))
                 .row(900000298).element("m0", 1, mapFor("a", "2", "c", "5"))
@@ -133,7 +134,7 @@ public class PrimaryDataAttributesTest {
                 .datasource("m1", "m1", Duration.seconds(600), null);
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900000300),
                 Timestamp.fromEpochSeconds(900000900),
                 rDescriptor,

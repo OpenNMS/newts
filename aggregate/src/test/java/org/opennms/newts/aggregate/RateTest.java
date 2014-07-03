@@ -32,6 +32,7 @@ import org.opennms.newts.aggregate.Rate;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -41,7 +42,7 @@ import com.google.common.collect.Sets;
 
 public class RateTest {
 
-    private static String m_resource = "localhost";
+    private static Resource m_resource = new Resource("localhost");
     private static String[] m_metrics = new String[25];
 
     static {

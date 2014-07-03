@@ -30,6 +30,7 @@ import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -58,7 +59,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
     @Test
     public void test() {
 
-        Iterator<Row<Sample>> testSamples = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testSamples = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(900000000).element("m0", 1)        // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0", 1)
                 .row(900000600).element("m0", 1)
@@ -89,7 +90,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300))
             .datasource("m0-avg", "m0", Duration.seconds(600), AVERAGE).export("m0-avg");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(900003600).element("m0-avg", 2)
                 .row(900007200).element("m0-avg", 2)
                 .build();
@@ -97,7 +98,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
-                "localhost",
+                new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),
                 rDescriptor,

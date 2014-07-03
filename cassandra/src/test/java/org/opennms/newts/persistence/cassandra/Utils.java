@@ -33,6 +33,7 @@ import java.util.Map;
 import org.opennms.newts.api.Element;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -47,11 +48,11 @@ class Utils {
     static abstract class AbstractRowsBuilder<T extends Element<?>> {
 
         private final List<Row<T>> m_results = Lists.newArrayList();
-        private final String m_resource;
+        private final Resource m_resource;
 
         private Row<T> m_current;
 
-        AbstractRowsBuilder(String resource) {
+        AbstractRowsBuilder(Resource resource) {
             m_resource = checkNotNull(resource, "resource argument");
         }
 
@@ -68,7 +69,7 @@ class Utils {
             return row(Timestamp.fromEpochSeconds(epochSeconds));
         }
 
-        protected String getResource() {
+        protected Resource getResource() {
             return m_resource;
         }
 
@@ -91,7 +92,7 @@ class Utils {
 
     static class MeasurementRowsBuilder extends AbstractRowsBuilder<Measurement> {
 
-        MeasurementRowsBuilder(String resource) {
+        MeasurementRowsBuilder(Resource resource) {
             super(resource);
         }
 
@@ -113,7 +114,7 @@ class Utils {
 
         private final MetricType m_type;
 
-        SampleRowsBuilder(String resource, MetricType type) {
+        SampleRowsBuilder(Resource resource, MetricType type) {
             super(resource);
 
             m_type = checkNotNull(type, "type argument");

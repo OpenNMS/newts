@@ -53,7 +53,7 @@ public class ResourceIndexingSampleProcessor implements SampleProcessor {
         Multimap<String, String> metrics = HashMultimap.create();
 
         for (Sample s : samples) {
-            metrics.put(s.getResource(), s.getName());
+            metrics.put(s.getResource().getId(), s.getName());
         }
 
         return metrics;

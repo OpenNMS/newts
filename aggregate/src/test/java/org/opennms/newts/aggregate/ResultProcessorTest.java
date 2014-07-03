@@ -26,6 +26,7 @@ import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -37,7 +38,7 @@ public class ResultProcessorTest {
     @Test
     public void testCalculated() {
 
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.COUNTER)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.COUNTER)
                 .row(900000000).element("m0",  3000).element("m1",  3000)      // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0",  6000).element("m1",  6000)
                 .row(900000600).element("m0",  9000).element("m1",  9000)
@@ -80,13 +81,13 @@ public class ResultProcessorTest {
                 .calculate("total", sum, "m0", "m1")
                 .export("total");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(900003600).element("total", 20)
                 .row(900007200).element("total", 20)
                 .build();
 
         ResultProcessor processor = new ResultProcessor(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900003600),
                 Timestamp.fromEpochSeconds(900007200),
                 rDescriptor,
@@ -99,7 +100,7 @@ public class ResultProcessorTest {
     @Test
     public void testCounterRate() {
 
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.COUNTER)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.COUNTER)
                 .row(900000000).element("m0",  3000)        // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0",  6000)
                 .row(900000600).element("m0",  9000)
@@ -129,13 +130,13 @@ public class ResultProcessorTest {
 
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300)).datasource("m0", AVERAGE).export("m0");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(900003600).element("m0", 10.0)
                 .row(900007200).element("m0", 10.0)
                 .build();
 
         ResultProcessor processor = new ResultProcessor(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900003600),
                 Timestamp.fromEpochSeconds(900007200),
                 rDescriptor,
@@ -148,7 +149,7 @@ public class ResultProcessorTest {
     @Test
     public void test() {
 
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(900000000).element("m0", 1)        // Thu Jul  9 11:00:00 CDT 1998
                 .row(900000300).element("m0", 1)
                 .row(900000600).element("m0", 1)
@@ -179,13 +180,13 @@ public class ResultProcessorTest {
         ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(300))
                 .datasource("m0-avg", "m0", Duration.seconds(600), AVERAGE).export("m0-avg");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(900003600).element("m0-avg", 2.0)
                 .row(900007200).element("m0-avg", 2.0)
                 .build();
 
         ResultProcessor processor = new ResultProcessor(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900003600),
                 Timestamp.fromEpochSeconds(900007200),
                 rDescriptor,

@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.Datasource;
@@ -44,7 +45,7 @@ import com.google.common.collect.Multimap;
 class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measurement>> {
 
     private final ResultDescriptor m_resultDescriptor;
-    private final String m_resource;
+    private final Resource m_resource;
     private final Iterator<Timestamp> m_timestamps;
     private final Duration m_resolution;
     private final Iterator<Row<Measurement>> m_input;
@@ -53,7 +54,7 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
     private Row<Measurement> m_working;
     private Row<Measurement> m_nextOut;
 
-    Aggregation(String resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Duration resolution, Iterator<Row<Measurement>> input) {
+    Aggregation(Resource resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Duration resolution, Iterator<Row<Measurement>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");

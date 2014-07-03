@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
@@ -63,7 +64,7 @@ public class MeasurementsResourceTest {
 
         when(
                 m_repository.select(
-                        eq("localhost"),
+                        eq(new Resource("localhost")),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900003600))),
                         any(ResultDescriptor.class),
@@ -74,7 +75,7 @@ public class MeasurementsResourceTest {
         assertThat(
                 m_resource.getMeasurements(
                         "temps",
-                        "localhost",
+                        new Resource("localhost"),
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500"),
                         Optional.of("15m")),
@@ -84,7 +85,7 @@ public class MeasurementsResourceTest {
         assertThat(
                 m_resource.getMeasurements(
                         getResultDescriptorDTO(),
-                        "localhost",
+                        new Resource("localhost"),
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500"),
                         Optional.of("15m")),

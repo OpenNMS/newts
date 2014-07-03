@@ -26,17 +26,17 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class Sample implements Element<ValueType<?>>{
 
     private final Timestamp m_timestamp;
-    private final String m_resource;
+    private final Resource m_resource;
     private final String m_name;
     private final MetricType m_type;
     private final ValueType<?> m_value;
     private final Map<String, String> m_attributes;
 
-    public Sample(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value) {
+    public Sample(Timestamp timestamp, Resource resource, String name, MetricType type, ValueType<?> value) {
         this(timestamp, resource, name, type, value, null);
     }
 
-    public Sample(Timestamp timestamp, String resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
+    public Sample(Timestamp timestamp, Resource resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "timestamp");
         m_resource = checkNotNull(resource, "resource");
         m_name = checkNotNull(name, "name");
@@ -49,7 +49,7 @@ public class Sample implements Element<ValueType<?>>{
         return m_timestamp;
     }
 
-    public String getResource() {
+    public Resource getResource() {
         return m_resource;
     }
 

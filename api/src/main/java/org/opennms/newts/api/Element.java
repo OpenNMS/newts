@@ -26,7 +26,7 @@ public interface Element<T> {
 
     Timestamp getTimestamp();
 
-    String getResource();
+    Resource getResource();
 
     String getName();
 

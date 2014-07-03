@@ -1,14 +1,19 @@
 package org.opennms.newts.reporter.metrics;
 
 
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.concurrent.TimeUnit;
+
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
 import com.codahale.metrics.Clock;
-import com.codahale.metrics.ConsoleReporter.Builder;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -21,11 +26,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A reporter which creates a comma-separated values file of the measurements for each metric.
@@ -146,6 +146,7 @@ public class NewtsReporter extends ScheduledReporter {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void report(SortedMap<String, Gauge> gauges,
                        SortedMap<String, Counter> counters,
                        SortedMap<String, Histogram> histograms,
@@ -241,16 +242,16 @@ public class NewtsReporter extends ScheduledReporter {
     }
     
     private void reportC(List<Sample> samples, Timestamp timestamp, String resource, String metricName, long count) {
-        samples.add(new Sample(timestamp, this.name+"-"+resource, metricName, MetricType.COUNTER, counter(count)));
+        samples.add(new Sample(timestamp, resourceFor(resource), metricName, MetricType.COUNTER, counter(count)));
     }
     
     private void reportG(List<Sample> samples, Timestamp timestamp, String resource, String metricName, double val) {
-        Sample s = new Sample(timestamp, this.name+"-"+resource, metricName, MetricType.GAUGE, gauge(val));
+        Sample s = new Sample(timestamp, resourceFor(resource), metricName, MetricType.GAUGE, gauge(val));
         samples.add(s);
     }
     
     private void reportG(List<Sample> samples, Timestamp timestamp, String resource, String metricName, double val, Map<String, String> attrs) {
-        Sample s = new Sample(timestamp, this.name+"-"+resource, metricName, MetricType.GAUGE, gauge(val), attrs);
+        Sample s = new Sample(timestamp, resourceFor(resource), metricName, MetricType.GAUGE, gauge(val), attrs);
         samples.add(s);
     }
     
@@ -266,6 +267,10 @@ public class NewtsReporter extends ScheduledReporter {
         return val instanceof Number ?
             Optional.of(((Number)val).doubleValue()) :
             Optional.<Double>absent();
+    }
+
+    private Resource resourceFor(String name) {
+        return new Resource(String.format("%s-%s", this.name, name));
     }
 
 }

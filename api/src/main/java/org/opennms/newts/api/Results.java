@@ -30,10 +30,10 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
     public static class Row<T extends Element<?>> implements Iterable<T> {
 
         private Timestamp m_timestamp;
-        private String m_resource;
+        private Resource m_resource;
         private Map<String, T> m_cells = Maps.newHashMap();
 
-        public Row(Timestamp timestamp, String resource) {
+        public Row(Timestamp timestamp, Resource resource) {
             m_timestamp = timestamp;
             m_resource = resource;
         }
@@ -50,7 +50,7 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
             return m_timestamp;
         }
 
-        public String getResource() {
+        public Resource getResource() {
             return m_resource;
         }
 

@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Results.Row;
@@ -100,7 +101,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
     }
 
     private final ResultDescriptor m_resultDescriptor;
-    private final String m_resource;
+    private final Resource m_resource;
     private final Iterator<Timestamp> m_timestamps;
     private final Duration m_interval;
     private final Iterator<Row<Sample>> m_input;
@@ -109,7 +110,7 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
     private Row<Sample> m_current = null;
 
-    PrimaryData(String resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Iterator<Row<Sample>> input) {
+    PrimaryData(Resource resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Iterator<Row<Sample>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");

@@ -565,7 +565,7 @@ public class ImportRunner {
                     //System.err.println("Importing: " + sample);
                     bldr.newObject();
                     bldr.attr("timestamp", sample.getTimestamp().asMillis());
-                    bldr.attr("resource", sample.getResource());
+                    bldr.attr("resource", sample.getResource().getId());
                     bldr.attr("name", sample.getName());
                     bldr.attr("type", sample.getType().name());
                     if (sample.getType() == MetricType.GAUGE) {

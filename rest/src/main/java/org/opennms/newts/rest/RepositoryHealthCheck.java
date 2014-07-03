@@ -18,6 +18,7 @@ package org.opennms.newts.rest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
@@ -38,7 +39,7 @@ public class RepositoryHealthCheck extends HealthCheck {
     @Override
     protected Result check() throws Exception {
 
-        m_repository.select("notreal", Optional.of(Timestamp.fromEpochMillis(0)), Optional.of(Timestamp.fromEpochMillis(0)));
+        m_repository.select(new Resource("notreal"), Optional.of(Timestamp.fromEpochMillis(0)), Optional.of(Timestamp.fromEpochMillis(0)));
 
         return Result.healthy();
     }

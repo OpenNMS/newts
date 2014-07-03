@@ -25,6 +25,7 @@ import java.util.Iterator;
 import org.junit.Test;
 import org.opennms.newts.aggregate.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.ResultDescriptor.BinaryFunction;
@@ -55,7 +56,7 @@ public class ComputeTest {
     @Test
     public void test() {
 
-        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("in", 2).element("out", 2)
                 .row(600).element("in", 6).element("out", 4)
                 .build();
@@ -65,7 +66,7 @@ public class ComputeTest {
                 .datasource("out", AVERAGE)
                 .calculate("total", PLUS, "in", "out");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("in", 2).element("out", 2).element("total", 4)
                 .row(600).element("in", 6).element("out", 4).element("total", 10)
                 .build();
@@ -78,7 +79,7 @@ public class ComputeTest {
     
     @Test
     public void testCalcOfCalc() {
-        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost"))
             .row(300).element("in", 20).element("out", 20)
             .row(600).element("in", 60).element("out", 40)
             .build();
@@ -91,7 +92,7 @@ public class ComputeTest {
             .export("tens")
         ;
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
             .row(300).element("in", 20).element("out", 20).element("sum", 40).element("tens", 4)
             .row(600).element("in", 60).element("out", 40).element("sum", 100).element("tens", 10)
             .build();
@@ -104,7 +105,7 @@ public class ComputeTest {
 
     @Test
     public void testExpressions() {
-        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost"))
             .row(300).element("in", 20).element("out", 20)
             .row(600).element("in", 60).element("out", 40)
             .build();
@@ -117,7 +118,7 @@ public class ComputeTest {
             .expression("ratio", "diff/sum")
             .export("ratio");
 
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
             .row(300).element("in", 20).element("out", 20).element("sum", 40).element("diff", 0).element("ratio", 0)
             .row(600).element("in", 60).element("out", 40).element("sum", 100).element("diff", 20).element("ratio", 0.2)
             .build();

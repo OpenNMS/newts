@@ -27,6 +27,7 @@ import java.util.List;
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
@@ -42,7 +43,7 @@ public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
 
         List<Sample> samples = Lists.newArrayList();
         int rows = 10, cols = 3;
-        String resource = "r";
+        Resource resource = new Resource("r");
 
         for (int i = 1; i <= rows; i++) {
             Timestamp ts = Timestamp.fromEpochMillis(i * 1000);

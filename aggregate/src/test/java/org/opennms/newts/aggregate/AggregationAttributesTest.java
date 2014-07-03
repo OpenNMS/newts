@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.opennms.newts.aggregate.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -25,7 +26,7 @@ public class AggregationAttributesTest {
     @Test
     public void test() {
 
-        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(   1).element("m0", 1, mapFor("a", "1"))
                 .row( 300).element("m0", 1)
                 .row( 600).element("m0", 1)
@@ -46,7 +47,7 @@ public class AggregationAttributesTest {
                 .datasource("m0-max", "m0", Duration.seconds(600), MAX);
 
         Aggregation aggregation = new Aggregation(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(   1),
                 Timestamp.fromEpochSeconds(3300),
                 rDescriptor,

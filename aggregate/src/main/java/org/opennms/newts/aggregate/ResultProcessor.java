@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -32,13 +33,13 @@ import org.opennms.newts.api.query.ResultDescriptor;
 
 public class ResultProcessor {
 
-    private final String m_resource;
+    private final Resource m_resource;
     private final Timestamp m_start;
     private final Timestamp m_end;
     private final ResultDescriptor m_resultDescriptor;
     private final Duration m_resolution;
 
-    public ResultProcessor(String resource, Timestamp start, Timestamp end, ResultDescriptor descriptor, Duration resolution) {
+    public ResultProcessor(Resource resource, Timestamp start, Timestamp end, ResultDescriptor descriptor, Duration resolution) {
         m_resource = checkNotNull(resource, "resource argument");
         m_start = checkNotNull(start, "start argument");
         m_end = checkNotNull(end, "end argument");

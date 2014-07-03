@@ -26,6 +26,7 @@ import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
@@ -38,7 +39,7 @@ public class PrimaryDataTest {
     public void testLeadingSamplesMiss() {
 
         // Missing a couple leading samples
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(900000600).element("m0", 1)
                 .row(900000900).element("m0", 2)
                 .row(900001200).element("m0", 3)
@@ -48,7 +49,7 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(900000000).element("m0", Double.NaN)
                 .row(900000300).element("m0", Double.NaN)
                 .row(900000600).element("m0", 1)
@@ -57,7 +58,7 @@ public class PrimaryDataTest {
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(900000000),
                 Timestamp.fromEpochSeconds(900001200),
                 rDescriptor,
@@ -71,7 +72,7 @@ public class PrimaryDataTest {
     public void testShortSamples() {
 
         // Samples occur prior to the nearest step interval boundary.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(000).element("m0", 0).element("m1", 1)
                 .row(250).element("m0", 1).element("m1", 2)
                 .row(550).element("m0", 2).element("m1", 3)
@@ -83,14 +84,14 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("m0", 1.16666667).element("m1", 2.16666667)
                 .row(600).element("m0", 2.16666667).element("m1", 3.16666667)
                 .row(900).element("m0",        3.0).element("m1",        4.0)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,
@@ -104,7 +105,7 @@ public class PrimaryDataTest {
     public void testVeryShortSamples() {
 
         // Samples occur prior to the nearest step interval boundary.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(000).element("m0", 0).element("m1", 1)
                 .row(250).element("m0", 1).element("m1", 2)
                 .row(550).element("m0", 2).element("m1", 3)
@@ -116,7 +117,7 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("m0", 1.16666667).element("m1", 2.16666667)
                 .row(600).element("m0", 2.16666667).element("m1", 3.16666667)
                 .row(900).element("m0", 3.0).element("m1", 4.0)
@@ -125,7 +126,7 @@ public class PrimaryDataTest {
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(1500),
                 rDescriptor,
@@ -142,7 +143,7 @@ public class PrimaryDataTest {
     public void testSkippedSample() {
 
         // Sample m0 is missing at timestamp 550, (but interval does not exceed heartbeat).
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(  0).element("m0", 0).element("m1", 1)
                 .row(250).element("m0", 1).element("m1", 2)
                 .row(550).element("m1", 3)
@@ -154,14 +155,14 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("m0", 1.00000000).element("m1", 2.16666667)
                 .row(600).element("m0", 3.00000000).element("m1", 3.16666667)
                 .row(900).element("m0", 3.00000000).element("m1", 4.00000000)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,
@@ -175,7 +176,7 @@ public class PrimaryDataTest {
     public void testManyToOneSamples() {
 
         // Element interval is less than step size.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(   0).element("m0", 0).element("m1", 1)
                 .row( 300).element("m0", 1).element("m1", 2)
                 .row( 600).element("m0", 2).element("m1", 3)
@@ -191,13 +192,13 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(1800), null).datasource("m1", "m1", Duration.seconds(1800), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row( 900).element("m0", 2).element("m1", 3)
                 .row(1800).element("m0", 5).element("m1", 6)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds( 900),
                 Timestamp.fromEpochSeconds(1800),
                 rDescriptor,
@@ -211,7 +212,7 @@ public class PrimaryDataTest {
     public void testOneToOneSamples() {
 
         // Samples perfectly correlate to step interval boundaries.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(   0).element("m0", 0).element("m1", 1)
                 .row( 300).element("m0", 1).element("m1", 2)
                 .row( 600).element("m0", 2).element("m1", 3)
@@ -223,14 +224,14 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row(300).element("m0", 1).element("m1", 2)
                 .row(600).element("m0", 2).element("m1", 3)
                 .row(900).element("m0", 3).element("m1", 4)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,
@@ -244,7 +245,7 @@ public class PrimaryDataTest {
     public void testOneToManySamples() {
 
         // Actual sample interval is smaller than step size; One sample is mapped to many measurements
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(   0).element("m0", 0).element("m1", 1)
                 .row( 900).element("m0", 1).element("m1", 2)
                 .row(1800).element("m0", 2).element("m1", 3)
@@ -255,7 +256,7 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(1000), null).datasource("m1", "m1", Duration.seconds(1000), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row( 300).element("m0", 1).element("m1", 2)
                 .row( 600).element("m0", 1).element("m1", 2)
                 .row( 900).element("m0", 1).element("m1", 2)
@@ -265,7 +266,7 @@ public class PrimaryDataTest {
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds( 300),
                 Timestamp.fromEpochSeconds(1800),
                 rDescriptor,
@@ -279,7 +280,7 @@ public class PrimaryDataTest {
     public void testLongSamples() {
 
         // Samples occur later-than (after) the step interval.
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(  0).element("m0", 0).element("m1", 1)
                 .row(350).element("m0", 1).element("m1", 2)
                 .row(650).element("m0", 2).element("m1", 3)
@@ -291,14 +292,14 @@ public class PrimaryDataTest {
                 .datasource("m0", "m0", Duration.seconds(600), null).datasource("m1", "m1", Duration.seconds(600), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row( 300).element("m0",        1.0).element("m1",        2.0)
                 .row( 600).element("m0", 1.83333333).element("m1", 2.83333333)
                 .row( 900).element("m0", 2.83333333).element("m1", 3.83333333)
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,
@@ -312,7 +313,7 @@ public class PrimaryDataTest {
     public void testHeartbeatOneSample() {
 
         // Sample interval of 600 seconds (m1) exceeds heartbeat of 601
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(  0).element("m1", 1)
                 .row(300).element("m1", 2)
                 .row(900).element("m1", 4)
@@ -323,7 +324,7 @@ public class PrimaryDataTest {
                 .datasource("m1", "m1", Duration.seconds(601), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row( 300)
                     .element("m1", 2)
                 .row( 600)
@@ -333,7 +334,7 @@ public class PrimaryDataTest {
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,
@@ -347,7 +348,7 @@ public class PrimaryDataTest {
     public void testHeartbeatTwoSamples() {
 
         // Sample interval of 600 seconds (m1) exceeds heartbeat of 601
-        Iterator<Row<Sample>> testData = new SampleRowsBuilder("localhost", MetricType.GAUGE)
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
                 .row(  0)
                     .element("m0", 0)
                     .element("m1", 1)
@@ -368,7 +369,7 @@ public class PrimaryDataTest {
                 .datasource("m1", "m1", Duration.seconds(601), null);
 
         // Expected results
-        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder("localhost")
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
                 .row( 300)
                     .element("m0", 1)
                     .element("m1", 2)
@@ -381,7 +382,7 @@ public class PrimaryDataTest {
                 .build();
 
         PrimaryData primaryData = new PrimaryData(
-                "localhost",
+                new Resource("localhost"),
                 Timestamp.fromEpochSeconds(300),
                 Timestamp.fromEpochSeconds(900),
                 rDescriptor,

@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
@@ -36,11 +37,15 @@ import com.google.inject.Injector;
 
 public class ExportRunner {
 
+    static {
+        CmdLineParser.registerHandler(Resource.class, ResourceOptionHandler.class);
+    }
+
     private final SampleRepository m_repository;
     private final CmdLineParser m_parser = new CmdLineParser(this);
 
     @Option(name = "-r", usage = "resource name to query (required)")
-    private String m_resource;
+    private Resource m_resource;
 
     @Option(name = "-m", usage = "metric to query (required)")
     private String m_metric;

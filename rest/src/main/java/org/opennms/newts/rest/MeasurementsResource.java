@@ -31,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
@@ -61,7 +62,7 @@ public class MeasurementsResource {
     @Timed
     public Results<Measurement> getMeasurements(
             ResultDescriptorDTO descriptorDTO,
-            @PathParam("resource") String resource,
+            @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start,
             @QueryParam("end") Optional<String> end,
             @QueryParam("resolution") Optional<String> resolutionParam) {
@@ -109,7 +110,7 @@ public class MeasurementsResource {
     @Timed
     public Results<Measurement> getMeasurements(
             @PathParam("report") String report,
-            @PathParam("resource") String resource,
+            @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start,
             @QueryParam("end") Optional<String> end,
             @QueryParam("resolution") Optional<String> resolutionParam) {

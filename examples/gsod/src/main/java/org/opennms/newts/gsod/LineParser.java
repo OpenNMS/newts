@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.opennms.newts.api.Gauge;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.slf4j.Logger;
@@ -40,9 +41,9 @@ public class LineParser {
     
         List<Sample> samples = Lists.newArrayList();
     
-        String station = stringAt(line, 0);
-        String wban    = stringAt(line, 7);
-        String dateYMD = stringAt(line, 14);
+        Resource station = new Resource(stringAt(line, 0));
+        String wban      = stringAt(line, 7);
+        String dateYMD   = stringAt(line, 14);
     
         Date date = getDateFormat().parse(dateYMD);
     

@@ -21,6 +21,7 @@ import java.util.Collection;
 import javax.ws.rs.WebApplicationException;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
@@ -42,7 +43,7 @@ class Transform {
             public Sample apply(SampleDTO input) {
                 return new Sample(
                         Timestamp.fromEpochMillis(input.getTimestamp()),
-                        input.getResource(),
+                        new Resource(input.getResource()),
                         input.getName(),
                         input.getType(),
                         ValueType.compose(input.getValue(), input.getType()),

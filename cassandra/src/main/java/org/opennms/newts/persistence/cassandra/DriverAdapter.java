@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
@@ -144,8 +145,8 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
         return Timestamp.fromEpochMillis(row.getDate(SchemaConstants.F_COLLECTED).getTime());
     }
 
-    private static String getResource(com.datastax.driver.core.Row row) {
-        return row.getString(SchemaConstants.F_RESOURCE);
+    private static Resource getResource(com.datastax.driver.core.Row row) {
+        return new Resource(row.getString(SchemaConstants.F_RESOURCE));
     }
 
     private static Map<String, String> getAttributes(com.datastax.driver.core.Row row) {

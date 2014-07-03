@@ -34,10 +34,10 @@ public class ResultsSerializerTest {
     public void testMeasurements() throws JsonProcessingException {
 
         Results<Measurement> testData = new Results<>();
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), "localhost", "ifInOctets", 5000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), "localhost", "ifOutOctets", 6000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), "localhost", "ifInOctets", 6000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), "localhost", "ifOutOctets", 7000));
+        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifInOctets", 5000));
+        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifOutOctets", 6000));
+        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifInOctets", 6000));
+        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifOutOctets", 7000));
 
         String json = "["
                 + "  ["
@@ -82,26 +82,26 @@ public class ResultsSerializerTest {
         Results<Sample> testData = new Results<>();
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
-                "localhost",
+                new Resource("localhost"),
                 "ifInOctets",
                 COUNTER,
                 ValueType.compose(5000, COUNTER)));
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
-                "localhost",
+                new Resource("localhost"),
                 "ifOutOctets",
                 COUNTER,
                 ValueType.compose(6000, COUNTER),
                 attributes));
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
-                "localhost",
+                new Resource("localhost"),
                 "ifInOctets",
                 COUNTER,
                 ValueType.compose(6000, COUNTER)));
         testData.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
-                "localhost",
+                new Resource("localhost"),
                 "ifOutOctets",
                 COUNTER,
                 ValueType.compose(7000, COUNTER)));

@@ -30,6 +30,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
@@ -60,7 +61,7 @@ public class SamplesResource {
     @GET
     @Timed
     @Path("/{resource}")
-    public Results<Sample> getSamples(@PathParam("resource") String resource,
+    public Results<Sample> getSamples(@PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start, @QueryParam("end") Optional<String> end) {
 
         /*
