@@ -35,14 +35,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SampleDTO {
 
     private final long m_timestamp;
-    private final String m_resource;
+    private final ResourceDTO m_resource;
     private final String m_name;
     private final MetricType m_type;
     private final Number m_value;
     private final Map<String, String> m_attributes;
 
     @JsonCreator
-    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") String resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value, @JsonProperty("attributes") Map<String, String> attributes) {
+    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") ResourceDTO resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value, @JsonProperty("attributes") Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "m_timestamp argument");
         m_resource = checkNotNull(resource, "m_resource argument");
         m_name = checkNotNull(name, "m_name argument");
@@ -55,7 +55,7 @@ public class SampleDTO {
         return m_timestamp;
     }
 
-    public String getResource() {
+    public ResourceDTO getResource() {
         return m_resource;
     }
 

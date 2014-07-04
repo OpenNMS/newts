@@ -43,7 +43,7 @@ class Transform {
             public Sample apply(SampleDTO input) {
                 return new Sample(
                         Timestamp.fromEpochMillis(input.getTimestamp()),
-                        new Resource(input.getResource()),
+                        new Resource(input.getResource().getId(), input.getResource().getAttributes()),
                         input.getName(),
                         input.getType(),
                         ValueType.compose(input.getValue(), input.getType()),
