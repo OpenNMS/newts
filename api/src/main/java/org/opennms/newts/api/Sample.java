@@ -20,9 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonSerialize(using=SampleSerializer.class)
 public class Sample implements Element<ValueType<?>>{
 
     private final Timestamp m_timestamp;

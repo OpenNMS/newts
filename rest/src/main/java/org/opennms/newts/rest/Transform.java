@@ -21,15 +21,20 @@ import java.util.Collection;
 import javax.ws.rs.WebApplicationException;
 
 import org.opennms.newts.api.Duration;
+import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
+import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
 
+import com.clearspring.analytics.util.Lists;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 
 
 class Transform {
@@ -88,8 +93,65 @@ class Transform {
      *            samples to convert
      * @return converted samples
      */
-    static Collection<Sample> sampleDTOs(Collection<SampleDTO> samples) {
+    static Collection<Sample> samples(Collection<SampleDTO> samples) {
         return Collections2.transform(samples, DTO_TO_SAMPLE);
+    }
+
+    /**
+     * Convert samples to {@link SampleDTO}s.
+     *
+     * @param samples
+     *            samples to convert.
+     * @return converted samples.
+     */
+    static Collection<Collection<SampleDTO>> sampleDTOs(Results<Sample> samples) {
+        return Lists.newArrayList(Iterables.transform(samples, new Function<Results.Row<Sample>, Collection<SampleDTO>>() {
+
+            @Override
+            public Collection<SampleDTO> apply(Row<Sample> input) {
+                return Collections2.transform(input.getElements(), new Function<Sample, SampleDTO>() {
+
+                    @Override
+                    public SampleDTO apply(Sample input) {
+                        return new SampleDTO(
+                                input.getTimestamp().asMillis(),
+                                new ResourceDTO(input.getResource().getId(), input.getResource().getAttributes()),
+                                input.getName(),
+                                input.getType(),
+                                input.getValue(),
+                                input.getAttributes());
+                    }
+                });
+            }
+        }));
+    }
+
+    /**
+     * Convert measurements to {@link MeasurementDTO}s.
+     *
+     * @param measurements
+     *            measurements to convert.
+     * @return converted measurements.
+     */
+    static Collection<Collection<MeasurementDTO>> measurementDTOs(Results<Measurement> measurements) {
+        return Lists.newArrayList(Iterables.transform(measurements, new Function<Results.Row<Measurement>, Collection<MeasurementDTO>>() {
+
+            @Override
+            public Collection<MeasurementDTO> apply(Row<Measurement> input) {
+                return Collections2.transform(input.getElements(), new Function<Measurement, MeasurementDTO>() {
+
+                    @Override
+                    public MeasurementDTO apply(Measurement input) {
+                        return new MeasurementDTO(
+                                input.getTimestamp().asMillis(),
+                                new ResourceDTO(input.getResource().getId(), input.getResource().getAttributes()),
+                                input.getName(),
+                                input.getValue(),
+                                input.getAttributes());
+                    }
+                });
+            }
+        }));
     }
 
     /**

@@ -1,43 +1,43 @@
-/*
- * Copyright 2014, The OpenNMS Group
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- *     
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.opennms.newts.api;
+package org.opennms.newts.rest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.opennms.newts.api.MetricType.COUNTER;
 
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.opennms.newts.api.Measurement;
+import org.opennms.newts.api.Resource;
+import org.opennms.newts.api.Results;
+import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.ValueType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
+public class ResultSerializationTest {
 
-public class ResultsSerializerTest {
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
 
     @Test
     public void testMeasurements() throws JsonProcessingException {
-
-        Results<Measurement> testData = new Results<>();
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifInOctets", 5000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifOutOctets", 6000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifInOctets", 6000));
-        testData.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifOutOctets", 7000));
+        
+        Results<Measurement> data = new Results<>();
+        data.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifInOctets", 5000));
+        data.addElement(new Measurement(Timestamp.fromEpochSeconds(900000000), new Resource("localhost"), "ifOutOctets", 6000));
+        data.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifInOctets", 6000));
+        data.addElement(new Measurement(Timestamp.fromEpochSeconds(900000300), new Resource("localhost"), "ifOutOctets", 7000));
 
         String json = "["
                 + "  ["
@@ -66,10 +66,8 @@ public class ResultsSerializerTest {
                 + "  ]"
                 + "]";
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        assertThat(mapper.writeValueAsString(testData), is(normalize(json)));
-
+        assertThat(new ObjectMapper().writeValueAsString(Transform.measurementDTOs(data)), is(normalize(json)));
+        
     }
 
     @Test
@@ -79,27 +77,27 @@ public class ResultsSerializerTest {
         Map<String, String> attributes = Maps.newHashMap();
         attributes.put("units", "bytes");
 
-        Results<Sample> testData = new Results<>();
-        testData.addElement(new Sample(
+        Results<Sample> data = new Results<>();
+        data.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
                 new Resource("localhost"),
                 "ifInOctets",
                 COUNTER,
                 ValueType.compose(5000, COUNTER)));
-        testData.addElement(new Sample(
+        data.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000000),
                 new Resource("localhost"),
                 "ifOutOctets",
                 COUNTER,
                 ValueType.compose(6000, COUNTER),
                 attributes));
-        testData.addElement(new Sample(
+        data.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
                 new Resource("localhost"),
                 "ifInOctets",
                 COUNTER,
                 ValueType.compose(6000, COUNTER)));
-        testData.addElement(new Sample(
+        data.addElement(new Sample(
                 Timestamp.fromEpochSeconds(900000300),
                 new Resource("localhost"),
                 "ifOutOctets",
@@ -138,9 +136,7 @@ public class ResultsSerializerTest {
                 + "  ]"
                 + "]";
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        assertThat(mapper.writeValueAsString(testData), is(normalize(json)));
+        assertThat(new ObjectMapper().writeValueAsString(Transform.sampleDTOs(data)), is(normalize(json)));
 
     }
 

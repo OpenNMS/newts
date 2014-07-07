@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.api;
-
+package org.opennms.newts.rest;
 
 import java.io.IOException;
 
@@ -23,27 +22,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+public class SampleDTOSerializer extends JsonSerializer<SampleDTO> {
 
-public class ResultsSerializer extends JsonSerializer<Results<Element<?>>> {
-
-    /** {@inheritDoc} */
     @Override
-    public void serialize(Results<Element<?>> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+    public void serialize(SampleDTO value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+        jgen.writeStartObject();
+        jgen.writeStringField("name", value.getName());
+        jgen.writeNumberField("timestamp", value.getTimestamp());
+        jgen.writeStringField("type", value.getType().toString());
+        jgen.writeObjectField("value", value.getValue());
 
-        jgen.writeStartArray();
-
-        for (Results.Row<Element<?>> row : value) {
-            jgen.writeStartArray();
-
-            for (Element<?> elem : row.getElements()) {
-                provider.defaultSerializeValue(elem, jgen);
-            }
-
-            jgen.writeEndArray();
+        // Since attributes is optional, be compact and omit from JSON output when unused.
+        if (value.getAttributes() != null && !value.getAttributes().isEmpty()) {
+            jgen.writeObjectField("attributes", value.getAttributes());
         }
 
-        jgen.writeEndArray();
-
+        jgen.writeEndObject();
     }
 
 }

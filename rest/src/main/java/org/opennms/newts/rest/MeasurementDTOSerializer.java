@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.api;
+package org.opennms.newts.rest;
 
 import java.io.IOException;
 
@@ -22,15 +22,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-public class SampleSerializer extends JsonSerializer<Sample> {
+public class MeasurementDTOSerializer extends JsonSerializer<MeasurementDTO> {
 
     @Override
-    public void serialize(Sample value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+    public void serialize(MeasurementDTO value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
         jgen.writeStartObject();
         jgen.writeStringField("name", value.getName());
-        jgen.writeNumberField("timestamp", value.getTimestamp().asMillis());
-        jgen.writeStringField("type", value.getType().toString());
-        jgen.writeObjectField("value", value.getValue());
+        jgen.writeNumberField("timestamp", value.getTimestamp());
+        jgen.writeNumberField("value", value.getValue());
 
         // Since attributes is optional, be compact and omit from JSON output when unused.
         if (value.getAttributes() != null && !value.getAttributes().isEmpty()) {

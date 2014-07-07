@@ -18,6 +18,7 @@ package org.opennms.newts.rest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -30,9 +31,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
-import org.opennms.newts.api.Results;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -60,7 +59,7 @@ public class MeasurementsResource {
     @POST
     @Path("/{resource}")
     @Timed
-    public Results<Measurement> getMeasurements(
+    public Collection<Collection<MeasurementDTO>> getMeasurements(
             ResultDescriptorDTO descriptorDTO,
             @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start,
@@ -102,13 +101,13 @@ public class MeasurementsResource {
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        return m_repository.select(resource, lower, upper, rDescriptor, resolution.get());
+        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, resolution.get()));
     }
 
     @GET
     @Path("/{report}/{resource}")
     @Timed
-    public Results<Measurement> getMeasurements(
+    public Collection<Collection<MeasurementDTO>> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start,

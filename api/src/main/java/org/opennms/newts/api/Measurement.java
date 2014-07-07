@@ -20,10 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-
-@JsonSerialize(using=MeasurementSerializer.class)
 public class Measurement implements Element<Double> {
 
     private final Timestamp m_timestamp;

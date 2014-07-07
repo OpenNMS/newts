@@ -31,8 +31,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.opennms.newts.api.Resource;
-import org.opennms.newts.api.Results;
-import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
@@ -54,14 +52,14 @@ public class SamplesResource {
     @POST
     @Timed
     public Response writeSamples(Collection<SampleDTO> samples) {
-        m_sampleRepository.insert(Transform.sampleDTOs(samples));
+        m_sampleRepository.insert(Transform.samples(samples));
         return Response.status(Response.Status.CREATED).build();
     }
 
     @GET
     @Timed
     @Path("/{resource}")
-    public Results<Sample> getSamples(@PathParam("resource") Resource resource,
+    public Collection<Collection<SampleDTO>> getSamples(@PathParam("resource") Resource resource,
             @QueryParam("start") Optional<String> start, @QueryParam("end") Optional<String> end) {
 
         /*
@@ -75,7 +73,7 @@ public class SamplesResource {
         Optional<Timestamp> lower = Transform.timestampFromString(start);
         Optional<Timestamp> upper = Transform.timestampFromString(end);
 
-        return m_sampleRepository.select(resource, lower, upper);
+        return Transform.sampleDTOs(m_sampleRepository.select(resource, lower, upper));
 
     }
 

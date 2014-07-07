@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
@@ -59,8 +60,7 @@ public class MeasurementsResourceTest {
     @Test
     public void testGetMeasurements() throws Exception {
 
-        @SuppressWarnings("unchecked")
-        final Results<Measurement> results = mock(Results.class);
+        final Results<Measurement> results = new Results<>();
 
         when(
                 m_repository.select(
@@ -79,7 +79,7 @@ public class MeasurementsResourceTest {
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500"),
                         Optional.of("15m")),
-                CoreMatchers.is(results));
+                CoreMatchers.instanceOf(Collection.class));
 
         // Include the report in the request
         assertThat(
@@ -89,7 +89,7 @@ public class MeasurementsResourceTest {
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500"),
                         Optional.of("15m")),
-                CoreMatchers.is(results));
+                CoreMatchers.instanceOf(Collection.class));
     }
 
     private static ResultDescriptorDTO getResultDescriptorDTO() throws JsonProcessingException, IOException {

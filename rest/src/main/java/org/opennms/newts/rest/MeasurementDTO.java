@@ -20,8 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
-import org.opennms.newts.api.MetricType;
-import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.Measurement;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,27 +28,25 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 /**
- * Read-only data transfer object for {@link Sample}s.
- * 
+ * Read-only data transfer object for {@link Measurement}s.
+ *
  * @author eevans
  */
-@JsonSerialize(using=SampleDTOSerializer.class)
-public class SampleDTO {
+@JsonSerialize(using = MeasurementDTOSerializer.class)
+public class MeasurementDTO {
 
     private final long m_timestamp;
     private final ResourceDTO m_resource;
     private final String m_name;
-    private final MetricType m_type;
-    private final Number m_value;
+    private final double m_value;
     private final Map<String, String> m_attributes;
 
     @JsonCreator
-    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") ResourceDTO resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value, @JsonProperty("attributes") Map<String, String> attributes) {
-        m_timestamp = checkNotNull(timestamp, "m_timestamp argument");
-        m_resource = checkNotNull(resource, "m_resource argument");
-        m_name = checkNotNull(name, "m_name argument");
-        m_type = checkNotNull(type, "m_type argument");
-        m_value = checkNotNull(value, "m_value argument");
+    public MeasurementDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") ResourceDTO resource, @JsonProperty("name") String name, @JsonProperty("value") double value, @JsonProperty("attributes") Map<String, String> attributes) {
+        m_timestamp = checkNotNull(timestamp, "timestamp argument");
+        m_resource = checkNotNull(resource, "resource argument");
+        m_name = checkNotNull(name, "name argument");
+        m_value = checkNotNull(value, "value argument");
         m_attributes = attributes;
     }
 
@@ -65,11 +62,7 @@ public class SampleDTO {
         return m_name;
     }
 
-    public MetricType getType() {
-        return m_type;
-    }
-
-    public Number getValue() {
+    public double getValue() {
         return m_value;
     }
 

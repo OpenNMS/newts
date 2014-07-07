@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import javax.ws.rs.core.Response;
@@ -58,8 +59,7 @@ public class SamplesResourceTest {
     @Test
     public void testGetSamples() {
 
-        @SuppressWarnings("unchecked")
-        final Results<Sample> results = mock(Results.class);
+        final Results<Sample> results = new Results<>();
 
         when(
                 m_repository.select(
@@ -73,7 +73,7 @@ public class SamplesResourceTest {
                         new Resource("localhost"),
                         Optional.of("1998-07-09T11:00:00-0500"),
                         Optional.of("1998-07-09T12:00:00-0500")),
-                CoreMatchers.is(results));
+                CoreMatchers.instanceOf(Collection.class));
 
     }
 
