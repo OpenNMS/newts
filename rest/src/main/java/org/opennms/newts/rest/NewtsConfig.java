@@ -39,10 +39,6 @@ public class NewtsConfig extends Configuration {
     private CassandraConfig m_cassandraConfig = new CassandraConfig();
 
     @Valid
-    @JsonProperty("indexing")
-    private IndexingConfig m_indexingConfig = new IndexingConfig();
-
-    @Valid
     @JsonProperty("reports")
     private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
 
@@ -68,10 +64,6 @@ public class NewtsConfig extends Configuration {
 
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
-    }
-
-    public IndexingConfig getIndexingConfig() {
-        return m_indexingConfig;
     }
 
 }
