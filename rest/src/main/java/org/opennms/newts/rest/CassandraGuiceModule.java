@@ -32,11 +32,11 @@ import com.google.inject.multibindings.Multibinder;
  * 
  * @author eevans
  */
-public class CassandraModule extends AbstractModule {
+public class CassandraGuiceModule extends AbstractModule {
 
     private final NewtsConfig m_newtsConf;
 
-    public CassandraModule(NewtsConfig newtsConfig) {
+    public CassandraGuiceModule(NewtsConfig newtsConfig) {
         m_newtsConf = checkNotNull(newtsConfig, "newtsConfig argument");
     }
 

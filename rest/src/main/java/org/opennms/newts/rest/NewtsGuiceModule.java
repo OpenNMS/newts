@@ -24,7 +24,7 @@ import com.google.inject.AbstractModule;
  * 
  * @author eevans
  */
-public class NewtsModule extends AbstractModule {
+public class NewtsGuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
