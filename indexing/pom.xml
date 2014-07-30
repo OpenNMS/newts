@@ -13,12 +13,11 @@
   <artifactId>newts-index-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>New Timeseries Datastore :: Index</name>
+  <name>New Timeseries Datastore :: Search</name>
 
   <modules>
     <module>api</module>
     <module>cassandra</module>
-    <module>rest</module>
   </modules>
 
 </project>
