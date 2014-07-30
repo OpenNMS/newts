@@ -9,6 +9,7 @@ import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.MetricType;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
@@ -25,11 +26,11 @@ import com.google.common.base.Optional;
 public class SampleGenerator implements Iterable<Optional<Sample>>, Iterator<Optional<Sample>> {
 
     private final IntervalGenerator m_intervals;
-    private final String m_resource;
+    private final Resource m_resource;
     private final String m_metric;
 
     public SampleGenerator(String resource, String metric, Timestamp start, Timestamp end, Duration interval) {
-        m_resource = checkNotNull(resource, "resource argument");
+        m_resource = new Resource(checkNotNull(resource, "resource argument"));
         m_metric = checkNotNull(metric, "metric argument");
 
         checkNotNull(start, "start argument");
