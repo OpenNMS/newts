@@ -16,7 +16,6 @@
   <name>New Timeseries Datastore :: Search</name>
 
   <modules>
-    <module>api</module>
     <module>cassandra</module>
   </modules>
 
