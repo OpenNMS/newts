@@ -20,7 +20,7 @@
     <module>cassandra</module>
     <module>rest</module>
     <module>examples</module>
-    <module>indexing</module>
+    <module>search</module>
     <module>metrics-reporter</module>
     <module>karaf</module>
   </modules>
