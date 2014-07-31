@@ -17,31 +17,55 @@ import com.google.common.base.Objects;
  */
 public class Resource {
 
+    public static final String DEFAULT_APPLICATION = "D";
+
+    private final String m_application;
     private final String m_id;
     private final Map<String, String> m_attributes;
 
     /**
-     * Creates a new {@link Resource} instance with the supplied resource ID, and an empty set of
-     * attributes.
+     * Creates a new {@link Resource} instance with the supplied resource ID, default application
+     * ID, and an empty set of attributes.
      *
      * @param id
      *            the resource identifier.
      */
     public Resource(String id) {
-        this(id, Collections.<String, String> emptyMap());
+        this(id, Collections.<String, String>emptyMap());
+    }
+
+    /**
+     * Creates a new {@link Resource} instance with the supplied resource ID, attributes and the
+     * default application ID.
+     *
+     * @param id
+     *            the resource identifier.
+     */
+    public Resource(String id, Map<String, String> attributes) {
+        this(DEFAULT_APPLICATION, id, attributes);
     }
 
     /**
      * Creates a new {@link Resource} with the supplied ID.
      *
-     * @param parent
-     *            the parent resource.
+     * @param application
+     *            the parent application.
+     * @param id
+     *            resource identifier.
      * @param attributes
      *            attributes to associate with this resource.
      */
-    public Resource(String id, Map<String, String> attributes) {
+    public Resource(String application, String id, Map<String, String> attributes) {
+        m_application = checkNotNull(application, "application argument");
         m_id = checkNotNull(id, "id argument");
         m_attributes = checkNotNull(attributes, "attributes argument");
+    }
+
+    /**
+     * @return the application ID of this resource.
+     */
+    public String getApplication() {
+        return m_application;
     }
 
     /**
@@ -65,13 +89,13 @@ public class Resource {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId(), getAttributes());
+        return Objects.hashCode(getApplication(), getId(), getAttributes());
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Resource)) return false;
-        return getId().equals(((Resource) o).getId());
+        return getApplication().equals(((Resource)o).getApplication()) && getId().equals(((Resource) o).getId());
     }
 
 }
