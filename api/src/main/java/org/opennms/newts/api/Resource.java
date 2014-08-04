@@ -3,10 +3,10 @@ package org.opennms.newts.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collections;
 import java.util.Map;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 
 
 /**
@@ -21,7 +21,7 @@ public class Resource {
 
     private final String m_application;
     private final String m_id;
-    private final Map<String, String> m_attributes;
+    private final Optional<Map<String, String>> m_attributes;
 
     /**
      * Creates a new {@link Resource} instance with the supplied resource ID, default application
@@ -31,7 +31,7 @@ public class Resource {
      *            the resource identifier.
      */
     public Resource(String id) {
-        this(id, Collections.<String, String>emptyMap());
+        this(id, Optional.<Map<String, String>>absent());
     }
 
     /**
@@ -41,7 +41,7 @@ public class Resource {
      * @param id
      *            the resource identifier.
      */
-    public Resource(String id, Map<String, String> attributes) {
+    public Resource(String id, Optional<Map<String, String>> attributes) {
         this(DEFAULT_APPLICATION, id, attributes);
     }
 
@@ -55,7 +55,7 @@ public class Resource {
      * @param attributes
      *            attributes to associate with this resource.
      */
-    public Resource(String application, String id, Map<String, String> attributes) {
+    public Resource(String application, String id, Optional<Map<String, String>> attributes) {
         m_application = checkNotNull(application, "application argument");
         m_id = checkNotNull(id, "id argument");
         m_attributes = checkNotNull(attributes, "attributes argument");
@@ -78,7 +78,7 @@ public class Resource {
     /**
      * @return the set of attributes for this resource.
      */
-    public Map<String, String> getAttributes() {
+    public Optional<Map<String, String>> getAttributes() {
         return m_attributes;
     }
 

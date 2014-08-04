@@ -17,6 +17,8 @@ package org.opennms.newts.rest;
 
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -48,13 +50,18 @@ class Transform {
             public Sample apply(SampleDTO input) {
                 return new Sample(
                         Timestamp.fromEpochMillis(input.getTimestamp()),
-                        new Resource(input.getResource().getId(), input.getResource().getAttributes()),
+                        new Resource(input.getResource().getId(), wrapMap(input.getResource().getAttributes())),
                         input.getName(),
                         input.getType(),
                         ValueType.compose(input.getValue(), input.getType()),
                         input.getAttributes());
             }
         };
+    }
+
+    private static Optional<Map<String, String>> wrapMap(Map<String, String> map) {
+        if (map == null) return Optional.<Map<String, String>> absent();
+        return Optional.of(map);
     }
 
     /**
@@ -115,7 +122,7 @@ class Transform {
                     public SampleDTO apply(Sample input) {
                         return new SampleDTO(
                                 input.getTimestamp().asMillis(),
-                                new ResourceDTO(input.getResource().getId(), input.getResource().getAttributes()),
+                                new ResourceDTO(input.getResource().getId(), unwrapMap(input.getResource().getAttributes())),
                                 input.getName(),
                                 input.getType(),
                                 input.getValue(),
@@ -144,7 +151,7 @@ class Transform {
                     public MeasurementDTO apply(Measurement input) {
                         return new MeasurementDTO(
                                 input.getTimestamp().asMillis(),
-                                new ResourceDTO(input.getResource().getId(), input.getResource().getAttributes()),
+                                new ResourceDTO(input.getResource().getId(), unwrapMap(input.getResource().getAttributes())),
                                 input.getName(),
                                 input.getValue(),
                                 input.getAttributes());
@@ -152,6 +159,11 @@ class Transform {
                 });
             }
         }));
+    }
+
+    private static Map<String, String> unwrapMap(Optional<Map<String, String>> wrapped) {
+        if (!wrapped.isPresent()) return Collections.<String, String> emptyMap();
+        return wrapped.get();
     }
 
     /**
