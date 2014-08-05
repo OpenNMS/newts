@@ -6,16 +6,16 @@
 
   <parent>
     <groupId>org.opennms.newts</groupId>
-    <artifactId>newts-search-parent</artifactId>
+    <artifactId>newts-cassandra-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>newts-search-cassandra</artifactId>
-  <packaging>jar</packaging>
+  <artifactId>newts-cassandra-common</artifactId>
+  <packaging>bundle</packaging>
 
-  <name>New Timeseries Datastore :: Search :: Cassandra</name>
+  <name>New Timeseries Datastore :: Cassandra :: Common</name>
 
   <properties>
     <skipITs>true</skipITs>
@@ -23,16 +23,6 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-cassandra-common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -42,23 +32,12 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.datastax.cassandra</groupId>
+      <artifactId>cassandra-driver-core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>4.9.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <version>4.9.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-queryparser</artifactId>
-      <version>4.9.0</version>
     </dependency>
 
     <dependency>
@@ -67,9 +46,20 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-cassandra-test</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.cassandraunit</groupId>
+      <artifactId>cassandra-unit</artifactId>
+      <version>2.0.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
+        The cassandra-all dependency is here to override the version that
+        cassandra-unit depends on. Be sure to remove this when upgrading to
+        org.cassandraunit/cassandra-unit >= 2.0.3.0, (see CASSANDRA-6293).
+    -->
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-all</artifactId>
+      <version>2.0.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -88,6 +78,23 @@
   <build>
     <plugins>
       <plugin>
+	<groupId>org.apache.felix</groupId>
+	<artifactId>maven-bundle-plugin</artifactId>
+	<version>2.3.7</version>
+	<extensions>true</extensions>
+	<configuration>
+	  <instructions>
+	    <Export-Package>
+	      org.opennms.newts.cassandra*
+	    </Export-Package>
+	    <Import-Package>
+	      <![CDATA[javax.inject*;resolution:=optional,*]]>
+	    </Import-Package>
+	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
+	  </instructions>
+	</configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>2.16</version>
@@ -105,5 +112,5 @@
       </plugin>
     </plugins>
   </build>
-  
+
 </project>

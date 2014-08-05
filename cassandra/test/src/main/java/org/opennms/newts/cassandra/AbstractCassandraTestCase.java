@@ -1,0 +1,45 @@
+package org.opennms.newts.cassandra;
+
+
+import java.io.File;
+import java.io.IOException;
+
+import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
+import org.cassandraunit.dataset.CQLDataSet;
+import org.cassandraunit.dataset.cql.FileCQLDataSet;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
+
+
+public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
+
+    protected static final String CASSANDRA_CONFIG   = "cassandra.yaml";
+    protected static final String CASSANDRA_HOST     = "localhost";
+    protected static final int    CASSANDRA_PORT     = 9043;
+    protected static final String CASSANDRA_KEYSPACE = "newts";
+
+    protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
+    protected static final String SCHEMA_RESOURCE = "/schema.cql";
+
+    public AbstractCassandraTestCase() {
+        super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
+    }
+
+    @Override
+    public CQLDataSet getDataSet() {
+        try {
+            String schema = Resources.toString(getClass().getResource(SCHEMA_RESOURCE), Charsets.UTF_8);
+            schema = schema.replace(KEYSPACE_PLACEHOLDER, CASSANDRA_KEYSPACE);
+            File schemaFile = File.createTempFile("schema-", ".cql", new File("target"));
+            Files.write(schema, schemaFile, Charsets.UTF_8);
+
+            return new FileCQLDataSet(schemaFile.getAbsolutePath(), false, true, CASSANDRA_KEYSPACE);
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+}
