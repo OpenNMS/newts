@@ -17,6 +17,7 @@
 
   <modules>
     <module>common</module>
+    <module>search</module>
     <module>storage</module>
     <module>test</module>
   </modules>

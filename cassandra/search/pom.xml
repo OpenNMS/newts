@@ -12,10 +12,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>newts-search-cassandra</artifactId>
+  <artifactId>newts-cassandra-search</artifactId>
   <packaging>jar</packaging>
 
-  <name>New Timeseries Datastore :: Search :: Cassandra</name>
+  <name>New Timeseries Datastore :: Cassandra :: Search</name>
 
   <properties>
     <skipITs>true</skipITs>
