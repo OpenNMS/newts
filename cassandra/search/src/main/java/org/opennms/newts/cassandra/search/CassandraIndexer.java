@@ -3,6 +3,7 @@ package org.opennms.newts.cassandra.search;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -22,7 +23,7 @@ public class CassandraIndexer implements Indexer {
 
     @Inject
     public CassandraIndexer(CassandraSession session) {
-        m_session = session; // FIXME: non-null session
+        m_session = checkNotNull(session, "session argument");
     }
 
     @Override

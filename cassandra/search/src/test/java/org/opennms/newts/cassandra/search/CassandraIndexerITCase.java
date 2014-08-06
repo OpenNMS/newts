@@ -44,7 +44,11 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         assertThat(searcher.search("people").size(), equalTo(3));
         assertThat(searcher.search("metal").size(), equalTo(1));
-        assertThat(searcher.search("beverage", "beer").size(), equalTo(1));
+        assertThat(searcher.search("beverage:beer").size(), equalTo(1));
+
+        // Or'd terms
+        assertThat(searcher.search("metal", "country").size(), equalTo(2));
+        assertThat(searcher.search("beer", "wine").size(), equalTo(3));
 
     }
 
