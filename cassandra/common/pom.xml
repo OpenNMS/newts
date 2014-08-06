@@ -13,7 +13,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>newts-cassandra-common</artifactId>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
 
   <name>New Timeseries Datastore :: Cassandra :: Common</name>
 
@@ -74,43 +74,5 @@
     </dependency>
 
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-	<groupId>org.apache.felix</groupId>
-	<artifactId>maven-bundle-plugin</artifactId>
-	<version>2.3.7</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <instructions>
-	    <Export-Package>
-	      org.opennms.newts.cassandra*
-	    </Export-Package>
-	    <Import-Package>
-	      <![CDATA[javax.inject*;resolution:=optional,*]]>
-	    </Import-Package>
-	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
-	  </instructions>
-	</configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.16</version>
-        <configuration>
-          <skipITs>${skipITs}</skipITs>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>
