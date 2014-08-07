@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
@@ -36,22 +37,53 @@ public class CassandraIndexer implements Indexer {
                 batch.add(
                         insertInto(Constants.Schema.T_TERMS)
                             .value(Constants.Schema.C_TERMS_APP, sample.getResource().getApplication())
-                            .value(Constants.Schema.C_TERMS_FIELD, "_all")  // FIXME: don't hard-code
-                            .value(Constants.Schema.C_TERMS_TERM, field.getValue())
+                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
                 );
                 batch.add(
                         insertInto(Constants.Schema.T_TERMS)
                             .value(Constants.Schema.C_TERMS_APP, sample.getResource().getApplication())
                             .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
-                            .value(Constants.Schema.C_TERMS_TERM, field.getValue())
+                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
                 );
             }
+
+            maybeAddResourceAttributes(batch, sample.getResource());
+            maybeAddMetricName(batch, sample.getResource(), sample.getName());
+
         }
 
         m_session.execute(batch.toString());
 
+    }
+
+    // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
+    private void maybeAddResourceAttributes(Batch statement, Resource resource) {
+        if (!resource.getAttributes().isPresent()) {
+            return;
+        }
+
+        for (Entry<String, String> attr : resource.getAttributes().get().entrySet()) {
+            statement.add(
+                    insertInto(Constants.Schema.T_ATTRS)
+                        .value(Constants.Schema.C_ATTRS_APP, resource.getApplication())
+                        .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
+                        .value(Constants.Schema.C_ATTRS_ATTR, attr.getKey())
+                        .value(Constants.Schema.C_ATTRS_VALUE, attr.getValue())
+            );
+        }
+    }
+
+    // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
+    private void maybeAddMetricName(Batch statement, Resource resource, String name) {
+        statement.add(
+                insertInto(Constants.Schema.T_METRICS)
+                    .value(Constants.Schema.C_METRICS_APP, resource.getApplication())
+                    .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
+                    .value(Constants.Schema.C_METRICS_NAME, name)
+        );
     }
 
 }

@@ -1,7 +1,9 @@
 package org.opennms.newts.cassandra.search;
 
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -18,7 +20,6 @@ import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -50,6 +51,12 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         assertThat(searcher.search("metal", "country").size(), equalTo(2));
         assertThat(searcher.search("beer", "wine").size(), equalTo(3));
 
+        // Attributes too
+        Resource r = searcher.search("metal").iterator().next();
+        assertThat(r.getId(), is(equalTo("/aab")));
+        assertThat(r.getAttributes().isPresent(), is(true));
+        assertThat(r.getAttributes().get(), equalTo(map(base, "music", "metal", "beverage", "beer")));
+
     }
 
     private CassandraSession getCassandraSession() {
@@ -68,7 +75,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
     /** Returns a Map from an even number of strings, and a (copy of a )base map */
     private Map<String, String> map(Map<String, String> base, String... attrs) {
-        Preconditions.checkArgument((attrs.length % 2) == 0, "odd number of attrs!");
+        checkArgument((attrs.length % 2) == 0, "odd number of attrs!");
 
         Map<String, String> map = Maps.newHashMap(base);
 
