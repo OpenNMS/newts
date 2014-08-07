@@ -12,6 +12,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.opennms.newts.api.Resource;
+import org.opennms.newts.api.search.SearchResults;
+import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.search.Constants.Schema;
 
@@ -24,7 +26,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
-public class CassandraSearcher {
+// FIXME: Needs proper query string parser; half-assedness ahead
+public class CassandraSearcher implements Searcher {
+
+    private static Splitter s_tokenSplitter = Splitter.onPattern("\\s+").omitEmptyStrings().trimResults();
 
     private CassandraSession m_session;
 
@@ -49,11 +54,27 @@ public class CassandraSearcher {
         return attributes.size() > 0 ? Optional.of(attributes) : Optional.<Map<String, String>>absent();
     }
 
-    // FIXME: hard-coded application ID!
-    public Collection<Resource> search(String... terms) {
-        List<Resource> hits = Lists.newArrayList();
+    private Collection<String> fetchMetricNames(String appName, String resourceId) {
+        List<String> metricNames = Lists.newArrayList();
 
-        for (String term : terms) {
+        Statement select = select(Schema.C_METRICS_NAME).from(Schema.T_METRICS)
+                .where(eq(Schema.C_METRICS_APP, appName))
+                .and(  eq(Schema.C_METRICS_RESOURCE, resourceId));
+
+        ResultSet rs = m_session.execute(select.toString()); // FIXME: toString()?
+
+        for (Row row : rs) {
+            metricNames.add(row.getString(Schema.C_METRICS_NAME));
+        }
+
+        return metricNames;
+    }
+
+    // FIXME: hard-coded application ID!
+    public SearchResults search(String queryString) {
+        SearchResults searchResults = new SearchResults();
+
+        for (String term : s_tokenSplitter.splitToList(queryString)) {
 
             Term t = Term.parse(term);
 
@@ -67,11 +88,12 @@ public class CassandraSearcher {
             for (Row row : rs) {
                 String id = row.getString(Constants.Schema.C_TERMS_RESOURCE);
                 Optional<Map<String, String>> attrs = fetchResourceAttributes(Resource.DEFAULT_APPLICATION, id);
-                hits.add(new Resource(id, attrs));
+                Collection<String> metrics = fetchMetricNames(Resource.DEFAULT_APPLICATION, id);
+                searchResults.addResult(new Resource(id, attrs), metrics);
             }
         }
 
-        return hits;
+        return searchResults;
     }
 
     static class Term {

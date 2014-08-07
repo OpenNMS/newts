@@ -16,6 +16,7 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.search.Indexer;
+import org.opennms.newts.api.search.SearchResults.Result;
 import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
 
@@ -32,9 +33,9 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         Map<String, String> base = map("meat", "people", "bread", "beer");
         List<Sample> samples = Lists.newArrayList();
 
-        samples.add(sampleFor(new Resource("/aaa", Optional.of(base))));
-        samples.add(sampleFor(new Resource("/aab", Optional.of(map(base, "music", "metal", "beverage", "beer")))));
-        samples.add(sampleFor(new Resource("/aac", Optional.of(map(base, "music", "country")))));
+        samples.add(sampleFor(new Resource("/aaa", Optional.of(base)), "m0"));
+        samples.add(sampleFor(new Resource("/aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
+        samples.add(sampleFor(new Resource("/aac", Optional.of(map(base, "music", "country"))), "m0"));
 
         CassandraSession session = getCassandraSession();
         Indexer indexer = new CassandraIndexer(session);
@@ -48,14 +49,19 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         assertThat(searcher.search("beverage:beer").size(), equalTo(1));
 
         // Or'd terms
-        assertThat(searcher.search("metal", "country").size(), equalTo(2));
-        assertThat(searcher.search("beer", "wine").size(), equalTo(3));
+        assertThat(searcher.search("metal country").size(), equalTo(2));
+        assertThat(searcher.search("beer wine").size(), equalTo(3));
 
         // Attributes too
-        Resource r = searcher.search("metal").iterator().next();
-        assertThat(r.getId(), is(equalTo("/aab")));
-        assertThat(r.getAttributes().isPresent(), is(true));
-        assertThat(r.getAttributes().get(), equalTo(map(base, "music", "metal", "beverage", "beer")));
+        Result r = searcher.search("metal").iterator().next();
+        assertThat(r.getResource().getId(), is(equalTo("/aab")));
+        assertThat(r.getResource().getAttributes().isPresent(), is(true));
+        assertThat(r.getResource().getAttributes().get(), equalTo(map(base, "music", "metal", "beverage", "beer")));
+
+        // And metrics
+        r = searcher.search("metal").iterator().next();
+        assertThat(r.getMetrics().size(), equalTo(1));
+        assertThat(r.getMetrics().iterator().next(), equalTo("m0"));
 
     }
 
@@ -63,9 +69,9 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         return new CassandraSession(CASSANDRA_KEYSPACE, CASSANDRA_HOST, CASSANDRA_PORT);
     }
 
-    /** Creates a sample (any sample), for a given resource. */
-    private Sample sampleFor(Resource resource) {
-        return new Sample(Timestamp.now(), resource, "m0", MetricType.GAUGE, ValueType.compose(0.0d, MetricType.GAUGE));
+    /** Creates a sample (any sample), for a given resource and metric name. */
+    private Sample sampleFor(Resource resource, String metric) {
+        return new Sample(Timestamp.now(), resource, metric, MetricType.GAUGE, ValueType.compose(0.0d, MetricType.GAUGE));
     }
 
     /** Returns a Map from an even number of strings **/
