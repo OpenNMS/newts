@@ -41,6 +41,7 @@ public class CassandraSearcher implements Searcher {
     private Optional<Map<String, String>> fetchResourceAttributes(String appName, String resourceId) {
         Map<String, String> attributes = Maps.newHashMap();
 
+        // TODO: Use prepared statement.
         Statement searchQuery = select(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE).from(Constants.Schema.T_ATTRS)
                 .where(eq(Schema.C_ATTRS_APP, appName))
                 .and(  eq(Schema.C_ATTRS_RESOURCE, resourceId));
@@ -57,6 +58,7 @@ public class CassandraSearcher implements Searcher {
     private Collection<String> fetchMetricNames(String appName, String resourceId) {
         List<String> metricNames = Lists.newArrayList();
 
+        // TODO: Use prepared statement.
         Statement select = select(Schema.C_METRICS_NAME).from(Schema.T_METRICS)
                 .where(eq(Schema.C_METRICS_APP, appName))
                 .and(  eq(Schema.C_METRICS_RESOURCE, resourceId));
@@ -70,7 +72,7 @@ public class CassandraSearcher implements Searcher {
         return metricNames;
     }
 
-    // FIXME: hard-coded application ID!
+    // FIXME: use of hard-coded application ID!
     public SearchResults search(String queryString) {
         SearchResults searchResults = new SearchResults();
 
@@ -85,6 +87,7 @@ public class CassandraSearcher implements Searcher {
 
             ResultSet rs = m_session.execute(searchQuery.toString()); // FIXME: toString()?
 
+            // TODO: Use async DB calls; Get attrs and metrics concurrently
             for (Row row : rs) {
                 String id = row.getString(Constants.Schema.C_TERMS_RESOURCE);
                 Optional<Map<String, String>> attrs = fetchResourceAttributes(Resource.DEFAULT_APPLICATION, id);
