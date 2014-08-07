@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.Searcher;
@@ -46,15 +47,15 @@ public class CassandraSearcher implements Searcher {
             Term t = Term.parse(term);
 
             Statement searchQuery = select(Constants.Schema.C_TERMS_RESOURCE).from(Constants.Schema.T_TERMS)
-                    .where(eq(Constants.Schema.C_TERMS_APP, Resource.DEFAULT_APPLICATION))
+                    .where(eq(Constants.Schema.C_TERMS_CONTEXT, Context.DEFAULT_CONTEXT.getId()))
                     .and(  eq(Constants.Schema.C_TERMS_FIELD, t.getField()))
                     .and(  eq(Constants.Schema.C_TERMS_VALUE, t.getValue()));
 
             // TODO: Use async DB calls; Get attrs and metrics concurrently
             for (Row row : m_session.execute(searchQuery.toString())) {  // FIXME: toString()?
                 String id = row.getString(Constants.Schema.C_TERMS_RESOURCE);
-                Optional<Map<String, String>> attrs = fetchResourceAttributes(Resource.DEFAULT_APPLICATION, id);
-                Collection<String> metrics = fetchMetricNames(Resource.DEFAULT_APPLICATION, id);
+                Optional<Map<String, String>> attrs = fetchResourceAttributes(Context.DEFAULT_CONTEXT, id);
+                Collection<String> metrics = fetchMetricNames(Context.DEFAULT_CONTEXT, id);
 
                 searchResults.addResult(new Resource(id, attrs), metrics);
             }
@@ -63,12 +64,12 @@ public class CassandraSearcher implements Searcher {
         return searchResults;
     }
 
-    private Optional<Map<String, String>> fetchResourceAttributes(String appName, String resourceId) {
+    private Optional<Map<String, String>> fetchResourceAttributes(Context context, String resourceId) {
         Map<String, String> attributes = Maps.newHashMap();
 
         // TODO: Use prepared statement.
         Statement searchQuery = select(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE).from(Constants.Schema.T_ATTRS)
-                .where(eq(Schema.C_ATTRS_APP, appName))
+                .where(eq(Schema.C_ATTRS_CONTEXT, context.getId()))
                 .and(  eq(Schema.C_ATTRS_RESOURCE, resourceId));
 
         for (Row row : m_session.execute(searchQuery.toString())) {      // FIXME: toString()?
@@ -78,12 +79,12 @@ public class CassandraSearcher implements Searcher {
         return attributes.size() > 0 ? Optional.of(attributes) : Optional.<Map<String, String>>absent();
     }
 
-    private Collection<String> fetchMetricNames(String appName, String resourceId) {
+    private Collection<String> fetchMetricNames(Context context, String resourceId) {
         List<String> metricNames = Lists.newArrayList();
 
         // TODO: Use prepared statement.
         Statement select = select(Schema.C_METRICS_NAME).from(Schema.T_METRICS)
-                .where(eq(Schema.C_METRICS_APP, appName))
+                .where(eq(Schema.C_METRICS_CONTEXT, context.getId()))
                 .and(  eq(Schema.C_METRICS_RESOURCE, resourceId));
 
         for (Row row : m_session.execute(select.toString())) {  // FIXME: toString()?

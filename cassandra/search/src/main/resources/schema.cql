@@ -2,24 +2,24 @@ CREATE KEYSPACE $KEYSPACE$
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
 CREATE TABLE $KEYSPACE$.terms (
-    application text,
+    context text,
     field text,
     value text,
     resource text,
-    PRIMARY KEY((application, field, value), resource)
+    PRIMARY KEY((context, field, value), resource)
 );
 
 CREATE TABLE $KEYSPACE$.resource_attributes (
-    application text,
+    context text,
     resource text,
     attribute text,
     value text,
-    PRIMARY KEY((application, resource), attribute)
+    PRIMARY KEY((context, resource), attribute)
 );
 
 CREATE TABLE $KEYSPACE$.resource_metrics (
-    application text,
+    context text,
     resource text,
     metric_name text,
-    PRIMARY KEY((application, resource), metric_name)
+    PRIMARY KEY((context, resource), metric_name)
 );

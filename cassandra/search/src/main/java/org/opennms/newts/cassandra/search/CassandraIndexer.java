@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.search.Indexer;
@@ -36,22 +37,22 @@ public class CassandraIndexer implements Indexer {
             for (Entry<String, String> field : sample.getResource().getAttributes().get().entrySet()) {
                 batch.add(
                         insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_APP, sample.getResource().getApplication())
+                            .value(Constants.Schema.C_TERMS_CONTEXT, sample.getContext().getId())
                             .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
                             .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
                 );
                 batch.add(
                         insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_APP, sample.getResource().getApplication())
+                            .value(Constants.Schema.C_TERMS_CONTEXT, sample.getContext().getId())
                             .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
                             .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
                 );
             }
 
-            maybeAddResourceAttributes(batch, sample.getResource());
-            maybeAddMetricName(batch, sample.getResource(), sample.getName());
+            maybeAddResourceAttributes(batch, sample.getContext(), sample.getResource());
+            maybeAddMetricName(batch, sample.getContext(), sample.getResource(), sample.getName());
 
         }
 
@@ -60,7 +61,7 @@ public class CassandraIndexer implements Indexer {
     }
 
     // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
-    private void maybeAddResourceAttributes(Batch statement, Resource resource) {
+    private void maybeAddResourceAttributes(Batch statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
@@ -68,7 +69,7 @@ public class CassandraIndexer implements Indexer {
         for (Entry<String, String> attr : resource.getAttributes().get().entrySet()) {
             statement.add(
                     insertInto(Constants.Schema.T_ATTRS)
-                        .value(Constants.Schema.C_ATTRS_APP, resource.getApplication())
+                        .value(Constants.Schema.C_ATTRS_CONTEXT, context.getId())
                         .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
                         .value(Constants.Schema.C_ATTRS_ATTR, attr.getKey())
                         .value(Constants.Schema.C_ATTRS_VALUE, attr.getValue())
@@ -77,10 +78,10 @@ public class CassandraIndexer implements Indexer {
     }
 
     // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
-    private void maybeAddMetricName(Batch statement, Resource resource, String name) {
+    private void maybeAddMetricName(Batch statement, Context context, Resource resource, String name) {
         statement.add(
                 insertInto(Constants.Schema.T_METRICS)
-                    .value(Constants.Schema.C_METRICS_APP, resource.getApplication())
+                    .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
                     .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
                     .value(Constants.Schema.C_METRICS_NAME, name)
         );

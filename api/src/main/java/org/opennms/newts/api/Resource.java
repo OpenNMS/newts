@@ -17,9 +17,6 @@ import com.google.common.base.Optional;
  */
 public class Resource {
 
-    public static final String DEFAULT_APPLICATION = "D";
-
-    private final String m_application;
     private final String m_id;
     private final Optional<Map<String, String>> m_attributes;
 
@@ -35,37 +32,16 @@ public class Resource {
     }
 
     /**
-     * Creates a new {@link Resource} instance with the supplied resource ID, attributes and the
-     * default application ID.
-     *
-     * @param id
-     *            the resource identifier.
-     */
-    public Resource(String id, Optional<Map<String, String>> attributes) {
-        this(DEFAULT_APPLICATION, id, attributes);
-    }
-
-    /**
      * Creates a new {@link Resource} with the supplied ID.
      *
-     * @param application
-     *            the parent application.
      * @param id
      *            resource identifier.
      * @param attributes
      *            attributes to associate with this resource.
      */
-    public Resource(String application, String id, Optional<Map<String, String>> attributes) {
-        m_application = checkNotNull(application, "application argument");
+    public Resource(String id, Optional<Map<String, String>> attributes) {
         m_id = checkNotNull(id, "id argument");
         m_attributes = checkNotNull(attributes, "attributes argument");
-    }
-
-    /**
-     * @return the application ID of this resource.
-     */
-    public String getApplication() {
-        return m_application;
     }
 
     /**
@@ -89,13 +65,13 @@ public class Resource {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getApplication(), getId(), getAttributes());
+        return Objects.hashCode(getId(), getAttributes());
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Resource)) return false;
-        return getApplication().equals(((Resource)o).getApplication()) && getId().equals(((Resource) o).getId());
+        return getId().equals(((Resource) o).getId());
     }
 
 }
