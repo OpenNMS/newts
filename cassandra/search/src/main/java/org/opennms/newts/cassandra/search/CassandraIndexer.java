@@ -34,33 +34,40 @@ public class CassandraIndexer implements Indexer {
         Batch batch = batch();
 
         for (Sample sample : samples) {
-            for (Entry<String, String> field : sample.getResource().getAttributes().get().entrySet()) {
-                batch.add(
-                        insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_CONTEXT, sample.getContext().getId())
-                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
-                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                            .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
-                );
-                batch.add(
-                        insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_CONTEXT, sample.getContext().getId())
-                            .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
-                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                            .value(Constants.Schema.C_TERMS_RESOURCE, sample.getResource().getId())
-                );
-            }
-
+            maybeIndexResourceAttributes(batch, sample.getContext(), sample.getResource());
             maybeAddResourceAttributes(batch, sample.getContext(), sample.getResource());
             maybeAddMetricName(batch, sample.getContext(), sample.getResource(), sample.getName());
-
         }
 
         m_session.execute(batch.toString());
 
     }
 
-    // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
+    // TODO: Make these inserts conditional on presence in a cache of seen attributes
+    private void maybeIndexResourceAttributes(Batch statement, Context context, Resource resource) {
+        if (!resource.getAttributes().isPresent()) {
+            return;
+        }
+
+        for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
+            statement.add(
+                    insertInto(Constants.Schema.T_TERMS)
+                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                        .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                        .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+            );
+            statement.add(
+                    insertInto(Constants.Schema.T_TERMS)
+                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                        .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
+                        .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+            );
+        }
+    }
+
+    // TODO: Make these inserts conditional on presence in a cache of seen attributes
     private void maybeAddResourceAttributes(Batch statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
