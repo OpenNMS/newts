@@ -17,7 +17,6 @@ import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.search.Constants.Schema;
 
-import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Statement;
 import com.google.common.base.Optional;
@@ -38,6 +37,32 @@ public class CassandraSearcher implements Searcher {
         m_session = checkNotNull(session, "session argument");
     }
 
+    // FIXME: use of hard-coded application ID!
+    public SearchResults search(String queryString) {
+        SearchResults searchResults = new SearchResults();
+
+        for (String term : s_tokenSplitter.splitToList(queryString)) {
+
+            Term t = Term.parse(term);
+
+            Statement searchQuery = select(Constants.Schema.C_TERMS_RESOURCE).from(Constants.Schema.T_TERMS)
+                    .where(eq(Constants.Schema.C_TERMS_APP, Resource.DEFAULT_APPLICATION))
+                    .and(  eq(Constants.Schema.C_TERMS_FIELD, t.getField()))
+                    .and(  eq(Constants.Schema.C_TERMS_VALUE, t.getValue()));
+
+            // TODO: Use async DB calls; Get attrs and metrics concurrently
+            for (Row row : m_session.execute(searchQuery.toString())) {  // FIXME: toString()?
+                String id = row.getString(Constants.Schema.C_TERMS_RESOURCE);
+                Optional<Map<String, String>> attrs = fetchResourceAttributes(Resource.DEFAULT_APPLICATION, id);
+                Collection<String> metrics = fetchMetricNames(Resource.DEFAULT_APPLICATION, id);
+
+                searchResults.addResult(new Resource(id, attrs), metrics);
+            }
+        }
+
+        return searchResults;
+    }
+
     private Optional<Map<String, String>> fetchResourceAttributes(String appName, String resourceId) {
         Map<String, String> attributes = Maps.newHashMap();
 
@@ -46,9 +71,7 @@ public class CassandraSearcher implements Searcher {
                 .where(eq(Schema.C_ATTRS_APP, appName))
                 .and(  eq(Schema.C_ATTRS_RESOURCE, resourceId));
 
-        ResultSet rs = m_session.execute(searchQuery.toString()); // FIXME: toString()?
-
-        for (Row row : rs) {
+        for (Row row : m_session.execute(searchQuery.toString())) {      // FIXME: toString()?
             attributes.put(row.getString(Schema.C_ATTRS_ATTR), row.getString(Schema.C_ATTRS_VALUE));
         }
 
@@ -63,40 +86,11 @@ public class CassandraSearcher implements Searcher {
                 .where(eq(Schema.C_METRICS_APP, appName))
                 .and(  eq(Schema.C_METRICS_RESOURCE, resourceId));
 
-        ResultSet rs = m_session.execute(select.toString()); // FIXME: toString()?
-
-        for (Row row : rs) {
+        for (Row row : m_session.execute(select.toString())) {  // FIXME: toString()?
             metricNames.add(row.getString(Schema.C_METRICS_NAME));
         }
 
         return metricNames;
-    }
-
-    // FIXME: use of hard-coded application ID!
-    public SearchResults search(String queryString) {
-        SearchResults searchResults = new SearchResults();
-
-        for (String term : s_tokenSplitter.splitToList(queryString)) {
-
-            Term t = Term.parse(term);
-
-            Statement searchQuery = select(Constants.Schema.C_TERMS_RESOURCE).from(Constants.Schema.T_TERMS)
-                    .where(eq(Constants.Schema.C_TERMS_APP, Resource.DEFAULT_APPLICATION))
-                    .and(  eq(Constants.Schema.C_TERMS_FIELD, t.getField()))
-                    .and(  eq(Constants.Schema.C_TERMS_VALUE, t.getValue()));
-
-            ResultSet rs = m_session.execute(searchQuery.toString()); // FIXME: toString()?
-
-            // TODO: Use async DB calls; Get attrs and metrics concurrently
-            for (Row row : rs) {
-                String id = row.getString(Constants.Schema.C_TERMS_RESOURCE);
-                Optional<Map<String, String>> attrs = fetchResourceAttributes(Resource.DEFAULT_APPLICATION, id);
-                Collection<String> metrics = fetchMetricNames(Resource.DEFAULT_APPLICATION, id);
-                searchResults.addResult(new Resource(id, attrs), metrics);
-            }
-        }
-
-        return searchResults;
     }
 
     static class Term {
