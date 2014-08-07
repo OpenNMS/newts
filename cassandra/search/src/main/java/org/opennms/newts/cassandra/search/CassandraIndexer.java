@@ -6,6 +6,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
@@ -16,7 +17,8 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
 
-import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.RegularStatement;
+import com.google.common.collect.Lists;
 
 
 public class CassandraIndexer implements Indexer {
@@ -31,20 +33,22 @@ public class CassandraIndexer implements Indexer {
     @Override
     public void update(Collection<Sample> samples) {
 
-        Batch batch = batch();
+        List<RegularStatement> statements = Lists.newArrayList();
 
         for (Sample sample : samples) {
-            maybeIndexResourceAttributes(batch, sample.getContext(), sample.getResource());
-            maybeAddResourceAttributes(batch, sample.getContext(), sample.getResource());
-            maybeAddMetricName(batch, sample.getContext(), sample.getResource(), sample.getName());
+            maybeIndexResourceAttributes(statements, sample.getContext(), sample.getResource());
+            maybeAddResourceAttributes(statements, sample.getContext(), sample.getResource());
+            maybeAddMetricName(statements, sample.getContext(), sample.getResource(), sample.getName());
         }
 
-        m_session.execute(batch.toString());
+        if (statements.size() > 0) {
+            m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString());   // FIXME: toString()?
+        }
 
     }
 
     // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeIndexResourceAttributes(Batch statement, Context context, Resource resource) {
+    private void maybeIndexResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
@@ -68,7 +72,7 @@ public class CassandraIndexer implements Indexer {
     }
 
     // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeAddResourceAttributes(Batch statement, Context context, Resource resource) {
+    private void maybeAddResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
@@ -85,7 +89,7 @@ public class CassandraIndexer implements Indexer {
     }
 
     // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
-    private void maybeAddMetricName(Batch statement, Context context, Resource resource, String name) {
+    private void maybeAddMetricName(List<RegularStatement> statement, Context context, Resource resource, String name) {
         statement.add(
                 insertInto(Constants.Schema.T_METRICS)
                     .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
