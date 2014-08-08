@@ -15,4 +15,9 @@ public class Context {
         return m_id;
     }
 
+    @Override
+    public String toString() {
+        return "Context[m_id=" + m_id + "]";
+    }
+
 }
