@@ -35,6 +35,7 @@ public class CassandraIndexer implements Indexer {
 
         List<RegularStatement> statements = Lists.newArrayList();
 
+        // TODO: Deduplicate resources & metrics to minimize size of batch insert.
         for (Sample sample : samples) {
             maybeIndexResourceAttributes(statements, sample.getContext(), sample.getResource());
             maybeAddResourceAttributes(statements, sample.getContext(), sample.getResource());
