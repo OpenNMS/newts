@@ -3,7 +3,7 @@ package org.opennms.newts.api;
 
 public class Context {
 
-    public static final Context DEFAULT_CONTEXT = new Context("D");
+    public static final Context DEFAULT_CONTEXT = new Context("G");
 
     private final String m_id;
 
