@@ -27,6 +27,7 @@ import org.cassandraunit.dataset.cql.FileCQLDataSet;
 import org.junit.After;
 import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
+import org.opennms.newts.cassandra.CassandraSession;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
@@ -55,10 +56,9 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
+        CassandraSession session = new CassandraSession(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT);
         m_repository = new CassandraSampleRepository(
-                KEYSPACE_NAME,
-                CASSANDRA_HOST,
-                CASSANDRA_PORT,
+                session,
                 CASSANDRA_TTL,
                 new MetricRegistry(),
                 mock(SampleProcessorService.class));

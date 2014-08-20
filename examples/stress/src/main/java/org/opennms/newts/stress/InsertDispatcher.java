@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,13 @@ class InsertDispatcher extends Dispatcher {
         super(config);
 
         m_config = config;
-        m_repository = new CassandraSampleRepository(
+
+        CassandraSession session = new CassandraSession(
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
-                config.getCassandraPort(),
+                config.getCassandraPort());
+        m_repository = new CassandraSampleRepository(
+                session,
                 Config.CASSANDRA_TTL,
                 new MetricRegistry(),
                 new SampleProcessorService(1));

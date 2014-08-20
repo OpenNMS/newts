@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import javax.inject.Named;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
@@ -47,15 +47,14 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.cassandra.CassandraSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
@@ -67,7 +66,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraSampleRepository.class);
 
-    private Session m_session;
+    private CassandraSession m_session;
     @SuppressWarnings("unused") private final MetricRegistry m_registry;
     private SampleProcessorService m_processorService;
     private Duration m_resourceShard = Duration.seconds(600000);
@@ -75,23 +74,12 @@ public class CassandraSampleRepository implements SampleRepository {
     private int m_ttl;
 
     @Inject
-    public CassandraSampleRepository(
-            @Named("samples.cassandra.keyspace") String keyspace,
-            @Named("samples.cassandra.host") String host,
-            @Named("samples.cassandra.port") int port,
-            @Named("samples.cassandra.time-to-live") int ttl,
-            MetricRegistry registry,
-            SampleProcessorService processorService)
-    {
+    public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, MetricRegistry registry, SampleProcessorService processorService) {
 
-        checkNotNull(keyspace, "Cassandra keyspace argument");
-        checkNotNull(host, "Cassandra host argument");
+        m_session = checkNotNull(session, "session argument");
         checkArgument(ttl >= 0, "Negative Cassandra column TTL");
 
         m_ttl = ttl;
-
-        Cluster cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
-        m_session = cluster.connect(keyspace);
 
         m_registry = checkNotNull(registry, "metric registry argument");
         m_processorService = processorService;

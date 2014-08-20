@@ -10,6 +10,7 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.StandardAggregationFunctions;
+import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
@@ -31,10 +32,13 @@ public class SelectDispatcher extends Dispatcher {
         super(config);
 
         m_config = config;
-        m_repository = new CassandraSampleRepository(
+
+        CassandraSession session = new CassandraSession(
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
-                config.getCassandraPort(),
+                config.getCassandraPort());
+        m_repository = new CassandraSampleRepository(
+                session,
                 Config.CASSANDRA_TTL,
                 new MetricRegistry(),
                 new SampleProcessorService(1));

@@ -13,9 +13,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ShutdownFuture;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.exceptions.DriverException;
 
 
@@ -32,6 +36,21 @@ public class CassandraSession {
         Cluster cluster = Cluster.builder().withPort(port).addContactPoint(hostname).build();
         m_session = cluster.connect(keyspace);
 
+    }
+
+    public PreparedStatement prepare(RegularStatement statement) {
+        try                           {  return m_session.prepare(statement);  }
+        catch (DriverException excep) {  throw new CassandraException(excep);  } 
+    }
+
+    public ResultSetFuture executeAsync(Statement statement) {
+        try                           {  return m_session.executeAsync(statement);  }
+        catch (DriverException excep) {  throw new CassandraException(excep);  } 
+    }
+
+    public ResultSet execute(Statement statement) {
+        try                           {  return m_session.execute(statement);  }
+        catch (DriverException excep) {  throw new CassandraException(excep);  }
     }
 
     public ResultSet execute(String statement) {

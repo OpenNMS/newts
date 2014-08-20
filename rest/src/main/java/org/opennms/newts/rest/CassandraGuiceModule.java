@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.google.inject.AbstractModule;
@@ -43,9 +44,10 @@ public class CassandraGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(String.class).annotatedWith(named("samples.cassandra.keyspace")).toInstance(m_newtsConf.getCassandraKeyspace());
-        bind(String.class).annotatedWith(named("samples.cassandra.host")).toInstance(m_newtsConf.getCassandraHost());
-        bind(Integer.class).annotatedWith(named("samples.cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
+        bind(String.class).annotatedWith(named("cassandra.keyspace")).toInstance(m_newtsConf.getCassandraKeyspace());
+        bind(String.class).annotatedWith(named("cassandra.hostname")).toInstance(m_newtsConf.getCassandraHost());
+        bind(Integer.class).annotatedWith(named("cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
+
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
 
