@@ -21,7 +21,6 @@ import static com.google.inject.name.Names.named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
-import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.google.inject.AbstractModule;
