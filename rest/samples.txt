@@ -1,7 +1,7 @@
 [
   {
     "timestamp": 900000000000,
-    "resource": {"id": "localhost:chassis:temps"},
+    "resource": {"id": "localhost:chassis:temps", "attributes": {"location": "americas"}},
     "name": "inlet",
     "type": "GAUGE",
     "value": 100,

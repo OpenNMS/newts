@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.google.inject.AbstractModule;
@@ -52,7 +53,8 @@ public class CassandraGuiceModule extends AbstractModule {
 
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
-        Multibinder.newSetBinder(binder(), SampleProcessor.class);
+        Multibinder<SampleProcessor> processors = Multibinder.newSetBinder(binder(), SampleProcessor.class);
+        processors.addBinding().to(CassandraIndexerSampleProcessor.class);
 
     }
 

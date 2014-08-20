@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.cassandra.CassandraException;
@@ -18,6 +20,7 @@ public class CassandraIndexerSampleProcessor implements SampleProcessor {
 
     private final CassandraIndexer m_indexer;
 
+    @Inject
     public CassandraIndexerSampleProcessor(CassandraIndexer indexer) {
         m_indexer = checkNotNull(indexer, "indexer argument");
     }
