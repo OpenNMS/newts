@@ -15,14 +15,19 @@
  */
 package org.opennms.newts.rest;
 
-import org.opennms.newts.persistence.cassandra.SchemaManager;
+import java.util.ServiceLoader;
 
 import net.sourceforge.argparse4j.inf.Namespace;
+
+import org.opennms.newts.cassandra.SchemaManager;
+import org.opennms.newts.cassandra.Schema;
 
 import com.yammer.dropwizard.cli.ConfiguredCommand;
 import com.yammer.dropwizard.config.Bootstrap;
 
 public class InitCommand extends ConfiguredCommand<NewtsConfig> {
+
+    private static ServiceLoader<Schema> s_schemas = ServiceLoader.load(Schema.class);
 
     protected InitCommand() {
         super("init", "Perform one-time application initialization");
@@ -30,8 +35,10 @@ public class InitCommand extends ConfiguredCommand<NewtsConfig> {
 
     @Override
     protected void run(Bootstrap<NewtsConfig> bootstrap, Namespace namespace, NewtsConfig config) throws Exception {
-        try (SchemaManager manager = new SchemaManager(config.getCassandraKeyspace(), config.getCassandraHost(), config.getCassandraPort())) {
-            manager.create(true);
+        try (SchemaManager m = new SchemaManager(config.getCassandraKeyspace(), config.getCassandraHost(), config.getCassandraPort())) {
+            for (Schema s : s_schemas) {
+                m.create(s, true);
+            }
         }
     }
 

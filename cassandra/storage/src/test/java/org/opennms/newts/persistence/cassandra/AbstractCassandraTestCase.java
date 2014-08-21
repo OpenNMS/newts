@@ -45,7 +45,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     public static final String KEYSPACE_NAME = "newts";
 
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
-    protected static final String SCHEMA_RESOURCE = "/schema.cql";
+    protected static final String SCHEMA_RESOURCE = "/samples_schema.cql";
 
     protected CassandraSampleRepository m_repository;
 

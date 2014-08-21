@@ -22,16 +22,19 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected static final String CASSANDRA_KEYSPACE = "newts";
 
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
-    protected static final String SCHEMA_RESOURCE = "/schema.cql";
 
     public AbstractCassandraTestCase() {
         super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
     }
 
+    protected String getSchemaResource() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public CQLDataSet getDataSet() {
         try {
-            String schema = Resources.toString(getClass().getResource(SCHEMA_RESOURCE), Charsets.UTF_8);
+            String schema = Resources.toString(getClass().getResource(getSchemaResource()), Charsets.UTF_8);
             schema = schema.replace(KEYSPACE_PLACEHOLDER, CASSANDRA_KEYSPACE);
             File schemaFile = File.createTempFile("schema-", ".cql", new File("target"));
             Files.write(schema, schemaFile, Charsets.UTF_8);

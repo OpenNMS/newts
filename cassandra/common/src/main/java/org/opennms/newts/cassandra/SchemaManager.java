@@ -13,56 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opennms.newts.persistence.cassandra;
+package org.opennms.newts.cassandra;
 
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.inject.Named;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AlreadyExistsException;
+import com.datastax.driver.core.exceptions.SyntaxError;
 
 
 public class SchemaManager implements AutoCloseable {
 
     private static final String KEYSPACE = "$KEYSPACE$";
-    private static final String SCHEMA_FILE = "schema.cql";
 
     private String m_keyspace;
     private Cluster m_cluster;
     private Session m_session;
 
     @Inject
-    public SchemaManager(@Named("cassandraKeyspace") String keyspace, @Named("cassandraHost") String host, @Named("cassandraPort") int port) {
+    public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port) {
         m_keyspace = keyspace;
         m_cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
         m_session = m_cluster.connect();
     }
 
-    public void create() throws IOException {
-        create(true);
+    public void create(Schema schema) throws IOException {
+        create(schema, true);
     }
 
-    /**
-     * Loads the schema from a file in classpath.
-     *
-     * @param ifNotExists
-     *            ignore {@link AlreadyExistsException}s if true
-     * @throws IOException
-     */
-    public void create(boolean ifNotExists) throws IOException {
+    public void create(Schema schema, boolean ifNotExists) throws IOException {
 
-        InputStream stream = getClass().getResourceAsStream("/" + SCHEMA_FILE);
-
-        if (stream == null) {
-            throw new RuntimeException(String.format("%s missing from classpath!", SCHEMA_FILE));
-        }
+        checkNotNull(schema, "schema argument");
+        InputStream stream = checkNotNull(schema.get(), "schema input stream");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
@@ -74,8 +66,11 @@ public class SchemaManager implements AutoCloseable {
             statement.append(scrubbed);
 
             if (scrubbed.endsWith(";")) {
+                // Substitute the actual keyspace name for any KEYSPACE macros.
+                String queryString = statement.toString().replace(KEYSPACE, m_keyspace);
+
                 try {
-                    m_session.execute(statement.toString().replace(KEYSPACE, m_keyspace));
+                    m_session.execute(queryString);
                 }
                 catch (AlreadyExistsException e) {
                     if (ifNotExists) {
@@ -85,45 +80,23 @@ public class SchemaManager implements AutoCloseable {
                         throw e;
                     }
                 }
+                catch (SyntaxError e) {
+                    System.out.printf("ERROR: %s (query: \"%s\").%n", e.getLocalizedMessage(), queryString);
+                    throw e;
+                }
                 statement = new StringBuilder();
             }
         }
 
     }
 
-    private String scrub(String line) {
+    private static String scrub(String line) {
         return line.replace("\\s+", "").replace("//.*$", "").replace(";.*$", ";");
     }
 
     @Override
     public void close() throws Exception {
         m_cluster.shutdown();
-    }
-
-    public static void main(String... args) throws IOException {
-
-        String keyspace = System.getProperty("cassandraKeyspace", "newts");
-        String hostname = System.getProperty("cassandraHost", "localhost");
-        String port = System.getProperty("cassandraPort", "9042");
-        boolean ifSchemaNotExists = Boolean.valueOf(System.getProperty("ifSchemaNotExists", "true"));
-
-        int portNumber = -1;
-
-        try {
-            portNumber = Integer.valueOf(port);
-        }
-        catch (NumberFormatException e) {
-            System.err.printf("%s is an invalid port number", port);
-            System.exit(1);
-        }
-
-        try {
-            new SchemaManager(keyspace, hostname, portNumber).create(ifSchemaNotExists);
-        }
-        finally {
-            System.exit(0);
-        }
-
     }
 
 }

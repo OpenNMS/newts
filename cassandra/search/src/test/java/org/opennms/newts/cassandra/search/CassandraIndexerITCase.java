@@ -27,6 +27,11 @@ import com.google.common.collect.Maps;
 
 public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
+    @Override
+    protected String getSchemaResource() {
+        return "/search_schema.cql";
+    }
+
     @Test
     public void test() {
 
