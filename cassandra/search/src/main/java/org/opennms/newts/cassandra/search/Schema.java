@@ -5,7 +5,7 @@ import java.io.InputStream;
 public class Schema implements  org.opennms.newts.cassandra.Schema{
 
     @Override
-    public InputStream get() {
+    public InputStream getInputStream() {
         return getClass().getResourceAsStream("/search_schema.cql");
     }
 

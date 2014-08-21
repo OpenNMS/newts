@@ -54,7 +54,7 @@ public class SchemaManager implements AutoCloseable {
     public void create(Schema schema, boolean ifNotExists) throws IOException {
 
         checkNotNull(schema, "schema argument");
-        InputStream stream = checkNotNull(schema.get(), "schema input stream");
+        InputStream stream = checkNotNull(schema.getInputStream(), "schema input stream");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
