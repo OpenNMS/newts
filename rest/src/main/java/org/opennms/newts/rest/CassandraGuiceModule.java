@@ -21,7 +21,9 @@ import static com.google.inject.name.Names.named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
+import org.opennms.newts.cassandra.search.CassandraSearcher;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.google.inject.AbstractModule;
@@ -51,6 +53,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
 
+        bind(Searcher.class).to(CassandraSearcher.class);
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
         Multibinder<SampleProcessor> processors = Multibinder.newSetBinder(binder(), SampleProcessor.class);

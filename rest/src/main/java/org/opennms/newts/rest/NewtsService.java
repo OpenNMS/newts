@@ -18,6 +18,7 @@ package org.opennms.newts.rest;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.search.Searcher;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -49,7 +50,6 @@ public class NewtsService extends Service<NewtsConfig> {
         Injector injector = Guice.createInjector(new CassandraGuiceModule(config));
 
         MetricRegistry metricRegistry = injector.getInstance(MetricRegistry.class);
-        SampleRepository repository = injector.getInstance(SampleRepository.class);
 
         // Create/start a JMX reporter for our MetricRegistry
         final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("newts").build();
@@ -67,9 +67,13 @@ public class NewtsService extends Service<NewtsConfig> {
             }
         });
 
+        SampleRepository repository = injector.getInstance(SampleRepository.class);
+        Searcher searcher = injector.getInstance(Searcher.class);
+
         // Add rest resources
         environment.addResource(new MeasurementsResource(repository, config.getReports()));
         environment.addResource(new SamplesResource(repository));
+        environment.addResource(new SearchResource(searcher));
 
         // Health checks
         environment.addHealthCheck(new RepositoryHealthCheck(repository));
