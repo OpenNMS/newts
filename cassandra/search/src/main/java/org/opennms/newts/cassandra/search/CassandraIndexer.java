@@ -18,10 +18,13 @@ import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
 
 import com.datastax.driver.core.RegularStatement;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 
 public class CassandraIndexer implements Indexer {
+
+    private static Splitter s_pathSplitter = Splitter.on('/').omitEmptyStrings().trimResults();
 
     private CassandraSession m_session;
 
@@ -37,8 +40,9 @@ public class CassandraIndexer implements Indexer {
 
         // TODO: Deduplicate resources & metrics to minimize size of batch insert.
         for (Sample sample : samples) {
+            maybeIndexResource(statements, sample.getContext(), sample.getResource());
             maybeIndexResourceAttributes(statements, sample.getContext(), sample.getResource());
-            maybeAddResourceAttributes(statements, sample.getContext(), sample.getResource());
+            maybeStoreResourceAttributes(statements, sample.getContext(), sample.getResource());
             maybeAddMetricName(statements, sample.getContext(), sample.getResource(), sample.getName());
         }
 
@@ -46,6 +50,19 @@ public class CassandraIndexer implements Indexer {
             m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString());   // FIXME: toString()?
         }
 
+    }
+
+    // TODO: Make these inserts conditional on presence in a cache of seen attributes
+    private void maybeIndexResource(List<RegularStatement> statement, Context context, Resource resource) {
+        for (String s : s_pathSplitter.split(resource.getId())) {
+            statement.add(
+                    insertInto(Constants.Schema.T_TERMS)
+                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                        .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                        .value(Constants.Schema.C_TERMS_VALUE, s)
+                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+            );
+        }
     }
 
     // TODO: Make these inserts conditional on presence in a cache of seen attributes
@@ -73,7 +90,7 @@ public class CassandraIndexer implements Indexer {
     }
 
     // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeAddResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
+    private void maybeStoreResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }

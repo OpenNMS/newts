@@ -40,7 +40,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         samples.add(sampleFor(new Resource("/aaa", Optional.of(base)), "m0"));
         samples.add(sampleFor(new Resource("/aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
-        samples.add(sampleFor(new Resource("/aac", Optional.of(map(base, "music", "country"))), "m0"));
+        samples.add(sampleFor(new Resource("/aac/aaa", Optional.of(map(base, "music", "country"))), "m0"));
 
         CassandraSession session = getCassandraSession();
         Indexer indexer = new CassandraIndexer(session);
@@ -48,6 +48,10 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         indexer.update(samples);
 
         CassandraSearcher searcher = new CassandraSearcher(session);
+
+        // Path components
+        assertThat(searcher.search("aaa").size(), equalTo(2));
+        assertThat(searcher.search("aac").size(), equalTo(1));
 
         assertThat(searcher.search("people").size(), equalTo(3));
         assertThat(searcher.search("metal").size(), equalTo(1));
