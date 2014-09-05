@@ -43,7 +43,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         samples.add(sampleFor(new Resource("/aac/aaa", Optional.of(map(base, "music", "country"))), "m0"));
 
         CassandraSession session = getCassandraSession();
-        Indexer indexer = new CassandraIndexer(session);
+        Indexer indexer = new CassandraIndexer(session, new GuavaResourceMetadataCache(10000));
 
         indexer.update(samples);
 

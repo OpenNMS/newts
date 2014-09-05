@@ -7,6 +7,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import org.opennms.newts.cassandra.CassandraSession;
 import com.datastax.driver.core.RegularStatement;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 
 public class CassandraIndexer implements Indexer {
@@ -27,93 +29,125 @@ public class CassandraIndexer implements Indexer {
     private static Splitter s_pathSplitter = Splitter.on('/').omitEmptyStrings().trimResults();
 
     private CassandraSession m_session;
+    private ResourceMetadataCache m_cache;
 
     @Inject
-    public CassandraIndexer(CassandraSession session) {
+    public CassandraIndexer(CassandraSession session, ResourceMetadataCache cache) {
         m_session = checkNotNull(session, "session argument");
+        m_cache = checkNotNull(cache, "cache argument");
     }
 
     @Override
     public void update(Collection<Sample> samples) {
 
         List<RegularStatement> statements = Lists.newArrayList();
+        Map<Context, Map<Resource, ResourceMetadata>> cacheQueue = Maps.newHashMap();
 
         // TODO: Deduplicate resources & metrics to minimize size of batch insert.
         for (Sample sample : samples) {
-            maybeIndexResource(statements, sample.getContext(), sample.getResource());
-            maybeIndexResourceAttributes(statements, sample.getContext(), sample.getResource());
-            maybeStoreResourceAttributes(statements, sample.getContext(), sample.getResource());
-            maybeAddMetricName(statements, sample.getContext(), sample.getResource(), sample.getName());
+            maybeIndexResource(cacheQueue, statements, sample.getContext(), sample.getResource());
+            maybeIndexResourceAttributes(cacheQueue, statements, sample.getContext(), sample.getResource());
+            maybeAddMetricName(cacheQueue, statements, sample.getContext(), sample.getResource(), sample.getName());
         }
 
         if (statements.size() > 0) {
             m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString());   // FIXME: toString()?
         }
 
+        // Order matters here; We want the cache updated only after a successful Cassandra write.
+        for (Context context : cacheQueue.keySet()) {
+            for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
+                m_cache.put(context, entry.getKey(), entry.getValue());
+            }
+        }
+
     }
 
-    // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeIndexResource(List<RegularStatement> statement, Context context, Resource resource) {
-        for (String s : s_pathSplitter.split(resource.getId())) {
-            statement.add(
-                    insertInto(Constants.Schema.T_TERMS)
-                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                        .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
-                        .value(Constants.Schema.C_TERMS_VALUE, s)
-                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-            );
+    private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
+        if (!m_cache.get(context, resource).isPresent()) {
+            for (String s : s_pathSplitter.split(resource.getId())) {
+                statement.add(
+                        insertInto(Constants.Schema.T_TERMS)
+                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                            .value(Constants.Schema.C_TERMS_VALUE, s)
+                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                );
+            }
+
+            getOrCreateResourceMetadata(context, resource, cacheQueue);
         }
     }
 
-    // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeIndexResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
+    private void maybeIndexResourceAttributes(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
 
+        ResourceMetadata rMetadata = getOrCreateResourceMetadata(context, resource, cacheQueue);
+        
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
-            statement.add(
-                    insertInto(Constants.Schema.T_TERMS)
-                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                        .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
-                        .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-            );
-            statement.add(
-                    insertInto(Constants.Schema.T_TERMS)
-                        .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                        .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
-                        .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                        .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-            );
+            if (!rMetadata.containsAttribute(field.getKey(), field.getValue())) {
+                // Search indexing
+                statement.add(
+                        insertInto(Constants.Schema.T_TERMS)
+                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                );
+                statement.add(
+                        insertInto(Constants.Schema.T_TERMS)
+                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                            .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
+                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                );
+                // Storage
+                statement.add(
+                        insertInto(Constants.Schema.T_ATTRS)
+                            .value(Constants.Schema.C_ATTRS_CONTEXT, context.getId())
+                            .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
+                            .value(Constants.Schema.C_ATTRS_ATTR, field.getKey())
+                            .value(Constants.Schema.C_ATTRS_VALUE, field.getValue())
+                );
+
+                rMetadata.putAttribute(field.getKey(), field.getValue());
+            }
         }
     }
 
-    // TODO: Make these inserts conditional on presence in a cache of seen attributes
-    private void maybeStoreResourceAttributes(List<RegularStatement> statement, Context context, Resource resource) {
-        if (!resource.getAttributes().isPresent()) {
-            return;
-        }
+    private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, String name) {
+        
+        ResourceMetadata rMetadata = getOrCreateResourceMetadata(context, resource, cacheQueue);
 
-        for (Entry<String, String> attr : resource.getAttributes().get().entrySet()) {
+        if (!rMetadata.containsMetric(name)) {
             statement.add(
-                    insertInto(Constants.Schema.T_ATTRS)
-                        .value(Constants.Schema.C_ATTRS_CONTEXT, context.getId())
-                        .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
-                        .value(Constants.Schema.C_ATTRS_ATTR, attr.getKey())
-                        .value(Constants.Schema.C_ATTRS_VALUE, attr.getValue())
+                    insertInto(Constants.Schema.T_METRICS)
+                        .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
+                        .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
+                        .value(Constants.Schema.C_METRICS_NAME, name)
             );
+            
+            rMetadata.putMetric(name);
         }
     }
 
-    // TODO: Make the add conditional on metric's presence in a cache of "seen" metrics.
-    private void maybeAddMetricName(List<RegularStatement> statement, Context context, Resource resource, String name) {
-        statement.add(
-                insertInto(Constants.Schema.T_METRICS)
-                    .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
-                    .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
-                    .value(Constants.Schema.C_METRICS_NAME, name)
-        );
+    private static ResourceMetadata getOrCreateResourceMetadata(Context context, Resource resource, Map<Context, Map<Resource, ResourceMetadata>> map) {
+
+        Map<Resource, ResourceMetadata> inner = map.get(context);
+        if (inner == null) {
+            inner = Maps.newHashMap();
+            map.put(context, inner);
+        }
+
+        ResourceMetadata rMeta = inner.get(resource);
+        if (rMeta == null) {
+            rMeta = new ResourceMetadata();
+            inner.put(resource, rMeta);
+        }
+
+        return rMeta;
     }
 
 }

@@ -24,6 +24,8 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
 import org.opennms.newts.cassandra.search.CassandraSearcher;
+import org.opennms.newts.cassandra.search.GuavaResourceMetadataCache;
+import org.opennms.newts.cassandra.search.ResourceMetadataCache;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.google.inject.AbstractModule;
@@ -52,7 +54,10 @@ public class CassandraGuiceModule extends AbstractModule {
 
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
+        
+        bind(Long.class).annotatedWith(named("search.rMetadata.maxCacheSize")).toInstance(1000000L);
 
+        bind(ResourceMetadataCache.class).to(GuavaResourceMetadataCache.class);
         bind(Searcher.class).to(CassandraSearcher.class);
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
