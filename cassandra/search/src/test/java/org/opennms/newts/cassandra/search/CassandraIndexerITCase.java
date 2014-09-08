@@ -5,11 +5,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
@@ -43,7 +48,11 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         samples.add(sampleFor(new Resource("/aac/aaa", Optional.of(map(base, "music", "country"))), "m0"));
 
         CassandraSession session = getCassandraSession();
-        Indexer indexer = new CassandraIndexer(session, new GuavaResourceMetadataCache(10000));
+
+        ResourceMetadataCache mockCache = mock(ResourceMetadataCache.class);
+        when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+
+        Indexer indexer = new CassandraIndexer(session, mockCache);
 
         indexer.update(samples);
 
