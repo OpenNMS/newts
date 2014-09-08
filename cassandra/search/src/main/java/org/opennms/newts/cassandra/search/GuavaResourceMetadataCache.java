@@ -25,11 +25,6 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
     }
 
     @Override
-    public void put(Context context, Resource resource, ResourceMetadata resourceMetadata) {
-        m_cache.put(key(context, resource), resourceMetadata);
-    }
-
-    @Override
     public Optional<ResourceMetadata> get(Context context, Resource resourceId) {
         ResourceMetadata r = m_cache.getIfPresent(key(context, resourceId));
         return (r != null) ? Optional.of(r) : Optional.<ResourceMetadata>absent();
@@ -37,6 +32,20 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
 
     private String key(Context context, Resource resource) {
         return m_keyJoiner.join(context.getId(), resource.getId());
+    }
+
+    @Override
+    public void merge(Context context, Resource resource, ResourceMetadata rMetadata) {
+
+        Optional<ResourceMetadata> o = get(context, resource);
+
+        if (!o.isPresent()) {
+            m_cache.put(key(context, resource), rMetadata);
+            return;
+        }
+
+        o.get().merge(rMetadata);
+
     }
 
 }

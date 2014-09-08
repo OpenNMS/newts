@@ -57,7 +57,7 @@ public class CassandraIndexer implements Indexer {
         // Order matters here; We want the cache updated only after a successful Cassandra write.
         for (Context context : cacheQueue.keySet()) {
             for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
-                m_cache.put(context, entry.getKey(), entry.getValue());
+                m_cache.merge(context, entry.getKey(), entry.getValue());
             }
         }
 

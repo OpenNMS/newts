@@ -10,8 +10,8 @@ import com.google.common.collect.Sets;
 
 public class ResourceMetadata {
 
-    private final Set<String> m_metrics = Sets.newHashSet();
-    private final Map<String, String> m_attributes = Maps.newHashMap();
+    private final Set<String> m_metrics = Sets.newConcurrentHashSet();
+    private final Map<String, String> m_attributes = Maps.newConcurrentMap();
 
     public boolean containsMetric(String metric) {
         return m_metrics.contains(metric);
@@ -27,6 +27,11 @@ public class ResourceMetadata {
 
     public void putAttribute(String key, String value) {
         m_attributes.put(key, value);
+    }
+
+    public void merge(ResourceMetadata other) {
+        m_metrics.addAll(other.m_metrics);
+        m_attributes.putAll(other.m_attributes);
     }
 
 }
