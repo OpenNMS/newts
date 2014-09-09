@@ -19,6 +19,7 @@ import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
 
 import com.datastax.driver.core.RegularStatement;
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -84,10 +85,10 @@ public class CassandraIndexer implements Indexer {
             return;
         }
 
-        ResourceMetadata rMetadata = getOrCreateResourceMetadata(context, resource, cacheQueue);
+        Optional<ResourceMetadata> cached = m_cache.get(context, resource);
         
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
-            if (!rMetadata.containsAttribute(field.getKey(), field.getValue())) {
+            if (!(cached.isPresent() && cached.get().containsAttribute(field.getKey(), field.getValue()))) {
                 // Search indexing
                 statement.add(
                         insertInto(Constants.Schema.T_TERMS)
@@ -112,16 +113,16 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_ATTRS_VALUE, field.getValue())
                 );
 
-                rMetadata.putAttribute(field.getKey(), field.getValue());
+                getOrCreateResourceMetadata(context, resource, cacheQueue).putAttribute(field.getKey(), field.getValue());
             }
         }
     }
 
     private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, String name) {
-        
-        ResourceMetadata rMetadata = getOrCreateResourceMetadata(context, resource, cacheQueue);
 
-        if (!rMetadata.containsMetric(name)) {
+        Optional<ResourceMetadata> cached = m_cache.get(context, resource);
+
+        if (!(cached.isPresent() && cached.get().containsMetric(name))) {
             statement.add(
                     insertInto(Constants.Schema.T_METRICS)
                         .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
@@ -129,7 +130,7 @@ public class CassandraIndexer implements Indexer {
                         .value(Constants.Schema.C_METRICS_NAME, name)
             );
             
-            rMetadata.putMetric(name);
+            getOrCreateResourceMetadata(context, resource, cacheQueue).putMetric(name);
         }
     }
 

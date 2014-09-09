@@ -5,15 +5,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Resource;
@@ -80,6 +83,24 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         r = searcher.search("metal").iterator().next();
         assertThat(r.getMetrics().size(), equalTo(1));
         assertThat(r.getMetrics().iterator().next(), equalTo("m0"));
+
+    }
+
+    @Test
+    public void testCache() {
+
+        ResourceMetadataCache cache = mock(ResourceMetadataCache.class);
+        when(cache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+
+        Indexer indexer = new CassandraIndexer(getCassandraSession(), cache);
+
+        Sample s = sampleFor(new Resource("/aaa", Optional.of(map("beverage", "beer"))), "m0");
+        indexer.update(Collections.singletonList(s));
+
+        ResourceMetadata expected = new ResourceMetadata().putMetric("m0").putAttribute("beverage", "beer");
+
+        verify(cache, atLeast(1)).get(any(Context.class), any(Resource.class));
+        verify(cache).merge(any(Context.class), any(Resource.class), eq(expected));
 
     }
 
