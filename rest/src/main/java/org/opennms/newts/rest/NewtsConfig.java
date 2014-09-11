@@ -35,6 +35,10 @@ public class NewtsConfig extends Configuration {
     private int m_maxThreads = 64;
 
     @Valid
+    @JsonProperty("search")
+    private SearchConfig m_searchConfig = new SearchConfig();
+    
+    @Valid
     @JsonProperty("cassandra")
     private CassandraConfig m_cassandraConfig = new CassandraConfig();
 
@@ -44,6 +48,10 @@ public class NewtsConfig extends Configuration {
 
     public int getMaxSampleProcessorThreads() {
         return m_maxThreads;
+    }
+
+    public SearchConfig getSearchConfig() {
+        return m_searchConfig;
     }
 
     public String getCassandraKeyspace() {

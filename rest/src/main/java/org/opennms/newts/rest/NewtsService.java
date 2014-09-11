@@ -68,12 +68,15 @@ public class NewtsService extends Service<NewtsConfig> {
         });
 
         SampleRepository repository = injector.getInstance(SampleRepository.class);
-        Searcher searcher = injector.getInstance(Searcher.class);
 
         // Add rest resources
         environment.addResource(new MeasurementsResource(repository, config.getReports()));
         environment.addResource(new SamplesResource(repository));
-        environment.addResource(new SearchResource(searcher));
+
+        // Add search resource only if search is enabled
+        if (config.getSearchConfig().isEnabled()) {
+            environment.addResource(new SearchResource(injector.getInstance(Searcher.class)));
+        }
 
         // Health checks
         environment.addHealthCheck(new RepositoryHealthCheck(repository));

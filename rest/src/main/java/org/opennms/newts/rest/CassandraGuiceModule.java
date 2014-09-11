@@ -62,7 +62,11 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
         Multibinder<SampleProcessor> processors = Multibinder.newSetBinder(binder(), SampleProcessor.class);
-        processors.addBinding().to(CassandraIndexerSampleProcessor.class);
+
+        // Only add the search indexer if search is enabled
+        if (m_newtsConf.getSearchConfig().isEnabled()) {
+            processors.addBinding().to(CassandraIndexerSampleProcessor.class);
+        }
 
     }
 

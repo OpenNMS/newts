@@ -9,6 +9,10 @@ cassandra:
   port: 9042
   time-to-live: 31536000
 
+# Resource search indexing
+search:
+  enabled: true
+
 logging:
   level: INFO
 
