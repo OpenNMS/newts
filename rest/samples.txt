@@ -1,0 +1,203 @@
+[
+  {
+    "timestamp": 900000000000,
+    "resource": {"id": "localhost:chassis:temps", "attributes": {"location": "americas"}},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100,
+    "attributes": { "units": "fahrenheit" }
+  },
+  {
+    "timestamp": 900000300000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900000600000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
+  },
+  {
+    "timestamp": 900000900000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900001200000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 116,
+    "attributes": { "units": "fahrenheit" }
+  },
+  {
+    "timestamp": 900001500000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900001800000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
+  },
+  {
+    "timestamp": 900002100000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900002400000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108,
+    "attributes": { "units": "fahrenheit" }
+  },
+  {
+    "timestamp": 900002700000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003000000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003300000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900003600000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900003900000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900004200000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900004500000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900004800000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900005100000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900005400000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 116
+  },
+  {
+    "timestamp": 900005700000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 112
+  },
+  {
+    "timestamp": 900006000000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006300000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006600000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 108
+  },
+  {
+    "timestamp": 900006900000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007200000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007500000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 104
+  },
+  {
+    "timestamp": 900007800000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  },
+  {
+    "timestamp": 900008100000,
+    "resource": {"id": "localhost:chassis:temps"},
+    "name": "inlet",
+    "type": "GAUGE",
+    "value": 100
+  }
+]

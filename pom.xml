@@ -20,7 +20,6 @@
     <module>cassandra</module>
     <module>rest</module>
     <module>examples</module>
-    <module>indexing</module>
     <module>metrics-reporter</module>
     <module>karaf</module>
   </modules>
@@ -28,7 +27,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cassandraVersion>2.0.0-rc2</cassandraVersion>
+    <cassandraVersion>2.0.3</cassandraVersion>
+    <cassandraDriverVersion>2.0.0-rc2</cassandraDriverVersion>
     <guavaVersion>17.0</guavaVersion>
     <guiceVersion>4.0-beta4</guiceVersion>
     <jacksonVersion>2.1.4</jacksonVersion>
@@ -75,7 +75,7 @@
       <dependency>
         <groupId>com.datastax.cassandra</groupId>
         <artifactId>cassandra-driver-core</artifactId>
-        <version>${cassandraVersion}</version>
+        <version>${cassandraDriverVersion}</version>
       </dependency>
 
       <dependency>

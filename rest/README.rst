@@ -21,13 +21,17 @@ To get started reading/writing data, try::
         -D - \
         -X POST \
         -H "Content-Type: application/json" \
-        -d @measurements.txt \
+        -d @samples.txt \
         http://0.0.0.0:8080/samples
 
     $ curl -D - -X GET 'http://0.0.0.0:8080/samples/localhost%3Achassis%3Atemps?start=1998-07-09T12:05:00-0500&end=1998-07-09T13:15:00-0500'; echo
     $ curl -D - -X GET 'http://0.0.0.0:8080/measurements/temps/localhost%3Achassis%3Atemps?end=1998-07-09T13:15:00-0500&start=1998-07-09T12:05:00-0500&resolution=15m'; echo
 
+To search::
 
+    $ curl -D - -X GET 'http://0.0.0.0:8080/search?q=americas'
+
+    
 API
 ---
 Samples

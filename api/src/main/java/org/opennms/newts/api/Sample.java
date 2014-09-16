@@ -24,6 +24,7 @@ import java.util.Map;
 public class Sample implements Element<ValueType<?>>{
 
     private final Timestamp m_timestamp;
+    private final Context m_context;
     private final Resource m_resource;
     private final String m_name;
     private final MetricType m_type;
@@ -31,11 +32,20 @@ public class Sample implements Element<ValueType<?>>{
     private final Map<String, String> m_attributes;
 
     public Sample(Timestamp timestamp, Resource resource, String name, MetricType type, ValueType<?> value) {
-        this(timestamp, resource, name, type, value, null);
+        this(timestamp, Context.DEFAULT_CONTEXT, resource, name, type, value, null);
     }
 
     public Sample(Timestamp timestamp, Resource resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
+        this(timestamp, Context.DEFAULT_CONTEXT, resource, name, type, value, attributes);
+    }
+
+    public Sample(Timestamp timestamp, Context context, Resource resource, String name, MetricType type, ValueType<?> value) {
+        this(timestamp, context, resource, name, type, value, null);
+    }
+    
+    public Sample(Timestamp timestamp, Context context, Resource resource, String name, MetricType type, ValueType<?> value, Map<String, String> attributes) {
         m_timestamp = checkNotNull(timestamp, "timestamp");
+        m_context = checkNotNull(context, "context argument");
         m_resource = checkNotNull(resource, "resource");
         m_name = checkNotNull(name, "name");
         m_type = checkNotNull(type, "type");
@@ -45,6 +55,10 @@ public class Sample implements Element<ValueType<?>>{
 
     public Timestamp getTimestamp() {
         return m_timestamp;
+    }
+
+    public Context getContext() {
+        return m_context;
     }
 
     public Resource getResource() {
@@ -70,9 +84,10 @@ public class Sample implements Element<ValueType<?>>{
     @Override
     public String toString() {
         return String.format(
-                "%s[timestamp=%s, resource=%s, name=%s, type=%s, value=%s]",
+                "%s[timestamp=%s, context=%s, resource=%s, name=%s, type=%s, value=%s]",
                 getClass().getSimpleName(),
                 getTimestamp(),
+                getContext(),
                 getResource(),
                 getName(),
                 getType(),

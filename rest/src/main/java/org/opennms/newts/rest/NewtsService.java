@@ -18,6 +18,7 @@ package org.opennms.newts.rest;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.search.Searcher;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -46,17 +47,9 @@ public class NewtsService extends Service<NewtsConfig> {
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 
-        Injector injector;
-
-        if (config.getIndexingConfig().isEnabled()) {
-            injector = Guice.createInjector(new CassandraModule(config), new CassandraResourceIndexModule(config));
-        }
-        else {
-            injector = Guice.createInjector(new CassandraModule(config));
-        }
+        Injector injector = Guice.createInjector(new CassandraGuiceModule(config));
 
         MetricRegistry metricRegistry = injector.getInstance(MetricRegistry.class);
-        SampleRepository repository = injector.getInstance(SampleRepository.class);
 
         // Create/start a JMX reporter for our MetricRegistry
         final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("newts").build();
@@ -74,9 +67,16 @@ public class NewtsService extends Service<NewtsConfig> {
             }
         });
 
+        SampleRepository repository = injector.getInstance(SampleRepository.class);
+
         // Add rest resources
         environment.addResource(new MeasurementsResource(repository, config.getReports()));
         environment.addResource(new SamplesResource(repository));
+
+        // Add search resource only if search is enabled
+        if (config.getSearchConfig().isEnabled()) {
+            environment.addResource(new SearchResource(injector.getInstance(Searcher.class)));
+        }
 
         // Health checks
         environment.addHealthCheck(new RepositoryHealthCheck(repository));

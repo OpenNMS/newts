@@ -9,19 +9,10 @@ cassandra:
   port: 9042
   time-to-live: 31536000
 
-# This is an experimental feature.  It may change drastically, and in
-# completely incompatible ways, or be removed entirely in a future release.
-# Use this at your own risk.
-indexing:
-  enabled: false
-  # Number of entries to cache in memory (used to avoid redudant writes).
-  maxCacheEntries: 1000000
-  cassandra:
-    keyspace: newts
-    host: localhost
-    port: 9042
-    time-to-live: 31536000
-  
+# Resource search indexing
+search:
+  enabled: true
+
 logging:
   level: INFO
 

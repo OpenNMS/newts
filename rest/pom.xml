@@ -29,6 +29,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-cassandra-search</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -45,16 +50,6 @@
       <groupId>com.yammer.dropwizard</groupId>
       <artifactId>dropwizard-core</artifactId>
       <version>0.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-index-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opennms.newts</groupId>
-      <artifactId>newts-index-cassandra</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <!-- Needed for CORS filter -->
     <dependency>
