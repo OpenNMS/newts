@@ -1,9 +1,13 @@
 package org.opennms.newts.cassandra.search;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 import java.util.Set;
 
+import com.codahale.metrics.Meter;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -12,9 +16,30 @@ public class ResourceMetadata {
 
     private final Set<String> m_metrics = Sets.newConcurrentHashSet();
     private final Map<String, String> m_attributes = Maps.newConcurrentMap();
+    private final Optional<Meter> m_metricReqs;
+    private final Optional<Meter> m_attributeReqs;
+    private final Optional<Meter> m_metricMisses;
+    private final Optional<Meter> m_attributeMisses;
+
+    public ResourceMetadata(Meter metricReqs, Meter attributeReqs, Meter metricMisses, Meter attributeMisses) {
+        m_metricReqs = Optional.of(checkNotNull(metricReqs, "metricsReqs argument"));
+        m_attributeReqs = Optional.of(checkNotNull(attributeReqs, "attributesReqs argument"));
+        m_metricMisses = Optional.of(checkNotNull(metricMisses, "metricsMisses argument"));
+        m_attributeMisses = Optional.of(checkNotNull(attributeMisses, "attributesMisses argument"));
+    }
+
+    public ResourceMetadata() {
+        m_metricReqs = Optional.absent();
+        m_attributeReqs = Optional.absent();
+        m_metricMisses = Optional.absent();
+        m_attributeMisses = Optional.absent();
+    }
 
     public boolean containsMetric(String metric) {
-        return m_metrics.contains(metric);
+        if (m_metricReqs.isPresent()) m_metricReqs.get().mark();
+        boolean contains = m_metrics.contains(metric);
+        if ((!contains) && m_metricMisses.isPresent()) m_metricMisses.get().mark(); 
+        return contains;
     }
 
     public ResourceMetadata putMetric(String metric) {
@@ -23,7 +48,10 @@ public class ResourceMetadata {
     }
 
     public boolean containsAttribute(String key, String value) {
-        return m_attributes.containsKey(key) && m_attributes.get(key).equals(value);
+        if (m_attributeReqs.isPresent()) m_attributeReqs.get().mark();
+        boolean contains = m_attributes.containsKey(key) && m_attributes.get(key).equals(value);
+        if ((!contains) && m_attributeMisses.isPresent()) m_attributeMisses.get().mark();
+        return contains;
     }
 
     public ResourceMetadata putAttribute(String key, String value) {

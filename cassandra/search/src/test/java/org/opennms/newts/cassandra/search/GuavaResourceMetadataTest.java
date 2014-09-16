@@ -9,6 +9,8 @@ import org.junit.Test;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 
+import com.codahale.metrics.MetricRegistry;
+
 
 public class GuavaResourceMetadataTest {
 
@@ -18,7 +20,7 @@ public class GuavaResourceMetadataTest {
         Context c = new Context("c");
         Resource r = new Resource("r");
 
-        ResourceMetadataCache cache = new GuavaResourceMetadataCache(10000);
+        ResourceMetadataCache cache = new GuavaResourceMetadataCache(10000, new MetricRegistry());
 
         assertThat(cache.get(c, r).isPresent(), not(true));
 
