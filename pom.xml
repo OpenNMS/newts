@@ -11,9 +11,30 @@
   <artifactId>newts-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <url>http://newts.io</url>
+  <name>Newts</name>
+  <description>High throughput, distributed time series datastore</description>
 
-  <name>New Timeseries Datastore</name>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
+  <scm>
+    <url>https://github.com/OpenNMS/newts</url>
+    <connection>https://github.com/OpenNMS/newts.git</connection>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>eevans</id>
+      <name>Eric Evans</name>
+      <email>eevans@opennms.com</email>
+    </developer>
+  </developers>
+  
   <modules>
     <module>aggregate</module>
     <module>api</module>
