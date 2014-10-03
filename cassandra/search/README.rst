@@ -1,5 +1,5 @@
-indexing-cassandra
-==================
+cassandra-search
+================
 
 Cassandra persistence for resource indexing.
 

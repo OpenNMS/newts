@@ -1,5 +1,5 @@
-newts-cassandra
-===============
+cassandra-storage
+=================
 
 Integration tests are skipped by default, to enable::
 
