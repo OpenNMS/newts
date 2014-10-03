@@ -1,4 +1,4 @@
-NewTS REST
+Newts REST
 ==========
 
 Quickstart
