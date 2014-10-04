@@ -18,6 +18,8 @@ import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.search.Constants.Schema;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Statement;
 import com.google.common.base.Optional;
@@ -29,17 +31,22 @@ import com.google.common.collect.Maps;
 // FIXME: Needs proper query string parser; half-assedness ahead
 public class CassandraSearcher implements Searcher {
 
-    private static Splitter s_tokenSplitter = Splitter.onPattern("\\s+").omitEmptyStrings().trimResults();
+    private final static Splitter s_tokenSplitter = Splitter.onPattern("\\s+").omitEmptyStrings().trimResults();
 
-    private CassandraSession m_session;
+    private final CassandraSession m_session;
+    private final Timer m_searchTimer;
 
     @Inject
-    public CassandraSearcher(CassandraSession session) {
+    public CassandraSearcher(CassandraSession session, MetricRegistry registry) {
         m_session = checkNotNull(session, "session argument");
+        m_searchTimer = registry.timer("search");
     }
 
     // FIXME: use of hard-coded application ID!
     public SearchResults search(String queryString) {
+
+        Timer.Context ctx = m_searchTimer.time();
+
         SearchResults searchResults = new SearchResults();
 
         for (String term : s_tokenSplitter.splitToList(queryString)) {
@@ -61,7 +68,12 @@ public class CassandraSearcher implements Searcher {
             }
         }
 
-        return searchResults;
+        try {
+            return searchResults;
+        }
+        finally {
+            ctx.stop();
+        }
     }
 
     private Optional<Map<String, String>> fetchResourceAttributes(Context context, String resourceId) {

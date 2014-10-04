@@ -52,6 +52,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.Timer.Context;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
@@ -66,12 +68,16 @@ public class CassandraSampleRepository implements SampleRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraSampleRepository.class);
 
-    private CassandraSession m_session;
-    @SuppressWarnings("unused") private final MetricRegistry m_registry;
-    private SampleProcessorService m_processorService;
+    private final CassandraSession m_session;
+    private final int m_ttl;
+    private final SampleProcessorService m_processorService;
+    private final PreparedStatement m_selectStatement;
+
+    private final Timer m_sampleSelectTimer;
+    private final Timer m_measurementSelectTimer;
+    private final Timer m_insertTimer;
+
     private Duration m_resourceShard = Duration.seconds(600000);
-    private PreparedStatement m_selectStatement;
-    private int m_ttl;
 
     @Inject
     public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, MetricRegistry registry, SampleProcessorService processorService) {
@@ -81,7 +87,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
         m_ttl = ttl;
 
-        m_registry = checkNotNull(registry, "metric registry argument");
+        checkNotNull(registry, "metric registry argument");
         m_processorService = processorService;
 
         Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
@@ -93,10 +99,16 @@ public class CassandraSampleRepository implements SampleRepository {
 
         m_selectStatement = m_session.prepare(select);
 
+        m_sampleSelectTimer = registry.timer("sample-select");
+        m_measurementSelectTimer = registry.timer("measurement-select");
+        m_insertTimer = registry.timer("insert-timer");
+
     }
 
     @Override
     public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
+
+        Context context = m_measurementSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -110,12 +122,19 @@ public class CassandraSampleRepository implements SampleRepository {
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
 
-        return results;
+        try {
+            return results;
+        }
+        finally {
+            context.stop();
+        }
 
     }
 
     @Override
     public Results<Sample> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+
+        Context context = m_sampleSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -133,11 +152,18 @@ public class CassandraSampleRepository implements SampleRepository {
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
 
-        return samples;
+        try {
+            return samples;
+        }
+        finally {
+            context.stop();
+        }
     }
 
     @Override
     public void insert(Collection<Sample> samples) {
+
+        Context context = m_insertTimer.time();
 
         Batch batch = unloggedBatch();
 
@@ -154,10 +180,15 @@ public class CassandraSampleRepository implements SampleRepository {
             );
         }
 
-        m_session.execute(batch);
+        try {
+            m_session.execute(batch);
 
-        if (m_processorService != null) {
-            m_processorService.submit(samples);
+            if (m_processorService != null) {
+                m_processorService.submit(samples);
+            }
+        }
+        finally {
+            context.stop();
         }
 
     }

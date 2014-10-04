@@ -18,6 +18,8 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.datastax.driver.core.RegularStatement;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
@@ -29,17 +31,24 @@ public class CassandraIndexer implements Indexer {
 
     private static Splitter s_pathSplitter = Splitter.on('/').omitEmptyStrings().trimResults();
 
-    private CassandraSession m_session;
-    private ResourceMetadataCache m_cache;
+    private final CassandraSession m_session;
+    private final ResourceMetadataCache m_cache;
+    private final Timer m_updateTimer;
 
     @Inject
-    public CassandraIndexer(CassandraSession session, ResourceMetadataCache cache) {
+    public CassandraIndexer(CassandraSession session, ResourceMetadataCache cache, MetricRegistry registry) {
         m_session = checkNotNull(session, "session argument");
         m_cache = checkNotNull(cache, "cache argument");
+        checkNotNull(registry, "registry argument");
+
+        m_updateTimer = registry.timer("update");
+
     }
 
     @Override
     public void update(Collection<Sample> samples) {
+
+        Timer.Context ctx = m_updateTimer.time();
 
         List<RegularStatement> statements = Lists.newArrayList();
         Map<Context, Map<Resource, ResourceMetadata>> cacheQueue = Maps.newHashMap();
@@ -51,15 +60,20 @@ public class CassandraIndexer implements Indexer {
             maybeAddMetricName(cacheQueue, statements, sample.getContext(), sample.getResource(), sample.getName());
         }
 
-        if (statements.size() > 0) {
-            m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString());   // FIXME: toString()?
-        }
-
-        // Order matters here; We want the cache updated only after a successful Cassandra write.
-        for (Context context : cacheQueue.keySet()) {
-            for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
-                m_cache.merge(context, entry.getKey(), entry.getValue());
+        try {
+            if (statements.size() > 0) {
+                m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString()); // FIXME: toString()?
             }
+
+            // Order matters here; We want the cache updated only after a successful Cassandra write.
+            for (Context context : cacheQueue.keySet()) {
+                for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
+                    m_cache.merge(context, entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        finally {
+            ctx.stop();
         }
 
     }

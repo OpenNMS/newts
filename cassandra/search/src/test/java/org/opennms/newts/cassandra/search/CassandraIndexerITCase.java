@@ -28,6 +28,7 @@ import org.opennms.newts.api.search.SearchResults.Result;
 import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -54,12 +55,13 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         ResourceMetadataCache mockCache = mock(ResourceMetadataCache.class);
         when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+        MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(session, mockCache);
+        Indexer indexer = new CassandraIndexer(session, mockCache, registry);
 
         indexer.update(samples);
 
-        CassandraSearcher searcher = new CassandraSearcher(session);
+        CassandraSearcher searcher = new CassandraSearcher(session, registry);
 
         // Path components
         assertThat(searcher.search("aaa").size(), equalTo(2));
@@ -91,8 +93,9 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         ResourceMetadataCache cache = mock(ResourceMetadataCache.class);
         when(cache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+        MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(getCassandraSession(), cache);
+        Indexer indexer = new CassandraIndexer(getCassandraSession(), cache, registry);
 
         Sample s = sampleFor(new Resource("/aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));
