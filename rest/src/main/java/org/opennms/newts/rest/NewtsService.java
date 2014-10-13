@@ -47,7 +47,7 @@ public class NewtsService extends Service<NewtsConfig> {
 
         environment.addFilter(CrossOriginFilter.class, "/*");
 
-        Injector injector = Guice.createInjector(new CassandraGuiceModule(config));
+        Injector injector = Guice.createInjector(new NewtsGuiceModule(), new CassandraGuiceModule(config));
 
         MetricRegistry metricRegistry = injector.getInstance(MetricRegistry.class);
 

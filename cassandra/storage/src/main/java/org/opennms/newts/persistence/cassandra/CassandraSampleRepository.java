@@ -16,6 +16,7 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
@@ -98,10 +99,10 @@ public class CassandraSampleRepository implements SampleRepository {
         select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
 
         m_selectStatement = m_session.prepare(select);
-
-        m_sampleSelectTimer = registry.timer("sample-select");
-        m_measurementSelectTimer = registry.timer("measurement-select");
-        m_insertTimer = registry.timer("insert-timer");
+        
+        m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
+        m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
+        m_insertTimer = registry.timer(metricName("insert-timer"));
 
     }
 
@@ -222,6 +223,10 @@ public class CassandraSampleRepository implements SampleRepository {
     // Use only in tests!
     void setResourceShard(Duration resourceShard) {
         m_resourceShard = resourceShard;
+    }
+
+    private String metricName(String suffix) {
+        return name("repository", suffix);
     }
 
 }

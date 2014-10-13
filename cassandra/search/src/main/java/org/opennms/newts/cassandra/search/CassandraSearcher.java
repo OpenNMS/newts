@@ -1,6 +1,7 @@
 package org.opennms.newts.cassandra.search;
 
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,7 +40,7 @@ public class CassandraSearcher implements Searcher {
     @Inject
     public CassandraSearcher(CassandraSession session, MetricRegistry registry) {
         m_session = checkNotNull(session, "session argument");
-        m_searchTimer = registry.timer("search");
+        m_searchTimer = registry.timer(name("search", "search"));
     }
 
     // FIXME: use of hard-coded application ID!

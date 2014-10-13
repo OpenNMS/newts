@@ -1,6 +1,7 @@
 package org.opennms.newts.cassandra.search;
 
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
@@ -45,7 +46,7 @@ public class CassandraIndexer implements Indexer {
         m_cache = checkNotNull(cache, "cache argument");
         checkNotNull(registry, "registry argument");
 
-        m_updateTimer = registry.timer("update");
+        m_updateTimer = registry.timer(name("search", "update"));
 
     }
 
