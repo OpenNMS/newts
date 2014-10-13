@@ -3,6 +3,7 @@ package org.opennms.newts.cassandra.search;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
@@ -32,12 +34,14 @@ public class CassandraIndexer implements Indexer {
     private static Splitter s_pathSplitter = Splitter.on('/').omitEmptyStrings().trimResults();
 
     private final CassandraSession m_session;
+    private final int m_ttl;
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
 
     @Inject
-    public CassandraIndexer(CassandraSession session, ResourceMetadataCache cache, MetricRegistry registry) {
+    public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry) {
         m_session = checkNotNull(session, "session argument");
+        m_ttl = ttl;
         m_cache = checkNotNull(cache, "cache argument");
         checkNotNull(registry, "registry argument");
 
@@ -87,6 +91,7 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
                             .value(Constants.Schema.C_TERMS_VALUE, s)
                             .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                            .using(ttl(m_ttl))
                 );
             }
 
@@ -110,6 +115,7 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
                             .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                            .using(ttl(m_ttl))
                 );
                 statement.add(
                         insertInto(Constants.Schema.T_TERMS)
@@ -117,6 +123,7 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
                             .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
                             .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                            .using(ttl(m_ttl))
                 );
                 // Storage
                 statement.add(
@@ -125,6 +132,7 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
                             .value(Constants.Schema.C_ATTRS_ATTR, field.getKey())
                             .value(Constants.Schema.C_ATTRS_VALUE, field.getValue())
+                            .using(ttl(m_ttl))
                 );
 
                 getOrCreateResourceMetadata(context, resource, cacheQueue).putAttribute(field.getKey(), field.getValue());
@@ -142,6 +150,7 @@ public class CassandraIndexer implements Indexer {
                         .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
                         .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
                         .value(Constants.Schema.C_METRICS_NAME, name)
+                        .using(ttl(m_ttl))
             );
             
             getOrCreateResourceMetadata(context, resource, cacheQueue).putMetric(name);

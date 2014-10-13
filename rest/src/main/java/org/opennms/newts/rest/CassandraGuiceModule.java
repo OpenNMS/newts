@@ -53,6 +53,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(Integer.class).annotatedWith(named("cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
 
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
+        bind(Integer.class).annotatedWith(named("search.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
         
         bind(Long.class).annotatedWith(named("search.rMetadata.maxCacheSize")).toInstance(1000000L);

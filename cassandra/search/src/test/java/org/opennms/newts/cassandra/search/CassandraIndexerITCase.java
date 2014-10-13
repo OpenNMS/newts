@@ -57,7 +57,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
         MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(session, mockCache, registry);
+        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry);
 
         indexer.update(samples);
 
@@ -95,7 +95,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         when(cache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
         MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(getCassandraSession(), cache, registry);
+        Indexer indexer = new CassandraIndexer(getCassandraSession(), 86400, cache, registry);
 
         Sample s = sampleFor(new Resource("/aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));
