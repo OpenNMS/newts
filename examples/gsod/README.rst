@@ -23,14 +23,28 @@ in the README for that module.
 Building
 --------
 
-To build the GSOD example code, run::
+To build the GSOD example code, run:
+
+.. code:: sh
 
    mvn install
+
+Running
+-------
+All of the example commands below assume that you are in the top-level
+directory of the *newts-gsod* module.  For example:
+
+.. code:: sh
+
+   cd <newts src>/examples/gsod
+
 
 Importing Data
 ~~~~~~~~~~~~~~
 
-To import the included data, run::
+To import the included data, run:
+
+.. code:: sh
 
 	java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
 		org.opennms.newts.gsod.ImportRunner -p 100 \
@@ -38,7 +52,9 @@ To import the included data, run::
 
 The importer accepts a single argument for the name of a directory that is
 searched recursively for GSOD data files.  You can load additional data by
-changing this argument accordingly::
+changing this argument accordingly:
+
+.. code:: sh
 
 	java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
 		org.opennms.newts.gsod.ImportRunner -p 100 \
@@ -46,7 +62,9 @@ changing this argument accordingly::
 
 The import process connects to Cassandra directly, if necessary you can
 override the Cassandra hostname, port, and keyspace name using system
-properties.  For example::
+properties.  For example:
+
+.. code:: sh
 
 	java -Dcassandra.keyspace=newts -Dcassandra.host=localhost -Dcassandra.port=9042 \
 		-cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
@@ -77,7 +95,9 @@ java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.
   
 Starting Demo Webserver
 ~~~~~~~~~~~~~~~~~~~~~~~
-Issue the following to start the web server::
+Issue the following to start the web server:
+
+.. code:: sh
 
    java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.newts.gsod.Web
 
@@ -85,6 +105,10 @@ View Examples
 ~~~~~~~~~~~~~
 You can either view individual graphs of the `6 Texas stations`_, or see a
 report of all 6 for the `Summer of 1988`_.
+
+*Note: These links assume that you are launching a browser on the same machine
+that Newts is running on.  You may need to alter the link accordingly if that
+is not the case.*
 
 
 .. _Global Surface Summary of Day: https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00516
