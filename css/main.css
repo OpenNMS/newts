@@ -4,3 +4,11 @@
 body {
   padding-top: 50px;
 }
+
+.post-date {
+  color: #999;
+}
+
+.post-content {
+  margin-bottom: 2em;
+}
