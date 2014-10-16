@@ -5,7 +5,7 @@ Quickstart
 ----------
 Building::
 
-    $ mvn clean package
+    $ mvn clean package -PsuperJar
 
 Initialize the database (Cassandra must be running)::
 
