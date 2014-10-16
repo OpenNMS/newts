@@ -36,6 +36,7 @@
   </developers>
   
   <modules>
+    <module>assembly</module>
     <module>aggregate</module>
     <module>api</module>
     <module>cassandra</module>

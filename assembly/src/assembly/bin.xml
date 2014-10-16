@@ -1,0 +1,33 @@
+<assembly>
+
+  <id>bin</id>
+  
+  <formats>
+    <format>tar.gz</format>
+    <format>tar.bz2</format>
+  </formats>
+
+  <fileSets>
+    <fileSet>
+      <directory>${basedir}/src/main/resources</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/bin</directory>
+      <outputDirectory>/bin</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/bin</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+
+  <files>
+    <file>
+      <source>${basedir}/../rest/example-config.yaml</source>
+      <outputDirectory>/etc</outputDirectory>
+      <destName>config.yaml</destName>
+    </file>
+  </files>
+
+</assembly>

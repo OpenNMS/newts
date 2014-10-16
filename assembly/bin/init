@@ -1,0 +1,27 @@
+#!/bin/sh
+
+BASEDIR=`dirname $0`/..
+LIBDIR="$BASEDIR"/lib
+
+# Construct a classpath
+for jar in $LIBDIR/*.jar; do
+    CLASSPATH=$CLASSPATH:$jar
+done
+
+export CLASSPATH
+
+# Use JAVA_HOME if set, otherwise look for java in PATH
+if [ -n "$JAVA_HOME" ]; then
+    JAVA="$JAVA_HOME"/bin/java
+else
+    JAVA=java
+fi
+
+CONF="$1"
+
+if [ ! -r "$CONF" ]; then
+    echo "Usage: $0 <config file>" >&2
+    exit 1
+fi
+
+$JAVA org.opennms.newts.rest.NewtsService init "$CONF"

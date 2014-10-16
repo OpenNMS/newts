@@ -1,0 +1,20 @@
+#!/bin/sh
+
+BASEDIR=`dirname $0`/..
+LIBDIR="$BASEDIR"/lib
+
+# Construct a classpath
+for jar in $LIBDIR/*.jar; do
+    CLASSPATH=$CLASSPATH:$jar
+done
+
+export CLASSPATH
+
+# Use JAVA_HOME if set, otherwise look for java in PATH
+if [ -n "$JAVA_HOME" ]; then
+    JAVA="$JAVA_HOME"/bin/java
+else
+    JAVA=java
+fi
+
+$JAVA org.opennms.newts.rest.NewtsDaemon $@
