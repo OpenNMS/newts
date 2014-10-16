@@ -15,6 +15,16 @@ search:
 
 logging:
   level: INFO
+  # Logging is sent to the console by default; Uncomment the following and
+  # set the paths accordingly to log to a file.
+  # appenders:
+  #   - type: file
+  #     currentLogFilename: /path/to/newts.log
+  #     threshold: ALL
+  #     archive: true
+  #     archivedLogFilenamePattern: /path/to/newts-%d.log
+  #     archivedFileCount: 5
+  #     timeZone: UTC
 
 reports:
   gauge:
