@@ -75,7 +75,6 @@ public class NewtsDaemon {
         }
 
         File pidFile = new File(cmdLine.getPidFilename());
-        pidFile.deleteOnExit();
 
         // Daemonize?
         if (cmdLine.isDaemon()) {
