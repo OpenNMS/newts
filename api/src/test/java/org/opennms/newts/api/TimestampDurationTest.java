@@ -48,6 +48,16 @@ public class TimestampDurationTest {
     }
 
     @Test
+    public void testDurationParse() {
+        assertEquals(Duration.days(100 * 7), Duration.parse("100w"));
+        assertEquals(Duration.days(100), Duration.parse("100d"));
+        assertEquals(Duration.hours(100), Duration.parse("100h"));
+        assertEquals(Duration.minutes(100), Duration.parse("100m"));
+        assertEquals(Duration.seconds(100), Duration.parse("100s"));
+        assertEquals(Duration.millis(100), Duration.parse("100ms"));
+    }
+
+    @Test
     public void testTimestampFloor() {
        assertEquals(fromEpochSeconds(0), fromEpochSeconds(0).stepFloor(Duration.minutes(60)));
     }

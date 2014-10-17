@@ -18,9 +18,13 @@ package org.opennms.newts.api;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Duration implements Comparable<Duration> {
+
+    private static final Pattern s_pattern = Pattern.compile("([\\d]+)([wdhms]|ms)");
 
     private final long m_duration;
     private final TimeUnit m_unit;
@@ -42,6 +46,18 @@ public class Duration implements Comparable<Duration> {
         return convert(TimeUnit.SECONDS);
     }
 
+    public static Duration days(long days) {
+        return new Duration(days, TimeUnit.DAYS);
+    }
+
+    public static Duration hours(long hours) {
+        return new Duration(hours, TimeUnit.HOURS);
+    }
+
+    public static Duration minutes(long minutes) {
+        return new Duration(minutes, TimeUnit.MINUTES);
+    }
+
     public static Duration seconds(long seconds) {
         return new Duration(seconds, TimeUnit.SECONDS);
     }
@@ -49,9 +65,44 @@ public class Duration implements Comparable<Duration> {
     public static Duration millis(long millis) {
         return new Duration(millis, TimeUnit.MILLISECONDS);
     }
-    
-    public static Duration minutes(long minutes) {
-        return new Duration(minutes, TimeUnit.MINUTES);
+
+    public static Duration parse(String durationSpec) {
+
+        Matcher matcher = s_pattern.matcher(durationSpec);
+
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException(String.format("%s is not a valid duration", durationSpec));
+        }
+
+        Integer value = Integer.parseInt(matcher.group(1));
+        String unit = matcher.group(2);
+
+        Duration r;
+
+        switch (unit) {
+            case "w":
+                r = Duration.days(value * 7);
+                break;
+            case "d":
+                r = Duration.days(value);
+                break;
+            case "h":
+                r = Duration.hours(value);
+                break;
+            case "m":
+                r = Duration.minutes(value);
+                break;
+            case "s":
+                r = Duration.seconds(value);
+                break;
+            case "ms":
+                r = Duration.millis(value);
+                break;
+            default:
+                throw new RuntimeException(String.format("%s is an unknown unit; this is a bug!", unit));
+        }
+
+        return r;
     }
 
     public long getDuration() {
