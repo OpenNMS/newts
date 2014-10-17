@@ -1,11 +1,11 @@
 {
-  "interval": 300,
+  "interval": "300s",
   "datasources": [
     {
       "label"     : "temperature",
       "source"    : "temperature",
       "function"  : "AVERAGE",
-      "heartbeat" : 600
+      "heartbeat" : "600s"
     }
   ],
   "exports": [

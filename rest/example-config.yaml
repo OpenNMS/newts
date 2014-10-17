@@ -28,48 +28,48 @@ logging:
 
 reports:
   gauge:
-    interval: 10
+    interval: 10s
     datasources:
       - label: value
         source: value
         function: AVERAGE
-        heartbeat: 10
+        heartbeat: 10s
     exports:
       - value
 
   counter:
-    interval: 10
+    interval: 10s
     datasources:
       - label: count
         source: count
         function: AVERAGE
-        heartbeat: 10
+        heartbeat: 10s
     exports:
       - count
 
   meter:
-    interval: 10
+    interval: 10s
     datasources:
       - label: count
         source: count
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: mean_rate
         source: mean_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m1_rate
         source: m1_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m5_rate
         source: m5_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m15_rate
         source: m15_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
     exports:
       - count
       - mean_rate
@@ -78,52 +78,52 @@ reports:
       - m15_rate    
 
   historgram:
-    interval: 10
+    interval: 10s
     datasources:
       - label: count
         source: count
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: max
         source: max
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: mean 
         source: mean 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: min 
         source: min 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: stddev 
         source: stddev 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p50 
         source: p50 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p75 
         source: p75 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p95 
         source: p95 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p98 
         source: p98 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p99
         source: p99
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p999
         source: p999
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
     exports:
       - count
       - max
@@ -138,68 +138,68 @@ reports:
       - p999
 
   timer:
-    interval: 10
+    interval: 10s
     datasources:
       - label: count
         source: count
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: max
         source: max
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: mean 
         source: mean 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: min 
         source: min 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: stddev 
         source: stddev 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p50 
         source: p50 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p75 
         source: p75 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p95 
         source: p95 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p98 
         source: p98 
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p99
         source: p99
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: p999
         source: p999
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: mean_rate
         source: mean_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m1_rate
         source: m1_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m5_rate
         source: m5_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
       - label: m15_rate
         source: m15_rate
         function: AVERAGE
-        heartbeat: 20
+        heartbeat: 20s
     exports:
       - count
       - max
@@ -218,32 +218,32 @@ reports:
       - m15_rate
   
   gsod:
-    interval: 3600
+    interval: 3600s
     datasources:
       - label: meanTemp
         source: meanTemperature
         function: AVERAGE
-        heartbeat: 7200
+        heartbeat: 7200s
       - label: maxTemp
         source: maxTemperature
         function: AVERAGE
-        heartbeat: 7200
+        heartbeat: 7200s
       - label: minTemp
         source: minTemperature
         function: AVERAGE
-        heartbeat: 7200
+        heartbeat: 7200s
     exports:
       - meanTemp
       - maxTemp
       - minTemp
 
   temps:
-    interval: 300
+    interval: 300s
     datasources:
       - label: inlet
         source: inlet
         function: AVERAGE
-        heartbeat: 600
+        heartbeat: 600s
     expressions:
       - label: sum
         expression: inlet * 100
@@ -252,15 +252,15 @@ reports:
       - sum
 
   octets:
-    interval: 300
+    interval: 300s
     datasources:
       - label: inOctets
         source: ifInOctets
-        heartbeat: 600
+        heartbeat: 600s
         function: AVERAGE
       - label: outOctets
         source: ifOutOctets
-        heartbeat: 600
+        heartbeat: 600s
         function: AVERAGE
     exports:
       - inOctets

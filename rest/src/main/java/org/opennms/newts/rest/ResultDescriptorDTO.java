@@ -19,10 +19,10 @@ package org.opennms.newts.rest;
 import java.util.Arrays;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.query.StandardAggregationFunctions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,7 +45,7 @@ public class ResultDescriptorDTO {
         private StandardAggregationFunctions m_function;
 
         @JsonProperty("heartbeat")
-        private Integer m_heartbeat;
+        private String m_heartbeat;
 
         public String getLabel() {
             return m_label;
@@ -59,8 +59,8 @@ public class ResultDescriptorDTO {
             return m_function;
         }
 
-        public Integer getHeartbeat() {
-            return m_heartbeat;
+        public Duration getHeartbeat() {
+            return Duration.parse(m_heartbeat);
         }
 
         @Override
@@ -103,9 +103,9 @@ public class ResultDescriptorDTO {
         }
     }
 
-    @Min(value = 1)
+
     @JsonProperty("interval")
-    private int m_interval = 300;
+    private String m_interval = "300s";
 
     @Valid
     @JsonProperty("datasources")
@@ -119,8 +119,8 @@ public class ResultDescriptorDTO {
     @JsonProperty("exports")
     private String[] m_exports;
 
-    public int getInterval() {
-        return m_interval;
+    public Duration getInterval() {
+        return Duration.parse(m_interval);
     }
 
     public Datasource[] getDatasources() {

@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
@@ -73,11 +72,11 @@ class Transform {
      */
     static ResultDescriptor resultDescriptor(ResultDescriptorDTO rDescriptorDTO) {
 
-        ResultDescriptor rDescriptor = new ResultDescriptor(Duration.seconds(rDescriptorDTO.getInterval()));
+        ResultDescriptor rDescriptor = new ResultDescriptor(rDescriptorDTO.getInterval());
 
         for (ResultDescriptorDTO.Datasource ds : rDescriptorDTO.getDatasources()) {
             if (ds.getHeartbeat() != null) {
-                rDescriptor.datasource(ds.getLabel(), ds.getSource(), Duration.seconds(ds.getHeartbeat()), ds.getFunction());
+                rDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getHeartbeat(), ds.getFunction());
             }
             else {
                 rDescriptor.datasource(ds.getLabel(), ds.getSource(), ds.getFunction());
