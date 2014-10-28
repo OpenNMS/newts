@@ -66,7 +66,7 @@ public class ResultDescriptorDTO {
         @Override
         public String toString() {
             return String.format(
-                    "%s[label=%s, source=%s, function=%s, heartbeat=%d]",
+                    "%s[label=%s, source=%s, function=%s, heartbeat=%s]",
                     getClass().getSimpleName(),
                     getLabel(),
                     getSource(),
@@ -138,7 +138,7 @@ public class ResultDescriptorDTO {
     @Override
     public String toString() {
         return String.format(
-                "%s[interval=%d, datasources=%s, expressions=%s, exports=%s]",
+                "%s[interval=%s, datasources=%s, expressions=%s, exports=%s]",
                 getClass().getSimpleName(),
                 getInterval(),
                 Arrays.asList(getDatasources()),
