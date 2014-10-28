@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 
 public class CassandraIndexer implements Indexer {
 
-    private static Splitter s_pathSplitter = Splitter.on('/').omitEmptyStrings().trimResults();
+    private static Splitter s_pathSplitter = Splitter.on(':').omitEmptyStrings().trimResults();
 
     private final CassandraSession m_session;
     private final int m_ttl;

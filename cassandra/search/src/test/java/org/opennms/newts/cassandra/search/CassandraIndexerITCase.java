@@ -47,9 +47,9 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         Map<String, String> base = map("meat", "people", "bread", "beer");
         List<Sample> samples = Lists.newArrayList();
 
-        samples.add(sampleFor(new Resource("/aaa", Optional.of(base)), "m0"));
-        samples.add(sampleFor(new Resource("/aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
-        samples.add(sampleFor(new Resource("/aac/aaa", Optional.of(map(base, "music", "country"))), "m0"));
+        samples.add(sampleFor(new Resource("aaa", Optional.of(base)), "m0"));
+        samples.add(sampleFor(new Resource("aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
+        samples.add(sampleFor(new Resource("aac:aaa", Optional.of(map(base, "music", "country"))), "m0"));
 
         CassandraSession session = getCassandraSession();
 
@@ -77,7 +77,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         // Attributes too
         Result r = searcher.search("metal").iterator().next();
-        assertThat(r.getResource().getId(), is(equalTo("/aab")));
+        assertThat(r.getResource().getId(), is(equalTo("aab")));
         assertThat(r.getResource().getAttributes().isPresent(), is(true));
         assertThat(r.getResource().getAttributes().get(), equalTo(map(base, "music", "metal", "beverage", "beer")));
 
@@ -97,7 +97,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
 
         Indexer indexer = new CassandraIndexer(getCassandraSession(), 86400, cache, registry);
 
-        Sample s = sampleFor(new Resource("/aaa", Optional.of(map("beverage", "beer"))), "m0");
+        Sample s = sampleFor(new Resource("aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));
 
         ResourceMetadata expected = new ResourceMetadata().putMetric("m0").putAttribute("beverage", "beer");
