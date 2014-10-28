@@ -35,9 +35,9 @@ A startup script, `bin/newts`, can be used to start the Newts REST service,
 running the script with `-h` will output usage information:
 
     $ bin/newts -h
-    Usage: java NewtsDaemon -c CFGFILE [-f ] [-p PIDFILE] [-h]
+    Usage: java NewtsDaemon -c CFGFILE [-D] [-p PIDFILE] [-h]
+      -D (--daemonize)      : Detach and run in the background
       -c (--config) CFGFILE : Path to configuration file (required).
-      -f (--foreground)     : Run in foreground.
       -h (--help)           : Print usage informations.
       -p (--pid) PIDFILE    : Path to PID file (default: newtsd.pid).
 
