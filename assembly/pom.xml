@@ -71,6 +71,11 @@
       <artifactId>newts-rest</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-cli</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

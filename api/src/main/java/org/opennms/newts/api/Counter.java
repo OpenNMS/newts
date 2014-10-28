@@ -111,6 +111,11 @@ public class Counter extends ValueType<UnsignedLong> {
         return getValue().doubleValue();
     }
 
+    @Override
+    public String toString() {
+        return Integer.toString(intValue());
+    }
+
     private static UnsignedLong toUnsignedLong(Number value) {
         if (value instanceof UnsignedLong) return (UnsignedLong) value;
         return UnsignedLong.fromLongBits(value.longValue());

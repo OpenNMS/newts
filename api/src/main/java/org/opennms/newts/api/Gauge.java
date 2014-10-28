@@ -83,4 +83,9 @@ public class Gauge extends ValueType<Double> {
         return getValue();
     }
 
+    @Override
+    public String toString() {
+        return String.format("%.2f", doubleValue());
+    }
+
 }
