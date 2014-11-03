@@ -50,8 +50,8 @@ statement returns [Statement ret]
     | st1=exitStatement { $ret = st1; }
     ;
 
-getMeasurements returns [ MeasurementsGet ret]
-    : K_GET K_MEASUREMENTS where=whereClause { return new MeasurementsGet(where); }
+getMeasurements
+    : K_GET K_MEASUREMENTS where=whereClause
     ;
 
 getSamples returns [SamplesGet ret]
