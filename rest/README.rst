@@ -3,14 +3,38 @@ Newts REST
 
 Quickstart
 ----------
-Building::
+
+Building
+~~~~~~~~
+::
 
     $ mvn clean package -PsuperJar
+    
+Upon a successful build, a dependency-bundled executable jar can be found
+in the ``target/`` directory.  Executing the jar with no arguments prints
+a brief command synopsis to standard out::
 
-Initialize the database (Cassandra must be running)::
+  usage: java -jar newts-rest-<version>.jar [-h] [-v] {server,init} ...
+  
+  positional arguments:
+    {server,init}          available commands
+   
+  optional arguments:
+    -h, --help             show this help message and exit
+    -v, --version          show the service version and exit
+
+
+Initialization
+~~~~~~~~~~~~~~
+A one-time initialization must be performed before starting the service for
+the first time.  For this initialization to succeed, Cassandra needs to be
+running, and ``config.yaml`` must have the keyspace, hostname, and port
+properly assigned::
 
     $ java -jar target/newts-rest-<version>-SNAPSHOT.jar init config.yaml
 
+Running
+~~~~~~~  
 Starting the REST server from the build directory::
 
     $ java -jar target/newts-rest-<version>-SNAPSHOT.jar server config.yaml
