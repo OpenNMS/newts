@@ -16,6 +16,8 @@
 package org.opennms.newts.api;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -67,6 +69,7 @@ public class Duration implements Comparable<Duration> {
     }
 
     public static Duration parse(String durationSpec) {
+        checkNotNull(durationSpec, "durationSpec argument");
 
         Matcher matcher = s_pattern.matcher(durationSpec);
 
