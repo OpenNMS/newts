@@ -11,7 +11,7 @@ cassandra:
 
 # Resource search indexing
 search:
-  enabled: false
+  enabled: true
 
 logging:
   level: INFO
