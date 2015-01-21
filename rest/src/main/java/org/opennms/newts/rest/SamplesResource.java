@@ -34,8 +34,8 @@ import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Optional;
-import com.yammer.metrics.annotation.Timed;
 
 
 @Path("/samples")

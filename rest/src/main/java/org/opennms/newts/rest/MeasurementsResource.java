@@ -38,8 +38,8 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Optional;
-import com.yammer.metrics.annotation.Timed;
 
 
 @Path("/measurements")

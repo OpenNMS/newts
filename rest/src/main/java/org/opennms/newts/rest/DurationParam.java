@@ -21,7 +21,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.opennms.newts.api.Duration;
 
-import com.yammer.dropwizard.jersey.params.AbstractParam;
+import io.dropwizard.jersey.params.AbstractParam;
 
 
 /**

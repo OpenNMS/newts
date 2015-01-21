@@ -21,7 +21,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.opennms.newts.api.Timestamp;
 
-import com.yammer.dropwizard.jersey.params.AbstractParam;
+import io.dropwizard.jersey.params.AbstractParam;
 
 
 /**

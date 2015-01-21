@@ -15,15 +15,15 @@
  */
 package org.opennms.newts.rest;
 
+import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.setup.Bootstrap;
+
 import java.util.ServiceLoader;
 
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import org.opennms.newts.cassandra.SchemaManager;
 import org.opennms.newts.cassandra.Schema;
-
-import com.yammer.dropwizard.cli.ConfiguredCommand;
-import com.yammer.dropwizard.config.Bootstrap;
+import org.opennms.newts.cassandra.SchemaManager;
 
 public class InitCommand extends ConfiguredCommand<NewtsConfig> {
 

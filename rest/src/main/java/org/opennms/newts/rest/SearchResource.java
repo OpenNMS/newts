@@ -13,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.Searcher;
 
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Optional;
-import com.yammer.metrics.annotation.Timed;
 
 
 @Path("/search")

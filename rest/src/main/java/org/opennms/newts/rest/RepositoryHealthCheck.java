@@ -23,7 +23,7 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
 import com.google.common.base.Optional;
-import com.yammer.metrics.core.HealthCheck;
+import com.codahale.metrics.health.HealthCheck;
 
 
 public class RepositoryHealthCheck extends HealthCheck {
@@ -31,7 +31,6 @@ public class RepositoryHealthCheck extends HealthCheck {
     private final SampleRepository m_repository;
 
     protected RepositoryHealthCheck(SampleRepository repository) {
-        super("repository");
         m_repository = checkNotNull(repository, "repository argument");
     }
 
