@@ -22,14 +22,26 @@ import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.FilterRegistration.Dynamic;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Searcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
@@ -39,6 +51,9 @@ import com.google.inject.Injector;
 
 public class NewtsService extends Application<NewtsConfig> {
 
+    private static final String UI_URL_PATH = "/ui";
+    private static final Logger LOG = LoggerFactory.getLogger(NewtsService.class);
+
     public static void main(String... args) throws Exception {
         new NewtsService().run(args);
     }
@@ -47,17 +62,18 @@ public class NewtsService extends Application<NewtsConfig> {
     public String getName() {
         return "newts";
     }
-    
+
     @Override
     public void initialize(Bootstrap<NewtsConfig> bootstrap) {
         bootstrap.addCommand(new InitCommand());
-        bootstrap.addBundle(new AssetsBundle("/app", "/ui", "index.html"));
+        bootstrap.addBundle(new AssetsBundle("/app", UI_URL_PATH, "index.html"));
     }
 
     @Override
     public void run(NewtsConfig config, Environment environment) throws Exception {
 
         configureCors(environment);
+        addTrailingSlashRedirectForUI(environment);
 
         Injector injector = Guice.createInjector(new NewtsGuiceModule(), new CassandraGuiceModule(config));
 
@@ -98,6 +114,35 @@ public class NewtsService extends Application<NewtsConfig> {
 
     }
 
+    private void addTrailingSlashRedirectForUI(Environment environment) {
+        environment.servlets().addFilter("TrailingSlashRedirect", new Filter() {
+
+            @Override
+            public void init(FilterConfig cfg) throws ServletException {
+                LOG.info("Initializing redirect filter");
+            }
+
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+                StringBuffer url = ((HttpServletRequest) request).getRequestURL();
+                String path = new URL(url.toString()).getPath();
+
+                if (path.endsWith(UI_URL_PATH)) {
+                    LOG.debug("Caught request to malformed URL {}, redirecting...", UI_URL_PATH);
+                    ((HttpServletResponse) response).sendRedirect(String.format("%s/", url.toString()));
+                }
+                else {
+                    chain.doFilter(request, response);
+                }
+            }
+
+            @Override
+            public void destroy() {
+            }
+        }).addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+
+    }
+
     // Copy-pasta from http://jitterted.com/tidbits/2014/09/12/cors-for-dropwizard-0-7-x/
     private void configureCors(Environment environment) {
         Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
@@ -107,6 +152,6 @@ public class NewtsService extends Application<NewtsConfig> {
         filter.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
         filter.setInitParameter("allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
         filter.setInitParameter("allowCredentials", "true");
-      }
+    }
 
 }
