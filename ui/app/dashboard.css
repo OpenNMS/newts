@@ -1,0 +1,42 @@
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+    padding-top: 50px;
+}
+
+p.result-meta {
+    padding: 8px 0 8px 2px;
+}
+
+div.ffooter {
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    width: 100%;
+    background-color: rgb(244, 244, 244);
+    border-top-color: rgb(184, 184, 184);
+    border-top-style: solid;
+    border-top-width: 1px;
+}
+
+#tooltip {
+    position: absolute;
+    display: none;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: black;
+    color: lightgrey;
+    opacity: 0.70;
+}
+
+.watermark {
+    background-image: url('logo.svg');
+    background-repeat: no-repeat;
+    background-size: 50%;
+    background-position: center center;
+    background-attachment: fixed;
+}
+
+#debugAlerts {
+    margin-top: 15px;
+}

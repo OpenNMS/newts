@@ -1,0 +1,49 @@
+
+
+<div>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-4">
+        <form ng-submit="vm.submit()" role="form">
+          <div class="input-group">
+            <input ng-model="vm.query" type="text" placeholder="Search..." class="form-control" />
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="submit" aria-label="Go!">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+              </button>
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <p ng-show="vm.resources.length" class="text-muted result-meta">
+    {{vm.resources.length}} matching results in {{vm.elapsed}} seconds.
+  </p>
+  <div class="table-responsive">
+    <table ng-show="vm.resources.length" class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Resource</th>
+          <th>Metric</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="resource in vm.resources">
+          <td>{{resource}}</td>
+          <td>
+            <div ng-dropdown-multiselect="" options="vm.metrics[resource]"
+                 selected-model="vm.selected[resource]" extra-settings="vm.selectSettings">
+            </div>
+          </td>
+          <td>
+            <button ng-click="vm.graph(resource)" type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

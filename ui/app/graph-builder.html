@@ -1,0 +1,139 @@
+
+<div ng-show="vm.showGraph">
+
+  <h2 class="sub-header">{{vm.resource}}</span></h2>
+
+  <!-- configuration panel -->
+  <div class="panel-group" role="tablist">
+    <div class="panel panel-default">
+      <!-- header -->
+      <div class="panel-heading" role="tab" id="graphConfigCollapseHeading">
+        <h4 class="panel-title">
+          <a class="collapsed" data-toggle="collapse" href="#graphConfigListGroup" aria-expanded="true"
+             aria-controls="graphConfigListGroup">Configuration</a>
+        </h4>
+      </div>
+      <div id="graphConfigListGroup" class="panel-collapse collapse" role="tabpanel"
+           aria-labelledby="graphConfigCollapseHeading" aria-expanded="true">
+        <ul class="list-group">
+
+          <!-- start/end datetime pickers -->
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-md-5">
+                <div class="dropdown">
+                  <a class="dropdown-toggle" id="datetimeDropdown0" role="button" data-toggle="dropdown"
+                     data-target="#" href="#">
+                    <div class="input-group">
+                      <input type="text" class="form-control" ng-model="vm.configForm._range.start"
+                             placeholder="Start date/time">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                    <datetimepicker ng-model="vm.configForm._range.start"
+                                    data-datetimepicker-config="{ dropdownSelector: '#datetimeDropdown0' }"/>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="dropdown">
+                  <a class="dropdown-toggle" id="datetimeDropdown1" role="button" data-toggle="dropdown"
+                     data-target="#" href="#">
+                    <div class="input-group">
+                      <input type="text" class="form-control" ng-model="vm.configForm._range.end"
+                             placeholder="End date/time">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                    <datetimepicker data-ng-model="vm.configForm._range.end"
+                                    data-datetimepicker-config="{ dropdownSelector: '#datetimeDropdown1' }"/>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2">
+                  <input ng-model="vm.configForm._resolution" type="text" class="form-control"
+                         placeholder="Resolution (eg 15m)"/>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- sample interval -->
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-md-3">
+                <input ng-model="vm.configForm._interval" type="text" class="form-control"
+                       placeholder="Sample interval (eg 300s)"/>
+              </div>
+            </div>
+          </li>
+
+          <!-- Per metric controls -->
+          <li ng-repeat="metric in vm.selectedMetrics" class="list-group-item">
+            <div class="row">
+              <div class="col-md-3">
+                <input ng-model="vm.configForm[metric].label" type="text" placeholder="Label (eg minimum)"
+                       class="form-control" />
+              </div>
+              <div class="col-md-3">
+                <input type="text" value="{{metric}}" class="form-control" disabled />
+              </div>
+              <!-- Function dropdown button -->
+              <div class="btn-group col-md-3">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="false">
+                  {{ vm.getSelectedFunction(metric) }} <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li ng-repeat="function in vm.availableFunctions">
+                    <a href="#" ng-click="vm.setSelectedFunction(metric, function)">{{ function }}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-3">
+                <input ng-model="vm.configForm[metric].heartbeat" type="text" placeholder="Heartbeat (eg 600s)"
+                       class="form-control" />
+              </div>
+            </div>
+          </li>
+
+          <!-- Save -->
+          <li class="list-group-item">
+            <button ng-click="vm.refresh()" type="button" class="btn btn-default">Save</</button>
+          </li>
+        </ul>
+        <!-- footer -->
+        <div class="panel-footer">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trigger tooltip when mouse hovers over data points -->
+  <script type="text/javascript">
+      $(function() {
+          $('#graph').bind('plothover', function(event, pos, item) {
+              if (item) {
+	          var x = item.datapoint[0].toFixed(2),
+                      y = item.datapoint[1].toFixed(2);
+                  $('#tooltip')
+                      .html(y)
+                      .css({ top: item.pageY+5, left: item.pageX+5 })
+                      .fadeIn(200);
+              }
+              else {
+	          $('#tooltip').hide();
+              }
+          });
+      })
+  </script>
+
+  <!-- graph -->
+  <div id="graph" style="height:400px;"></div>
+
+  <!-- tooltip div -->
+  <div id="tooltip"></div>
+
+</div>

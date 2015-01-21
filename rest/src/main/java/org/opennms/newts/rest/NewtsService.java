@@ -25,6 +25,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.yammer.dropwizard.Service;
+import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.lifecycle.Managed;
@@ -40,6 +41,7 @@ public class NewtsService extends Service<NewtsConfig> {
     public void initialize(Bootstrap<NewtsConfig> bootstrap) {
         bootstrap.setName("newts");
         bootstrap.addCommand(new InitCommand());
+        bootstrap.addBundle(new AssetsBundle("/app", "/ui", "index.html"));
     }
 
     @Override

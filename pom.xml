@@ -44,6 +44,7 @@
     <module>examples</module>
     <module>metrics-reporter</module>
     <module>karaf</module>
+    <module>ui</module>
   </modules>
 
   <properties>

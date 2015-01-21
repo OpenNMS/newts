@@ -1,0 +1,23 @@
+{
+  "name": "newts-ui",
+  "description": "A user-interface for Newts",
+  "version": "1.0.0",
+  "homepage": "https://github.com/OpenNMS/newts",
+  "license": "APL2",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.x",
+    "angular-route": "1.2.x",
+    "angular-loader": "1.2.x",
+    "angular-mocks": "~1.2.x",
+    "html5-boilerplate": "~4.3.0",
+    "bootstrap": "~3.3.0",
+    "flot": "~0.8.3",
+    "angularjs-dropdown-multiselect": "~1.5.2",
+    "angular-bootstrap-datetimepicker": "~0.3.7",
+    "modernizer": "~2.8.2"
+  },
+  "resolutions": {
+    "angular": "1.2.x"
+  }
+}
