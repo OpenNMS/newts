@@ -1,9 +1,6 @@
 Newts UI
 ========
 
-newts setup
-  do https://github.com/OpenNMS/newts/wiki/GettingStarted
-sample data
-  use https://github.com/eevans/fpinger
-newts-ui
-  do ``npm start`` from a terminal; go to http://localhost:8000/app
+This module contains a simple web-based interface implemented in AngularJS_.
+
+.. _AngularJS: https://angularjs.org/
