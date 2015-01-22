@@ -1,8 +1,0 @@
-1.0.1
-~~~~~
-
-The Karaf_ feature Maven_ module was renamed from ``karaf``, to
-``newts-karaf``.  Update dependency names accordingly.
-
-.. _Karaf: http://karaf.apache.org
-.. _Maven: http://maven.apache.org
