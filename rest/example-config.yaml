@@ -13,13 +13,26 @@ cassandra:
 search:
   enabled: true
 
-# If enabled, suitable file permissions should be used to keep these
-# credentials secret.
+# If enabled, suitable file permissions should be used to keep thess credentials
+# secret, and HTTPS enabled (see the servers section below) to prevent exposing
+# them over the network.
 authentication:
   enabled: false
   credentials:
-    eevans: qwerty
-    pquill: password
+    eevans: notsecret
+    pquill: notsafe
+
+# See http://dropwizard.io/manual/configuration.html#servers for a complete
+# configuration reference.
+# server:
+#   applicationConnectors:
+#     - type: http
+#       port: 8080
+#     - type: https
+#       port: 8443
+#       keyStorePath: /path/to/keystore.jks
+#       keyStorePassword: password
+#       validateCerts: false
 
 logging:
   level: INFO
