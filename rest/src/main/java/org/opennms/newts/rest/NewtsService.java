@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2015, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -72,8 +72,10 @@ public class NewtsService extends Application<NewtsConfig> {
     @Override
     public void run(NewtsConfig config, Environment environment) throws Exception {
 
+        // Filters
         configureCors(environment);
-        addTrailingSlashRedirectForUI(environment);
+        configureUIRedirect(environment);
+        configureAuthentication(environment, config);
 
         Injector injector = Guice.createInjector(new NewtsGuiceModule(), new CassandraGuiceModule(config));
 
@@ -97,7 +99,7 @@ public class NewtsService extends Application<NewtsConfig> {
 
         SampleRepository repository = injector.getInstance(SampleRepository.class);
 
-        // Add rest resources
+        // Rest resources
         environment.jersey().register(new MeasurementsResource(repository, config.getReports()));
         environment.jersey().register(new SamplesResource(repository));
 
@@ -114,7 +116,15 @@ public class NewtsService extends Application<NewtsConfig> {
 
     }
 
-    private void addTrailingSlashRedirectForUI(Environment environment) {
+    private void configureAuthentication(Environment environment, NewtsConfig config) {
+        if (config.getAuthenticationConfig().isEnabled()) {
+            environment.servlets()
+                .addFilter("BasicAuth", new HttpBasicAuthenticationFilter(config))
+                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+        }
+    }
+
+    private void configureUIRedirect(Environment environment) {
         environment.servlets().addFilter("TrailingSlashRedirect", new Filter() {
 
             @Override

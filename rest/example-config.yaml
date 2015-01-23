@@ -13,6 +13,14 @@ cassandra:
 search:
   enabled: true
 
+# If enabled, suitable file permissions should be used to keep these
+# credentials secret.
+authentication:
+  enabled: false
+  credentials:
+    eevans: qwerty
+    pquill: password
+
 logging:
   level: INFO
   # Logging is sent to the console by default; Uncomment the following and

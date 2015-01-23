@@ -46,6 +46,10 @@ public class NewtsConfig extends Configuration {
     @JsonProperty("reports")
     private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
 
+    @Valid
+    @JsonProperty("authentication")
+    private AuthenticationConfig m_authenticationConfig = new AuthenticationConfig();
+
     public int getMaxSampleProcessorThreads() {
         return m_maxThreads;
     }
@@ -72,6 +76,10 @@ public class NewtsConfig extends Configuration {
 
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
+    }
+
+    public AuthenticationConfig getAuthenticationConfig() {
+        return m_authenticationConfig;
     }
 
 }
