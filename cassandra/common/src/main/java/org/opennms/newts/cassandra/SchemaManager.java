@@ -74,7 +74,7 @@ public class SchemaManager implements AutoCloseable {
                 }
                 catch (AlreadyExistsException e) {
                     if (ifNotExists) {
-                        System.err.printf("%s (skipping)%n", e.getLocalizedMessage());
+                        System.err.printf("%s; Nothing here to do%n", e.getLocalizedMessage());
                     }
                     else {
                         throw e;
