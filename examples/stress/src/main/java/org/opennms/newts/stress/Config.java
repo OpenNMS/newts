@@ -28,6 +28,7 @@ class Config {
     private String m_cassandraHost = "localhost";
     private int m_cassandraPort = 9042;
     private String m_cassandraKeyspace = "newts";
+    private String m_cassandraCompression = "NONE";
     private Timestamp m_start = Timestamp.fromEpochSeconds(900000000);
     private Timestamp m_end = Timestamp.fromEpochSeconds(931536000);
     private Duration m_interval = Duration.seconds(300);
@@ -116,6 +117,10 @@ class Config {
 
     String getCassandraKeyspace() {
         return m_cassandraKeyspace;
+    }
+
+    String getCassandraCompression() {
+        return m_cassandraCompression;
     }
 
     Command getCommand() {

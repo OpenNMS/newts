@@ -74,6 +74,10 @@ public class NewtsConfig extends Configuration {
         return m_cassandraConfig.getColumnTTL();
     }
 
+    public String getCassandraCompression() {
+        return m_cassandraConfig.getCompression();
+    }
+
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
     }

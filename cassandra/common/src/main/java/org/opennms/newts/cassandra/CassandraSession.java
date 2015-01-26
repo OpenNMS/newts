@@ -12,8 +12,12 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ProtocolOptions.Compression;
 import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
@@ -25,15 +29,26 @@ import com.datastax.driver.core.exceptions.DriverException;
 
 public class CassandraSession {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CassandraSession.class);
+
     private final Session m_session;
 
     @Inject
-    public CassandraSession(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname, @Named("cassandra.port") int port) {
+    public CassandraSession(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname, @Named("cassandra.port") int port, @Named("cassandra.compression") String compression) {
         checkNotNull(keyspace, "keyspace argument");
         checkNotNull(hostname, "hostname argument");
         checkArgument(port > 0 && port < 65535, "not a valid port number: %d", port);
+        checkNotNull(compression, "compression argument");
 
-        Cluster cluster = Cluster.builder().withPort(port).addContactPoint(hostname).build();
+        LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
+
+        Cluster cluster = Cluster
+                .builder()
+                .withPort(port)
+                .addContactPoint(hostname)
+                .withCompression(Compression.valueOf(compression.toUpperCase()))
+                .build();
+
         m_session = cluster.connect(keyspace);
 
     }

@@ -18,6 +18,8 @@ package org.opennms.newts.rest;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Pattern.Flag;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,6 +40,10 @@ public class CassandraConfig {
     @Min(value = 0)
     @JsonProperty("time-to-live")
     private int m_columnTTL = 31536000;
+    
+    @Pattern(regexp = "none|lzr|snappy", flags=Flag.CASE_INSENSITIVE)
+    @JsonProperty("compression")
+    private String m_compression = "NONE"; 
 
     public String getKeyspace() {
         return m_keyspace;
@@ -53,6 +59,10 @@ public class CassandraConfig {
 
     public int getColumnTTL() {
         return m_columnTTL;
+    }
+
+    public String getCompression() {
+        return m_compression;
     }
 
 }

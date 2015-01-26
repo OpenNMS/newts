@@ -51,6 +51,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(String.class).annotatedWith(named("cassandra.keyspace")).toInstance(m_newtsConf.getCassandraKeyspace());
         bind(String.class).annotatedWith(named("cassandra.hostname")).toInstance(m_newtsConf.getCassandraHost());
         bind(Integer.class).annotatedWith(named("cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
+        bind(String.class).annotatedWith(named("cassandra.compression")).toInstance(m_newtsConf.getCassandraCompression());
 
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("search.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());

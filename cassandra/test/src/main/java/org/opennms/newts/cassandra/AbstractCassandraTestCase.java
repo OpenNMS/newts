@@ -16,10 +16,11 @@ import com.google.common.io.Resources;
 
 public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
 
-    protected static final String CASSANDRA_CONFIG   = "cassandra.yaml";
-    protected static final String CASSANDRA_HOST     = "localhost";
-    protected static final int    CASSANDRA_PORT     = 9043;
-    protected static final String CASSANDRA_KEYSPACE = "newts";
+    protected static final String CASSANDRA_CONFIG      = "cassandra.yaml";
+    protected static final String CASSANDRA_HOST        = "localhost";
+    protected static final int    CASSANDRA_PORT        = 9043;
+    protected static final String CASSANDRA_COMPRESSION = "NONE";
+    protected static final String CASSANDRA_KEYSPACE    = "newts";
 
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
 

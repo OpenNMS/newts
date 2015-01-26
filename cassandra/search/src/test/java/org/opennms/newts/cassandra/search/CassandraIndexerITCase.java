@@ -108,7 +108,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
     }
 
     private CassandraSession getCassandraSession() {
-        return new CassandraSession(CASSANDRA_KEYSPACE, CASSANDRA_HOST, CASSANDRA_PORT);
+        return new CassandraSession(CASSANDRA_KEYSPACE, CASSANDRA_HOST, CASSANDRA_PORT, CASSANDRA_COMPRESSION);
     }
 
     /** Creates a sample (any sample), for a given resource and metric name. */
