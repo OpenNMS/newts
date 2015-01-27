@@ -14,6 +14,7 @@ Support for `HTTP Basic Auth`_ has been added.
 The Karaf_ feature Maven_ module was renamed from ``karaf``, to ``newts-karaf``.
 Update any dependencies accordingly.
 
+
 .. _HTTP Basic Auth: http://en.wikipedia.org/wiki/Basic_access_authentication
 .. _AngularJS: http://angularjs.org
 .. _Karaf: http://karaf.apache.org

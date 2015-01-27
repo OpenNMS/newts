@@ -19,6 +19,7 @@ package org.opennms.newts.aggregate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opennms.newts.api.MetricType.GAUGE;
 
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -41,6 +42,7 @@ import com.google.common.collect.Maps;
 class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
     private static final Gauge NAN = new Gauge(Double.NaN);
+    private static final EnumSet<MetricType> COUNTERS = EnumSet.of(MetricType.COUNTER, MetricType.ABSOLUTE, MetricType.DERIVE);
 
     private final Iterator<Row<Sample>> m_input;
     private final Set<String> m_metrics;
@@ -71,8 +73,8 @@ class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
                 continue;
             }
 
-            // Use rate as result if COUNTER, else pass through as-is.
-            result.addElement(sample.getType().equals(MetricType.COUNTER) ? getRate(sample) : sample);
+            // Use rate as result if one of counter types, else pass through as-is.
+            result.addElement(COUNTERS.contains(sample.getType()) ? getRate(sample) : sample);
 
             m_prevSamples.put(sample.getName(), sample);
 
@@ -91,7 +93,7 @@ class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
             value = sample.getValue().delta(previous.getValue()).divideBy(elapsed);
         }
 
-        return new Sample(sample.getTimestamp(), sample.getResource(), sample.getName(), GAUGE, value);
+        return new Sample(sample.getTimestamp(), sample.getResource(), sample.getName(), GAUGE, value, sample.getAttributes());
     }
 
     @Override

@@ -28,6 +28,11 @@ public class Derive extends Counter {
     }
 
     @Override
+    public ValueType<UnsignedLong> delta(Number value) {
+        return new Derive(getValue().minus(toUnsignedLong(value)));
+    }
+
+    @Override
     public MetricType getType() {
         return MetricType.DERIVE;
     }

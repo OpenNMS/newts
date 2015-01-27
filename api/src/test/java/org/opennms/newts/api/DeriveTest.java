@@ -15,25 +15,26 @@
  */
 package org.opennms.newts.api;
 
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
+
 import com.google.common.primitives.UnsignedLong;
 
 
-public class Absolute extends Counter {
+public class DeriveTest {
 
-    private static final long serialVersionUID = 1L;
+    @Test
+    public void test() {
 
-    public Absolute(UnsignedLong value) {
-        super(value);
-    }
+        Derive n1 = new Derive(UnsignedLong.valueOf(5L));
+        Derive n2 = new Derive(UnsignedLong.valueOf(10L));
 
-    @Override
-    public ValueType<UnsignedLong> delta(Number value) {
-        return this;
-    }
+        assertThat(n2.delta(n1).longValue(), is(equalTo(5L)));
 
-    @Override
-    public MetricType getType() {
-        return MetricType.ABSOLUTE;
     }
 
 }

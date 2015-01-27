@@ -103,7 +103,7 @@ class Utils {
         }
 
         @Override
-        AbstractRowsBuilder<Measurement> element(String name, double value, Map<String, String> attrs) {
+        MeasurementRowsBuilder element(String name, double value, Map<String, String> attrs) {
             addElement(new Measurement(getCurrentTimestamp(), getResource(), name, value, attrs));
             return this;
         }
@@ -127,7 +127,7 @@ class Utils {
         }
 
         @Override
-        AbstractRowsBuilder<Sample> element(String name, double value, Map<String, String> attrs) {
+        SampleRowsBuilder element(String name, double value, Map<String, String> attrs) {
             addElement(new Sample(getCurrentTimestamp(), getResource(), name, m_type, ValueType.compose(value, m_type), attrs));
             return this;
         }
