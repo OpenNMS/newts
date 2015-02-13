@@ -8,6 +8,8 @@ import javax.inject.Named;
 
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -18,6 +20,8 @@ import com.google.common.cache.CacheBuilder;
 
 
 public class GuavaResourceMetadataCache implements ResourceMetadataCache {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(GuavaResourceMetadataCache.class);
 
     private static final Joiner m_keyJoiner = Joiner.on(':');
     
@@ -28,7 +32,8 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
     private final Meter m_attributeMisses;
 
     @Inject
-    public GuavaResourceMetadataCache(@Named("search.rMetadata.maxCacheSize") long maxSize, MetricRegistry registry) {
+    public GuavaResourceMetadataCache(@Named("search.resourceMetadata.maxCacheEntries") long maxSize, MetricRegistry registry) {
+        LOG.info("Initializing resource metadata cache ({} max entries)", maxSize);
         m_cache = CacheBuilder.newBuilder().maximumSize(maxSize).build();
 
         m_metricReqs = registry.meter(name(getClass(), "metric-reqs"));

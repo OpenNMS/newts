@@ -16,6 +16,8 @@
 package org.opennms.newts.rest;
 
 
+import javax.validation.constraints.Min;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -24,8 +26,16 @@ public class SearchConfig {
     @JsonProperty("enabled")
     private boolean m_isEnabled = true;
 
+    @Min(value = 0)
+    @JsonProperty("maxCacheEntries")
+    private long m_maxCacheEntries = 1000000;
+
     public boolean isEnabled() {
         return m_isEnabled;
+    }
+
+    public long getMaxCacheEntries() {
+        return m_maxCacheEntries;
     }
 
 }

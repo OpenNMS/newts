@@ -13,6 +13,8 @@ cassandra:
 # Resource search indexing
 search:
   enabled: true
+  # Cache of resource metadata; Used to avoid redundant indexing
+  maxCacheEntries: 1000000
 
 # If enabled, suitable file permissions should be used to keep thess credentials
 # secret, and HTTPS enabled (see the servers section below) to prevent exposing
