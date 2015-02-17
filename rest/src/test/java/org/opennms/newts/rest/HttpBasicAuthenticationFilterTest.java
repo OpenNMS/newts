@@ -60,11 +60,26 @@ public class HttpBasicAuthenticationFilterTest {
         m_filter = new HttpBasicAuthenticationFilter(m_newtsConfig);
 
         when(m_request.getHeader("Authorization")).thenReturn(basicAuthHeader(m_user, m_pass));
+        when(m_request.getMethod()).thenReturn("GET");
         when(m_authConfig.isEnabled()).thenReturn(true);
         when(m_authConfig.getCredentials()).thenReturn(Collections.singletonMap(m_user, m_pass));
         when(m_newtsConfig.getAuthenticationConfig()).thenReturn(m_authConfig);
     }
 
+    @Test
+    public void testCorsPreflight() throws IOException, ServletException {
+        // Authorization cannot succeed.
+        when(m_request.getHeader("Authorization")).thenReturn(null);
+
+        // Rejigger request instance for CORS preflight
+        when(m_request.getMethod()).thenReturn("OPTIONS");
+        when(m_request.getHeader("Origin")).thenReturn("http://host.example.com");
+        when(m_request.getHeader("Access-Control-Request-Method")).thenReturn("POST");
+
+        m_filter.doFilter(m_request, m_response, m_chain);
+        verify(m_chain).doFilter(m_request, m_response);
+    }
+    
     @Test
     public void testFilterEnabled() throws IOException, ServletException {
 

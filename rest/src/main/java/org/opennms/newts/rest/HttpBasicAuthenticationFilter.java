@@ -64,9 +64,11 @@ public class HttpBasicAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         LOG.trace("doFilter()");
 
-        if (enabled()) {
+        HttpServletRequest request = (HttpServletRequest)servletRequest;
+
+        if (enabled() && !isCorsPreflight(request)) {
             LOG.trace("Authentication is enabled");
-            HttpServletRequest request = (HttpServletRequest)servletRequest;
+
             HttpServletResponse response = (HttpServletResponse)servletResponse;
             Optional<String> authHeader = getAuthorizationHeader(request);
 
@@ -113,6 +115,10 @@ public class HttpBasicAuthenticationFilter implements Filter {
         }
 
         return false;
+    }
+
+    private boolean isCorsPreflight(HttpServletRequest request) {
+        return request.getMethod().equals("OPTIONS") && (request.getHeader("Access-Control-Request-Method") != null);
     }
 
     private boolean enabled() {
