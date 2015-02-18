@@ -49,26 +49,26 @@ public class Counter extends ValueType<UnsignedLong> {
 
     @Override
     public ValueType<UnsignedLong> delta(Number value) {
-        UnsignedLong difference = getValue().minus(toUnsignedLong(value));
 
-        if (isNegative(difference)) {
-            UnsignedLong difference32 = difference.plus(MAX32).plus(UnsignedLong.ONE);
+        UnsignedLong previous = toUnsignedLong(value);
 
-            if (isNegative(difference32)) {
-                return new Counter(difference.plus(MAX64).plus(UnsignedLong.ONE));
+        // If previous value is greater-than this one, we've wrapped
+        if (previous.compareTo(getValue()) > 0) {
+            UnsignedLong count32 = getValue().plus(MAX32).plus(UnsignedLong.ONE);
+
+            // Still smaller, this is a 64-bit counter wrap
+            if (previous.compareTo(count32) > 0) {
+                return new Counter(MAX64.minus(previous).plus(getValue()).plus(UnsignedLong.ONE));
             }
+            // Process as 32-bit counter wrap
             else {
-                return new Counter(difference32);
+                return new Counter(MAX32.minus(previous).plus(getValue())).plus(UnsignedLong.ONE);
             }
         }
+        // ...no counter wrap has occurred.
         else {
-            return new Counter(difference);
+            return new Counter(getValue().minus(previous));
         }
-
-    }
-
-    private boolean isNegative(UnsignedLong val) {
-        return val.compareTo(UnsignedLong.ZERO) < 0;
     }
 
     @Override
