@@ -98,7 +98,7 @@ public class CassandraSampleRepository implements SampleRepository {
         select.where(gte(SchemaConstants.F_COLLECTED, bindMarker("start")));
         select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
 
-        m_selectStatement = m_session.prepare(select);
+        m_selectStatement = m_session.prepare(select.toString());
         
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));

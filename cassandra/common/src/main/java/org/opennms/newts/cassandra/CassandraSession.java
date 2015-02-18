@@ -53,6 +53,11 @@ public class CassandraSession {
 
     }
 
+    public PreparedStatement prepare(String statement) {
+        try                           {  return m_session.prepare(statement);  }
+        catch (DriverException excep) {  throw new CassandraException(excep);  } 
+    }
+
     public PreparedStatement prepare(RegularStatement statement) {
         try                           {  return m_session.prepare(statement);  }
         catch (DriverException excep) {  throw new CassandraException(excep);  } 

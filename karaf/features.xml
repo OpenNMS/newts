@@ -8,7 +8,7 @@
       <bundle dependency="true">mvn:io.netty/netty/3.7.0.Final</bundle>
       <bundle dependency="true">mvn:org.codehaus.jackson/jackson-core-asl/1.9.13</bundle>
       <bundle dependency="true">mvn:org.codehaus.jackson/jackson-mapper-asl/1.9.13</bundle>
-      <bundle dependency="true">mvn:com.datastax.cassandra/cassandra-driver-core/2.0.0-rc2</bundle>
+      <bundle dependency="true">mvn:com.datastax.cassandra/cassandra-driver-core/2.1.1</bundle>
     </feature>
 
     <feature name="fastxml-jackson" description="Jackson JSON library" version="2.1.4">
