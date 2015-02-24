@@ -41,8 +41,8 @@
     }
 
     // Construct a measurements URL.
-    function url(host, port, resource, resolution, range) {
-        var urlString = 'http://'+host+':'+port+'/measurements/'+resource, args = [];
+    function url(baseUrl, resource, resolution, range) {
+        var urlString = baseUrl+'/measurements/'+resource, args = [];
 
         if (resolution)  args.push('resolution='+resolution);
         if (range.start) args.push('start='+new Date(range.start).toISOString());
@@ -168,10 +168,9 @@
         }
         
         function drawGraph() {
-            var host, port, flotData, resultDescriptor, options;
-            
-            host = siteConfig.restHost;
-            port = siteConfig.restPort;
+            var baseUrl, flotData, resultDescriptor, options;
+
+            baseUrl = siteConfig.restUrl;
 
             resultDescriptor = { 'interval': vm.configForm._interval, 'datasources': [], 'exports': [] };
 
@@ -200,7 +199,7 @@
                 }
             };
 
-            $http.post(url(host, port, vm.resource, vm.configForm._resolution, vm.configForm._range), resultDescriptor)
+            $http.post(url(baseUrl, vm.resource, vm.configForm._resolution, vm.configForm._range), resultDescriptor)
                 .success(function(data, status, headers, config) {
                     flotData = transform(data, resultDescriptor.exports);
                     $.plot("#graph", flotData, options);

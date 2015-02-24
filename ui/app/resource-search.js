@@ -17,8 +17,8 @@
             };
         });
 
-    function url(host, port, queryString) {
-        return 'http://'+host+':'+port+'/search?q='+queryString;
+    function url(baseUrl, queryString) {
+        return baseUrl+'/search?q='+queryString;
     }
 
     function search($scope, $http, graphService, siteConfig) {
@@ -45,9 +45,9 @@
         }
 
         function submit() {
-            var host = siteConfig.restHost, port = siteConfig.restPort, i = 0, start = new Date().getTime();
+            var baseUrl = siteConfig.restUrl, i = 0, start = new Date().getTime();
             
-            $http.get(url(host, port, vm.query))
+            $http.get(url(baseUrl, vm.query))
                 .success(function(data, status, headers, config) {
                     vm.resources = [];
                     data.forEach(function(obj) {
