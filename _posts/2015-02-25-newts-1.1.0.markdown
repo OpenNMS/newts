@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.1.0"
+date: "2015-02-25 14:46:21 -0600"
+author: eevans
+version: 1.1.0
+categories: [release]
+---
+
+Newts 1.1.0 has been released, check out the [release notes](https://github.com/OpenNMS/newts/blob/1.1.0/NEWS.rst) for a list of what's changed.
+
