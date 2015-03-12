@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2015, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -163,12 +163,26 @@ public class CassandraSampleRepository implements SampleRepository {
 
     @Override
     public void insert(Collection<Sample> samples) {
+        insert(samples, false);
+    }
+
+    @Override
+    public void insert(Collection<Sample> samples, boolean calculateTimeToLive) {
 
         Context context = m_insertTimer.time();
+        Timestamp now = Timestamp.now();
 
         Batch batch = unloggedBatch();
 
         for (Sample m : samples) {
+            int ttl = m_ttl;
+            if (calculateTimeToLive) {
+                ttl -= (int)now.minus(m.getTimestamp()).asSeconds();
+            }
+            if (ttl < 0) {
+                ttl = 86400;
+            }
+
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
                         .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
@@ -177,7 +191,7 @@ public class CassandraSampleRepository implements SampleRepository {
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
                         .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()))
                         .value(SchemaConstants.F_ATTRIBUTES, m.getAttributes())
-                        .using(ttl(m_ttl))
+                        .using(ttl(ttl))
             );
         }
 
