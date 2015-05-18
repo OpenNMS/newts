@@ -1,0 +1,137 @@
+/* QueryParser.jj */
+options {
+    STATIC = false;
+}
+PARSER_BEGIN(QueryParser)
+
+package org.opennms.newts.api.search.query;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opennms.newts.api.search.BooleanClause;
+import org.opennms.newts.api.search.BooleanQuery;
+import org.opennms.newts.api.search.Operator;
+import org.opennms.newts.api.search.Query;
+import org.opennms.newts.api.search.TermQuery;
+import org.opennms.newts.api.search.Term;
+
+public class QueryParser extends QueryParserBase {
+
+    public QueryParser() {
+        this(new StringReader("")); 
+    }
+
+}
+
+PARSER_END(QueryParser)
+
+// Skip whitespace characters
+SKIP : {
+  " "
+| "\t"
+| "\r"
+| "\n"
+| "\r\n"
+}
+
+<*> TOKEN : {
+  // Escape all characters followed by a backslash
+  <#_ESCAPED_CHAR: "\\" ~[] >
+| <#_TERM_START_CHAR: ( ~[ " ", "\t", "\n", "\r", "\u3000", "+", "-", "!", "(", ")", ":", "^",
+                           "[", "]", "\"", "{", "}", "~", "*", "?", "\\", "/" ]
+                       | <_ESCAPED_CHAR> ) >
+| <#_TERM_CHAR: ( <_TERM_START_CHAR> | <_ESCAPED_CHAR> ) >
+}
+
+TOKEN : {
+  <AND: ("AND" | "&&") >
+| <OR: ("OR" | "||") >
+| <LPAREN: "(" >
+| <RPAREN: ")" >
+| <COLON: ":" >
+| <TERM: <_TERM_START_CHAR> (<_TERM_CHAR>)*  >
+}
+
+Operator Operator() : {
+  Operator op = Operator.OR;
+}
+{
+  [
+      <AND> { op = Operator.AND; }
+    | <OR>  { op = Operator.OR; }
+  ]
+  { return op; }
+}
+
+Query TopLevelQuery() : {
+  Query q;
+}
+{
+  q=Query() <EOF>
+  {
+    return q;
+  }
+}
+
+Query Query() : {
+    List<BooleanClause> clauses = new ArrayList<BooleanClause>();
+    Operator op;
+    Query q, firstQuery=null;
+}
+{
+  // Grab the first clause, which won't be prefixed by an operator
+  q=Clause()
+  {
+   clauses.add(new BooleanClause(q, Operator.OR));
+   firstQuery = q;
+  }
+
+  // Grab the remaining clauses, which may or may not be prefixed by an operator
+  (
+   op=Operator() q=Clause()
+   { clauses.add(new BooleanClause(q, op)); }
+  )*
+
+  // If there is a single clause, then return the first query
+  // Otherwise build a new query that contains all of the clauses
+  {
+   if (clauses.size() == 1 && firstQuery != null)
+    return firstQuery;
+   else {
+    return new BooleanQuery(clauses);
+   }
+  }
+}
+
+Query Clause() : {
+  Query q;
+  Token fieldToken=null;
+}
+{
+  (
+   LOOKAHEAD(2)
+   q=Term()
+   | <LPAREN> q=Query() <RPAREN>
+  )
+
+  { return q; }
+}
+
+Query Term() : {
+  Token lhs, rhs;
+  Query q;
+}
+{
+(
+  LOOKAHEAD(2)
+  lhs=<TERM> <COLON> rhs=<TERM>
+  { q = new TermQuery(new Term(discardEscapeChar(lhs.image), discardEscapeChar(rhs.image))); }
+|
+  lhs=<TERM>
+  { q = new TermQuery(new Term(discardEscapeChar(lhs.image))); }
+)
+
+  { return q; }
+}

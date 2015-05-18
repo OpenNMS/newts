@@ -25,6 +25,11 @@
     </dependency>
     <dependency>
       <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-queryparser</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
       <artifactId>newts-cassandra</artifactId>
       <version>${project.version}</version>
     </dependency>
