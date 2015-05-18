@@ -2,8 +2,8 @@ package org.opennms.newts.cassandra.search;
 
 
 import static com.codahale.metrics.MetricRegistry.name;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.in;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,8 +27,11 @@ import org.opennms.newts.cassandra.search.Constants.Schema;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Select.Where;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -41,10 +44,23 @@ public class CassandraSearcher implements Searcher {
     private final CassandraSession m_session;
     private final Timer m_searchTimer;
 
+    private final PreparedStatement m_selectAttributesStatement;
+    private final PreparedStatement m_selectMetricNamesStatement;
+
     @Inject
     public CassandraSearcher(CassandraSession session, MetricRegistry registry) {
         m_session = checkNotNull(session, "session argument");
         m_searchTimer = registry.timer(name("search", "search"));
+
+        Select select = QueryBuilder.select(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE).from(Schema.T_ATTRS);
+        select.where(eq(Schema.C_ATTRS_CONTEXT, bindMarker(Schema.C_ATTRS_CONTEXT)))
+              .and(  eq(Schema.C_ATTRS_RESOURCE, bindMarker(Schema.C_ATTRS_RESOURCE)));
+        m_selectAttributesStatement = m_session.prepare(select.toString());
+
+        select = QueryBuilder.select(Schema.C_METRICS_NAME).from(Schema.T_METRICS);
+        select.where(eq(Schema.C_METRICS_CONTEXT, bindMarker(Schema.C_METRICS_CONTEXT)))
+              .and(  eq(Schema.C_METRICS_RESOURCE, bindMarker(Schema.C_METRICS_RESOURCE)));
+        m_selectMetricNamesStatement = m_session.prepare(select.toString());
     }
 
     @Override
@@ -135,12 +151,11 @@ public class CassandraSearcher implements Searcher {
     private Optional<Map<String, String>> fetchResourceAttributes(Context context, String resourceId) {
         Map<String, String> attributes = Maps.newHashMap();
 
-        // TODO: Use prepared statement.
-        Statement searchQuery = select(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE).from(Constants.Schema.T_ATTRS)
-                .where(eq(Schema.C_ATTRS_CONTEXT, context.getId()))
-                .and(  eq(Schema.C_ATTRS_RESOURCE, resourceId));
+        BoundStatement bindStatement = m_selectAttributesStatement.bind();
+        bindStatement.setString(Schema.C_ATTRS_CONTEXT, context.getId());
+        bindStatement.setString(Schema.C_ATTRS_RESOURCE, resourceId);
 
-        for (Row row : m_session.execute(searchQuery.toString())) {      // FIXME: toString()?
+        for (Row row : m_session.execute(bindStatement)) {
             attributes.put(row.getString(Schema.C_ATTRS_ATTR), row.getString(Schema.C_ATTRS_VALUE));
         }
 
@@ -150,12 +165,11 @@ public class CassandraSearcher implements Searcher {
     private Collection<String> fetchMetricNames(Context context, String resourceId) {
         List<String> metricNames = Lists.newArrayList();
 
-        // TODO: Use prepared statement.
-        Statement select = select(Schema.C_METRICS_NAME).from(Schema.T_METRICS)
-                .where(eq(Schema.C_METRICS_CONTEXT, context.getId()))
-                .and(  eq(Schema.C_METRICS_RESOURCE, resourceId));
+        BoundStatement bindStatement = m_selectMetricNamesStatement.bind();
+        bindStatement.setString(Schema.C_METRICS_CONTEXT, context.getId());
+        bindStatement.setString(Schema.C_METRICS_RESOURCE, resourceId);
 
-        for (Row row : m_session.execute(select.toString())) {  // FIXME: toString()?
+        for (Row row : m_session.execute(bindStatement)) {
             metricNames.add(row.getString(Schema.C_METRICS_NAME));
         }
 
