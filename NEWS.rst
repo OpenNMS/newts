@@ -1,3 +1,9 @@
+1.2.0
+~~~~~
+
+Improved `Search API`_ and query parsing with support for AND operators
+and grouped terms.
+
 1.1.0
 ~~~~~
 
@@ -15,6 +21,7 @@ The Karaf_ feature Maven_ module was renamed from ``karaf``, to ``newts-karaf``.
 Update any dependencies accordingly.
 
 
+.. _Search API: https://github.com/OpenNMS/newts/wiki/Search
 .. _HTTP Basic Auth: http://en.wikipedia.org/wiki/Basic_access_authentication
 .. _AngularJS: http://angularjs.org
 .. _Karaf: http://karaf.apache.org
