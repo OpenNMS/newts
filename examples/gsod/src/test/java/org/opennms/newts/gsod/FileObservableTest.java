@@ -15,6 +15,8 @@
  */
 package org.opennms.newts.gsod;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -26,6 +28,7 @@ import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 
 import rx.Observable;
@@ -33,29 +36,31 @@ import rx.observers.TestObserver;
 
 public class FileObservableTest {
     
-    @Rule public TestName name = new TestName();
+    @Rule
+    public TestName name = new TestName();
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
-    public void testWalking() throws IOException {
-        
-        Path dir = tempDir("target/testing/walker-test");
-        
+    public void testWalking() throws IOException, InterruptedException {
+
+        Path dir = tempFolder.getRoot().toPath();
+
         List<Path> files = createTestTree(dir, "a/a", "a/b", "b/a", "b/b");
-        
+
         TestObserver<Path> testObserver = new TestObserver<>();
         
         Observable<Path> walk = FileObservable.fileTreeWalker(dir);
         
         walk.subscribe(testObserver);
         
-        testObserver.assertReceivedOnNext(files);
+        List<Path> observedFiles = testObserver.getOnNextEvents();
+        
+        assertTrue(files.containsAll(observedFiles) && observedFiles.containsAll(files));
         testObserver.assertTerminalEvent();
-        
-        
-        
-        
     }
-    
+
     @Test
     public void testLines() throws IOException {
         
@@ -68,8 +73,7 @@ public class FileObservableTest {
            "",
            "line5"
         );
-        
-        
+
         TestObserver<String> testObserver = new TestObserver<>();
         
         Observable<String> contents = FileObservable.lines(testFile);
@@ -87,8 +91,6 @@ public class FileObservableTest {
     }
 
     private List<Path> createTestTree(Path root, String... files) throws IOException {
-        
-        root.toFile().mkdirs();
 
         List<Path> paths = new ArrayList<Path>();
         for(String file : files) {
@@ -101,19 +103,11 @@ public class FileObservableTest {
         }
         return paths;
     }
-    
-    
-    private Path tempDir(String root) throws IOException {
-        File rootDir = new File(root);
-        rootDir.mkdirs();
-        return Files.createTempDirectory(rootDir.toPath(), name.getMethodName());
-    }
-    
+
     private Path tempFile(String dir) throws IOException {
         File d = new File(dir);
         d.mkdirs();
         return Files.createTempFile(d.toPath(), name.getMethodName(), ".txt");
     }
-    
-    
+
 }
