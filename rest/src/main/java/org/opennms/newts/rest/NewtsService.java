@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Searcher;
+import org.opennms.newts.graphite.GraphiteListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,22 +71,24 @@ public class NewtsService extends Application<NewtsConfig> {
     }
 
     @Override
-    public void run(NewtsConfig config, Environment environment) throws Exception {
+    public void run(final NewtsConfig config, Environment environment) throws Exception {
 
         // Filters
         configureCors(environment);
         configureUIRedirect(environment);
         configureAuthentication(environment, config);
 
-        Injector injector = Guice.createInjector(new NewtsGuiceModule(), new CassandraGuiceModule(config));
+        final Injector injector = Guice.createInjector(new NewtsGuiceModule(), new CassandraGuiceModule(config), new GraphiteGuiceModule(config));
 
         MetricRegistry metricRegistry = injector.getInstance(MetricRegistry.class);
 
         // Create/start a JMX reporter for our MetricRegistry
         final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("newts").build();
 
-        environment.lifecycle().manage(new Managed() {
+        // Create (and start if so configured), a Graphite line-protocol listener
+        final GraphiteListenerThread listener = new GraphiteListenerThread(injector.getInstance(GraphiteListener.class));
 
+        environment.lifecycle().manage(new Managed() {
             @Override
             public void stop() throws Exception {
                 reporter.stop();
@@ -94,6 +97,9 @@ public class NewtsService extends Application<NewtsConfig> {
             @Override
             public void start() throws Exception {
                 reporter.start();
+                if (config.getGraphiteConfig().isEnabled()) {
+                    listener.start();
+                }
             }
         });
 

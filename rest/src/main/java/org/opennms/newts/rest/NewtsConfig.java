@@ -15,7 +15,6 @@
  */
 package org.opennms.newts.rest;
 
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-
 
 public class NewtsConfig extends Configuration {
 
@@ -37,7 +35,7 @@ public class NewtsConfig extends Configuration {
     @Valid
     @JsonProperty("search")
     private SearchConfig m_searchConfig = new SearchConfig();
-    
+
     @Valid
     @JsonProperty("cassandra")
     private CassandraConfig m_cassandraConfig = new CassandraConfig();
@@ -49,6 +47,10 @@ public class NewtsConfig extends Configuration {
     @Valid
     @JsonProperty("authentication")
     private AuthenticationConfig m_authenticationConfig = new AuthenticationConfig();
+
+    @Valid
+    @JsonProperty("graphite")
+    private GraphiteConfig m_graphiteConfig = new GraphiteConfig();
 
     public int getMaxSampleProcessorThreads() {
         return m_maxThreads;
@@ -84,6 +86,10 @@ public class NewtsConfig extends Configuration {
 
     public AuthenticationConfig getAuthenticationConfig() {
         return m_authenticationConfig;
+    }
+
+    public GraphiteConfig getGraphiteConfig() {
+        return m_graphiteConfig;
     }
 
 }
