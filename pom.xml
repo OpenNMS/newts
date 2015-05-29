@@ -40,6 +40,7 @@
     <module>aggregate</module>
     <module>api</module>
     <module>cassandra</module>
+    <module>graphite</module>
     <module>rest</module>
     <module>examples</module>
     <module>metrics-reporter</module>
