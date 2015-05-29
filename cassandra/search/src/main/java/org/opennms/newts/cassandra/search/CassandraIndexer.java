@@ -82,7 +82,7 @@ public class CassandraIndexer implements Indexer {
 
         try {
             if (statements.size() > 0) {
-                m_session.execute(batch(statements.toArray(new RegularStatement[0])).toString()); // FIXME: toString()?
+                m_session.execute(batch(statements.toArray(new RegularStatement[statements.size()])));
             }
 
             // Order matters here; We want the cache updated only after a successful Cassandra write.
