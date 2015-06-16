@@ -16,12 +16,14 @@
 package org.opennms.newts.api;
 
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
-public class Timestamp implements Comparable<Timestamp> {
+public class Timestamp implements Comparable<Timestamp>, Serializable {
+    private static final long serialVersionUID = 8827895112055791967L;
 
     public final long m_time;
     public final TimeUnit m_unit;
