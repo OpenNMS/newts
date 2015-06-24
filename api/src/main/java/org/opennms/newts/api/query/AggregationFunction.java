@@ -16,12 +16,13 @@
 package org.opennms.newts.api.query;
 
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import com.google.common.base.Function;
 
 
-public interface AggregationFunction extends Function<Collection<Double>, Double> {
+public interface AggregationFunction extends Function<Collection<Double>, Double>, Serializable {
 
     /**
      * An Aggregation function is a function that takes the list of PDPs should be aggregated in a

@@ -19,10 +19,12 @@ package org.opennms.newts.api.query;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 
-public class Calculation {
+public class Calculation implements Serializable {
+    private static final long serialVersionUID = -1273272566473340413L;
 
     private final String m_label;
     private final CalculationFunction m_calculationFunction;

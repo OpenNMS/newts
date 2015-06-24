@@ -15,6 +15,8 @@
  */
 package org.opennms.newts.api.query;
 
-public interface CalculationFunction {
+import java.io.Serializable;
+
+public interface CalculationFunction extends Serializable {
     double apply(double... ds);
 }

@@ -19,6 +19,7 @@ package org.opennms.newts.api.query;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -35,13 +36,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
-public class ResultDescriptor {
+public class ResultDescriptor implements Serializable {
+    private static final long serialVersionUID = -6983442401680715547L;
 
-    public static interface UnaryFunction {
+    public static interface UnaryFunction extends Serializable {
         double apply(double a);
     }
 
-    public static interface BinaryFunction {
+    public static interface BinaryFunction extends Serializable {
         double apply(double a, double b);
     }
 
@@ -217,6 +219,7 @@ public class ResultDescriptor {
 
     public ResultDescriptor calculate(String label, final BinaryFunction binaryFunction, String arg1, String arg2) {
         CalculationFunction calculationFunction = new CalculationFunction() {
+            private static final long serialVersionUID = -4149546450724920349L;
 
             @Override
             public double apply(double... ds) {
@@ -231,6 +234,7 @@ public class ResultDescriptor {
 
     public ResultDescriptor calculate(String label, final UnaryFunction unaryFunction, String arg) {
         CalculationFunction calculationFunction = new CalculationFunction() {
+            private static final long serialVersionUID = 2353112913166459161L;
 
             @Override
             public double apply(double... ds) {
@@ -248,7 +252,8 @@ public class ResultDescriptor {
         final Expression expr = je.createExpression(expression);
         final String[] labels = getLabels().toArray(new String[0]);
         CalculationFunction evaluate = new CalculationFunction() {
-            
+            private static final long serialVersionUID = -3328049421398096252L;
+
             @Override
             public double apply(double... ds) {
                 JexlContext jc = new MapContext();

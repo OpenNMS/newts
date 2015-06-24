@@ -18,10 +18,13 @@ package org.opennms.newts.api.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
+
 import org.opennms.newts.api.Duration;
 
 
-public class Datasource {
+public class Datasource implements Serializable {
+    private static final long serialVersionUID = -8283578649327643169L;
 
     private final String m_label;
     private final String m_source;

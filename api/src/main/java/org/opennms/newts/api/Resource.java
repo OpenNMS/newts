@@ -18,6 +18,7 @@ package org.opennms.newts.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.google.common.base.Objects;
@@ -30,7 +31,8 @@ import com.google.common.base.Optional;
  * 
  * @author eevans
  */
-public class Resource {
+public class Resource implements Serializable {
+    private static final long serialVersionUID = -7061059766465651705L;
 
     private final String m_id;
     private final Optional<Map<String, String>> m_attributes;

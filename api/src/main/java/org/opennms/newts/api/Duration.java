@@ -18,13 +18,15 @@ package org.opennms.newts.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class Duration implements Comparable<Duration> {
+public class Duration implements Comparable<Duration>, Serializable {
+    private static final long serialVersionUID = -6758879321662337772L;
 
     private static final Pattern s_pattern = Pattern.compile("([\\d]+)([wdhms]|ms)");
 

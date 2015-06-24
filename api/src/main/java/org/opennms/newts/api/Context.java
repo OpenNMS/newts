@@ -15,8 +15,11 @@
  */
 package org.opennms.newts.api;
 
+import java.io.Serializable;
+import com.google.common.base.Objects;
 
-public class Context {
+public class Context implements Serializable {
+    private static final long serialVersionUID = 6042152517787919500L;
 
     public static final Context DEFAULT_CONTEXT = new Context("G");
 
@@ -35,4 +38,16 @@ public class Context {
         return "Context[m_id=" + m_id + "]";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final Context other = (Context) obj;
+        return Objects.equal(this.m_id, other.m_id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.m_id);
+    }
 }

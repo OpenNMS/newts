@@ -16,16 +16,20 @@
 package org.opennms.newts.api;
 
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 
-public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
+public class Results<T extends Element<?>> implements Iterable<Results.Row<T>>, Serializable {
+    private static final long serialVersionUID = -3273508775312254315L;
 
-    public static class Row<T extends Element<?>> implements Iterable<T> {
+    public static class Row<T extends Element<?>> implements Iterable<T>, Serializable {
+        private static final long serialVersionUID = 4284597337435202235L;
 
         private Timestamp m_timestamp;
         private Resource m_resource;
@@ -71,6 +75,21 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
                     getElements());
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            final Row<?> other = (Row<?>) obj;
+            return Objects.equal(this.m_timestamp, other.m_timestamp)
+                    && Objects.equal(this.m_resource, other.m_resource)
+                    && Objects.equal(this.m_cells, other.m_cells);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(
+                    this.m_timestamp, this.m_resource, this.m_cells);
+        }
     }
 
     Map<Timestamp, Row<T>> m_rows = Maps.newTreeMap();
@@ -106,4 +125,16 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>> {
         return String.format("%s[%s]", getClass().getSimpleName(), getRows());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final Results<?> other = (Results<?>) obj;
+        return Objects.equal(this.m_rows, other.m_rows);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.m_rows);
+    }
 }

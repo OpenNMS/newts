@@ -18,10 +18,14 @@ package org.opennms.newts.api;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import com.google.common.base.Objects;
 
-public class Sample implements Element<ValueType<?>>{
+
+public class Sample implements Element<ValueType<?>>, Serializable {
+    private static final long serialVersionUID = 3819211879010998577L;
 
     private final Timestamp m_timestamp;
     private final Context m_context;
@@ -94,4 +98,23 @@ public class Sample implements Element<ValueType<?>>{
                 getValue());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final Sample other = (Sample) obj;
+        return Objects.equal(this.m_timestamp, other.m_timestamp)
+                && Objects.equal(this.m_context, other.m_context)
+                && Objects.equal(this.m_resource, other.m_resource)
+                && Objects.equal(this.m_name, other.m_name)
+                && Objects.equal(this.m_type, other.m_type)
+                && Objects.equal(this.m_value, other.m_value)
+                && Objects.equal(this.m_attributes, other.m_attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(
+                this.m_timestamp, this.m_context, this.m_resource, this.m_name, m_type, this.m_value, this.m_attributes);
+    }
 }
