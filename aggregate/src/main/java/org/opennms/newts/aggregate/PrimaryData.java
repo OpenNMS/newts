@@ -43,7 +43,7 @@ import com.google.common.collect.Maps;
  */
 class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measurement>> {
 
-    private class Accumulation {
+    private static class Accumulation {
         private long m_known, m_unknown;
         private ValueType<?> m_value;
         private Map<String, String> m_attributes = Maps.newHashMap();
