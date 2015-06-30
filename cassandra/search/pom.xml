@@ -13,7 +13,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>newts-cassandra-search</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>New Timeseries Datastore :: Cassandra :: Search</name>
 
@@ -87,6 +87,22 @@
 
   <build>
     <plugins>
+      <plugin>
+	<groupId>org.apache.felix</groupId>
+	<artifactId>maven-bundle-plugin</artifactId>
+	<extensions>true</extensions>
+	<configuration>
+	  <instructions>
+	    <Export-Package>
+	      org.opennms.newts.cassandra.search*
+	    </Export-Package>
+	    <Import-Package>
+	      <![CDATA[javax.inject*;resolution:=optional,*]]>
+	    </Import-Package>
+	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
+	  </instructions>
+	</configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>

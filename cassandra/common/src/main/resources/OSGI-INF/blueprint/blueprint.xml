@@ -1,0 +1,36 @@
+<blueprint
+	xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+	xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0 
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+
+		http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
+		http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+
+		http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0
+		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
+">
+
+  <!-- Configuration properties -->
+  <cm:property-placeholder id="properties" persistent-id="org.opennms.newts.cassandra" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="cassandra.keyspace"     value="newts"/>
+      <cm:property name="cassandra.hostname"     value="localhost"/>
+      <cm:property name="cassandra.port"         value="9042"/>
+      <cm:property name="cassandra.compression"  value="NONE"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <bean id="cassandraSession" class="org.opennms.newts.cassandra.CassandraSession" >
+    <argument index="0" value="${cassandra.keyspace}" />
+    <argument index="1" value="${cassandra.hostname}" />
+    <argument index="2" value="${cassandra.port}" />
+    <argument index="3" value="${cassandra.compression}" />
+  </bean>
+
+  <service ref="cassandraSession" interface="org.opennms.newts.cassandra.CassandraSession" />
+
+</blueprint>

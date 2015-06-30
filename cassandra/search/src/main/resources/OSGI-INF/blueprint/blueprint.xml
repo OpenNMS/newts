@@ -14,30 +14,16 @@
 		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
 ">
 
-  <!-- Configuration properties -->
-  <cm:property-placeholder id="properties" persistent-id="org.opennms.newts.cassandra" update-strategy="none">
-    <cm:default-properties>
-      <cm:property name="cassandra.time-to-live" value="31536000"/>
-      <cm:property name="processor.threadCount"  value="10" />
-    </cm:default-properties>
-  </cm:property-placeholder>
-
   <reference id="cassandraSession" ext:proxy-method="classes" interface="org.opennms.newts.cassandra.CassandraSession" />
 
   <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry" />
 
-  <bean id="sampleProcessorService" class="org.opennms.newts.api.SampleProcessorService" >
-    <argument value="${processor.threadCount}" />
+  <bean id="cassandraSearcher" class="org.opennms.newts.cassandra.search.CassandraSearcher">
+	<argument index="0" ref="cassandraSession" />
+	<argument index="1" ref="metricRegistry" />
   </bean>
 
-  <bean id="cassandraSampleRepository" class="org.opennms.newts.persistence.cassandra.CassandraSampleRepository">
-    <argument index="0" ref="cassandraSession" />
-    <argument index="1" value="${cassandra.time-to-live}" />
-    <argument index="2" ref="metricRegistry" />
-    <argument index="3" ref="sampleProcessorService" />
-  </bean>
-
-  <service ref="cassandraSampleRepository" interface="org.opennms.newts.api.SampleRepository">
+  <service ref="cassandraSearcher" interface="org.opennms.newts.api.search.Searcher">
     <service-properties>
       <entry key="newts.backend" value="cassandra"/>
     </service-properties>
