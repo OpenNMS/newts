@@ -23,7 +23,7 @@
   </modules>
 
   <properties>
-    <cassandraUnitVersion>2.0.2.2</cassandraUnitVersion>
+    <cassandraUnitVersion>2.1.3.1</cassandraUnitVersion>
   </properties>
 
   <dependencyManagement>
@@ -31,7 +31,7 @@
       <dependency>
         <groupId>org.cassandraunit</groupId>
         <artifactId>cassandra-unit</artifactId>
-        <version>2.0.2.2</version>
+        <version>${cassandraUnitVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

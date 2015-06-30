@@ -52,8 +52,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cassandraVersion>2.0.3</cassandraVersion>
-    <cassandraDriverVersion>2.1.1</cassandraDriverVersion>
+    <cassandraDriverVersion>2.1.6</cassandraDriverVersion>
     <guavaVersion>17.0</guavaVersion>
     <guiceVersion>4.0-beta4</guiceVersion>
     <jacksonVersion>2.3.5</jacksonVersion>
