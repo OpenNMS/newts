@@ -64,11 +64,13 @@ public class MeasurementsResource {
             @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<TimestampParam> start,
             @QueryParam("end") Optional<TimestampParam> end,
-            @QueryParam("resolution") Optional<DurationParam> resolution) {
+            @QueryParam("resolution") Optional<DurationParam> resolution,
+            @QueryParam("context") Optional<String> contextId) {
 
         Optional<Timestamp> lower = Transform.toTimestamp(start);
         Optional<Timestamp> upper = Transform.toTimestamp(end);
         Optional<Duration> step = Transform.toDuration(resolution);
+        Context context = contextId.isPresent() ? new Context(contextId.get()) : Context.DEFAULT_CONTEXT;
 
         LOG.debug(
                 "Retrieving measurements for resource {}, from {} to {} w/ resolution {} and w/ report {}",
@@ -80,7 +82,7 @@ public class MeasurementsResource {
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        return Transform.measurementDTOs(m_repository.select(Context.DEFAULT_CONTEXT, resource, lower, upper, rDescriptor, step));
+        return Transform.measurementDTOs(m_repository.select(context, resource, lower, upper, rDescriptor, step));
     }
 
     @GET
@@ -91,7 +93,8 @@ public class MeasurementsResource {
             @PathParam("resource") Resource resource,
             @QueryParam("start") Optional<TimestampParam> start,
             @QueryParam("end") Optional<TimestampParam> end,
-            @QueryParam("resolution") Optional<DurationParam> resolution) {
+            @QueryParam("resolution") Optional<DurationParam> resolution,
+            @QueryParam("context") Optional<String> contextId) {
 
         ResultDescriptorDTO descriptorDTO = m_reports.get(report);
 
@@ -100,7 +103,7 @@ public class MeasurementsResource {
             return null;
         }
 
-        return getMeasurements(descriptorDTO, resource, start, end, resolution);
+        return getMeasurements(descriptorDTO, resource, start, end, resolution, contextId);
     }
 
 }

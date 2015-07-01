@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.search.Query;
 import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.Searcher;
@@ -50,7 +51,7 @@ public class SearchResource {
 
     @GET
     @Timed
-    public SearchResults search(@QueryParam("q") Optional<String> query) {
+    public SearchResults search(@QueryParam("q") Optional<String> query, @QueryParam("context") Optional<String> contextId) {
         checkArgument(query.isPresent(), "missing required query parameter (q=<argument>)");
         QueryParser qp = new QueryParser();
         Query parsedQuery;
@@ -59,7 +60,8 @@ public class SearchResource {
         } catch (ParseException e) {
             throw new WebApplicationException(e, Response.status(Status.BAD_REQUEST).entity("Invalid query " + query.get()).build());
         }
-        return m_searcher.search(parsedQuery);
+        Context context = contextId.isPresent() ? new Context(contextId.get()) : Context.DEFAULT_CONTEXT;
+        return m_searcher.search(context, parsedQuery);
     }
 
 }

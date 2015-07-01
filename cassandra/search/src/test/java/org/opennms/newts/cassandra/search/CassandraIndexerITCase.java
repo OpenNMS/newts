@@ -83,25 +83,25 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         CassandraSearcher searcher = new CassandraSearcher(session, registry);
 
         // Match path components
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("aaa")).size(), equalTo(2));
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("aac")).size(), equalTo(1));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aaa")).size(), equalTo(2));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aac")).size(), equalTo(1));
 
         // Match attribute values
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("people")).size(), equalTo(3));
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("metal")).size(), equalTo(1));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("people")).size(), equalTo(3));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("metal")).size(), equalTo(1));
 
         // Match attribute key + value pairs
         BooleanQuery query = new BooleanQuery();
         query.add(new TermQuery(new Term("beverage", "beer")), Operator.OR);
-        assertThat(searcher.search(query).size(), equalTo(1));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, query).size(), equalTo(1));
 
         // Or'd terms
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("metal", "country")).size(), equalTo(2));
-        assertThat(searcher.search(QueryBuilder.matchAnyValue("beer", "wine")).size(), equalTo(3));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("metal", "country")).size(), equalTo(2));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("beer", "wine")).size(), equalTo(3));
 
         // And'd terms
-        assertThat(searcher.search(QueryBuilder.matchAllValues("metal", "country")).size(), equalTo(0));
-        assertThat(searcher.search(QueryBuilder.matchAllValues("aaa", "aac")).size(), equalTo(1));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAllValues("metal", "country")).size(), equalTo(0));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAllValues("aaa", "aac")).size(), equalTo(1));
 
         // Groups queries
         // (beer AND metal) OR (aaa AND country)
@@ -116,10 +116,10 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         query = new BooleanQuery();
         query.add(subquery1, Operator.OR);
         query.add(subquery2, Operator.OR);
-        assertThat(searcher.search(query).size(), equalTo(2));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, query).size(), equalTo(2));
 
         // Attributes are retrieved
-        Result r = searcher.search(QueryBuilder.matchAnyValue("metal")).iterator().next();
+        Result r = searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("metal")).iterator().next();
         assertThat(r.getResource().getId(), is(equalTo("aab")));
         assertThat(r.getResource().getAttributes().isPresent(), is(true));
         assertThat(r.getResource().getAttributes().get(), equalTo(map(base, "music", "metal", "beverage", "beer")));

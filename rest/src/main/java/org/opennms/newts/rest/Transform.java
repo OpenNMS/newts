@@ -48,6 +48,7 @@ class Transform {
             public Sample apply(SampleDTO input) {
                 return new Sample(
                         Timestamp.fromEpochMillis(input.getTimestamp()),
+                        input.getContext(),
                         new Resource(input.getResource().getId(), wrapMap(input.getResource().getAttributes())),
                         input.getName(),
                         input.getType(),
@@ -124,7 +125,8 @@ class Transform {
                                 input.getName(),
                                 input.getType(),
                                 input.getValue(),
-                                input.getAttributes());
+                                input.getAttributes(),
+                                input.getContext().getId());
                     }
                 });
             }

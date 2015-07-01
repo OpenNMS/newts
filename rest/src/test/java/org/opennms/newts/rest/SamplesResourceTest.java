@@ -74,7 +74,8 @@ public class SamplesResourceTest {
                 m_resource.getSamples(
                         new Resource("localhost"),
                         Optional.of(new TimestampParam("1998-07-09T11:00:00-0500")),
-                        Optional.of(new TimestampParam("1998-07-09T12:00:00-0500"))),
+                        Optional.of(new TimestampParam("1998-07-09T12:00:00-0500")),
+                        Optional.<String>absent()),
                 CoreMatchers.instanceOf(Collection.class));
 
     }

@@ -61,12 +61,14 @@ public class SamplesResource {
     @Timed
     @Path("/{resource}")
     public Collection<Collection<SampleDTO>> getSamples(@PathParam("resource") Resource resource,
-            @QueryParam("start") Optional<TimestampParam> start, @QueryParam("end") Optional<TimestampParam> end) {
+            @QueryParam("start") Optional<TimestampParam> start, @QueryParam("end") Optional<TimestampParam> end,
+            @QueryParam("context") Optional<String> contextId) {
 
         Optional<Timestamp> lower = Transform.toTimestamp(start);
         Optional<Timestamp> upper = Transform.toTimestamp(end);
+        Context context = contextId.isPresent() ? new Context(contextId.get()) : Context.DEFAULT_CONTEXT;
 
-        return Transform.sampleDTOs(m_sampleRepository.select(Context.DEFAULT_CONTEXT, resource, lower, upper));
+        return Transform.sampleDTOs(m_sampleRepository.select(context, resource, lower, upper));
     }
 
 }

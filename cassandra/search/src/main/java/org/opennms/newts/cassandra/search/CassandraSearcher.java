@@ -86,14 +86,9 @@ public class CassandraSearcher implements Searcher {
     }
 
     @Override
-    public SearchResults search(Query query) {
-        return search(query, Context.DEFAULT_CONTEXT);
-    }
-
-    @Override
-    public SearchResults search(Query query, Context context) {
-        checkNotNull(query, "query argument");
+    public SearchResults search(Context context, Query query) {
         checkNotNull(context, "context argument");
+        checkNotNull(query, "query argument");
 
         Timer.Context ctx = m_searchTimer.time();
 
@@ -103,17 +98,17 @@ public class CassandraSearcher implements Searcher {
             Set<String> ids;
             Query q = query.rewrite();
             if (q instanceof BooleanQuery) {
-                ids = searchForIds((BooleanQuery)q, context);
+                ids = searchForIds(context, (BooleanQuery)q);
             } else if (q instanceof TermQuery) {
-                ids = searchForIds((TermQuery)q, context);
+                ids = searchForIds(context, (TermQuery)q);
             } else {
                 throw new IllegalStateException("Unsupported query: " + q);
             }
 
             for (final String id : ids) {
                 // Fetch the metric names and attributes concurrently
-                ResultSetFuture attrsFuture = fetchResourceAttributes(Context.DEFAULT_CONTEXT, id);
-                ResultSetFuture metricsFuture = fetchMetricNames(Context.DEFAULT_CONTEXT, id);
+                ResultSetFuture attrsFuture = fetchResourceAttributes(context, id);
+                ResultSetFuture metricsFuture = fetchMetricNames(context, id);
 
                 try {
                     Optional<Map<String, String>> attrs = getResourceAttributesFromResults(attrsFuture);
@@ -135,7 +130,7 @@ public class CassandraSearcher implements Searcher {
      * Returns the set of resource ids that match the given
      * term query.
      */
-    private Set<String> searchForIds(TermQuery query, Context context) {
+    private Set<String> searchForIds(Context context, TermQuery query) {
         Set<String> ids = Sets.newTreeSet();
 
         BoundStatement bindStatement = m_searchStatement.bind();
@@ -157,7 +152,7 @@ public class CassandraSearcher implements Searcher {
      * Separate clauses are performed with separate database queries and their
      * results are joined in memory.
      */
-    private Set<String> searchForIds(BooleanQuery query, Context context) {
+    private Set<String> searchForIds(Context context, BooleanQuery query) {
         Set<String> ids = Sets.newTreeSet();
 
         for (BooleanClause clause : query.getClauses()) {
@@ -165,9 +160,9 @@ public class CassandraSearcher implements Searcher {
 
             Query subQuery = clause.getQuery();
             if (subQuery instanceof BooleanQuery) {
-                subQueryIds = searchForIds((BooleanQuery)subQuery, context);
+                subQueryIds = searchForIds(context, (BooleanQuery)subQuery);
             } else if (subQuery instanceof TermQuery) {
-                subQueryIds = searchForIds((TermQuery)subQuery, context);
+                subQueryIds = searchForIds(context, (TermQuery)subQuery);
             } else {
                 throw new IllegalStateException("Unsupported query: " + subQuery);
             }

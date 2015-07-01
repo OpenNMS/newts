@@ -17,6 +17,8 @@ package org.opennms.newts.rest;
 
 import java.io.IOException;
 
+import org.opennms.newts.api.Context;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -35,6 +37,11 @@ public class SampleDTOSerializer extends JsonSerializer<SampleDTO> {
         // Since attributes is optional, be compact and omit from JSON output when unused.
         if (value.getAttributes() != null && !value.getAttributes().isEmpty()) {
             jgen.writeObjectField("attributes", value.getAttributes());
+        }
+
+        // Omit the context field when it is set to the default
+        if (!Context.DEFAULT_CONTEXT.equals(value.getContext())) {
+            jgen.writeStringField("context", value.getContext().getId());
         }
 
         jgen.writeEndObject();

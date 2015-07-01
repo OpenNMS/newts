@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Sample;
 
@@ -42,15 +43,19 @@ public class SampleDTO {
     private final MetricType m_type;
     private final Number m_value;
     private final Map<String, String> m_attributes;
+    private final Context m_context;
 
     @JsonCreator
-    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") ResourceDTO resource, @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value, @JsonProperty("attributes") Map<String, String> attributes) {
+    public SampleDTO(@JsonProperty("timestamp") long timestamp, @JsonProperty("resource") ResourceDTO resource,
+            @JsonProperty("name") String name, @JsonProperty("type") MetricType type, @JsonProperty("value") Number value,
+            @JsonProperty("attributes") Map<String, String> attributes, @JsonProperty("context") String context) {
         m_timestamp = checkNotNull(timestamp, "m_timestamp argument");
         m_resource = checkNotNull(resource, "m_resource argument");
         m_name = checkNotNull(name, "m_name argument");
         m_type = checkNotNull(type, "m_type argument");
         m_value = checkNotNull(value, "m_value argument");
         m_attributes = attributes;
+        m_context = context != null ? new Context(context) : Context.DEFAULT_CONTEXT;
     }
 
     public long getTimestamp() {
@@ -77,4 +82,7 @@ public class SampleDTO {
         return m_attributes;
     }
 
+    public Context getContext() {
+        return m_context;
+    }
 }

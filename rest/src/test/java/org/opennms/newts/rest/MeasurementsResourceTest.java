@@ -80,7 +80,8 @@ public class MeasurementsResourceTest {
                         new Resource("localhost"),
                         Optional.of(new TimestampParam("1998-07-09T11:00:00-0500")),
                         Optional.of(new TimestampParam("1998-07-09T12:00:00-0500")),
-                        Optional.of(new DurationParam("15m"))),
+                        Optional.of(new DurationParam("15m")),
+                        Optional.<String>absent()),
                 CoreMatchers.instanceOf(Collection.class));
 
         // Include the report in the request
@@ -90,7 +91,8 @@ public class MeasurementsResourceTest {
                         new Resource("localhost"),
                         Optional.of(new TimestampParam("1998-07-09T11:00:00-0500")),
                         Optional.of(new TimestampParam("1998-07-09T12:00:00-0500")),
-                        Optional.of(new DurationParam("15m"))),
+                        Optional.of(new DurationParam("15m")),
+                        Optional.<String>absent()),
                 CoreMatchers.instanceOf(Collection.class));
     }
 
