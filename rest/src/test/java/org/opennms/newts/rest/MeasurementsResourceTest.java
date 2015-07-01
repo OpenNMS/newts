@@ -68,7 +68,7 @@ public class MeasurementsResourceTest {
                         eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900003600))),
                         any(ResultDescriptor.class),
-                        eq(Duration.seconds(900)))
+                        eq(Optional.of(Duration.seconds(900))))
         ).thenReturn(results);
 
         // Reference the report by name

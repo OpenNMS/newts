@@ -27,10 +27,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
@@ -68,25 +67,19 @@ public class MeasurementsResource {
 
         Optional<Timestamp> lower = Transform.toTimestamp(start);
         Optional<Timestamp> upper = Transform.toTimestamp(end);
-
-        if (!resolution.isPresent()) {
-            throw new WebApplicationException(
-                    Response.status(Response.Status.BAD_REQUEST)
-                            .entity("the 'resolution' query argument is mandatory (for the time being)")
-                            .build());
-        }
+        Optional<Duration> step = Transform.toDuration(resolution);
 
         LOG.debug(
                 "Retrieving measurements for resource {}, from {} to {} w/ resolution {} and w/ report {}",
                 resource,
                 lower,
                 upper,
-                resolution.get().get(),
+                step,
                 descriptorDTO);
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, resolution.get().get()));
+        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, step));
     }
 
     @GET

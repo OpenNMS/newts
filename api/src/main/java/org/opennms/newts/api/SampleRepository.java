@@ -36,11 +36,11 @@ public interface SampleRepository {
      *            query end time (defaults to current time if absent)
      * @param descriptor
      *            aggregation descriptor
-     * @param resolultion
-     *            temporal resolution of results
+     * @param resolution
+     *            temporal resolution of results (defaults to a value resulting in 1-10 measurements, if absent)
      * @return query results
      */
-    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution);
+    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution);
 
     /**
      * Read stored samples.

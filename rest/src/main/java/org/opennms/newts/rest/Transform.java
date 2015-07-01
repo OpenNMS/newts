@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
@@ -165,5 +166,9 @@ class Transform {
 
     static Optional<Timestamp> toTimestamp(Optional<TimestampParam> value) {
         return value.isPresent() ? Optional.of(value.get().get()) : Optional.<Timestamp>absent();
+    }
+
+    static Optional<Duration> toDuration(Optional<DurationParam> value) {
+        return value.isPresent() ? Optional.of(value.get().get()) : Optional.<Duration>absent();
     }
 }

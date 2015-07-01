@@ -68,7 +68,7 @@ public class GraphiteListener implements Runnable {
 
             @Override
             public Results<Measurement> select(Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2,
-                    ResultDescriptor arg3, Duration arg4) {
+                    ResultDescriptor arg3, Optional<Duration> arg4) {
                 throw new UnsupportedOperationException();
             }
 

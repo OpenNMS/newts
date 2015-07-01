@@ -61,6 +61,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -68,6 +69,9 @@ import com.google.common.collect.Lists;
 public class CassandraSampleRepository implements SampleRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(CassandraSampleRepository.class);
+
+    // Used to calculate the duration when the duration is not specified
+    private static final int TARGET_NUMBER_OF_STEPS = 10;
 
     private final CassandraSession m_session;
     private final int m_ttl;
@@ -107,7 +111,7 @@ public class CassandraSampleRepository implements SampleRepository {
     }
 
     @Override
-    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Duration resolution) {
+    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution) {
 
         Context context = m_measurementSelectTimer.time();
 
@@ -115,11 +119,34 @@ public class CassandraSampleRepository implements SampleRepository {
 
         Timestamp upper = end.isPresent() ? end.get() : Timestamp.now();
         Timestamp lower = start.isPresent() ? start.get() : upper.minus(Duration.seconds(86400));
+        Duration step;
+        if (resolution.isPresent()) {
+            step = resolution.get();
+        } else {
+            // Determine the ideal step size, splitting the interval evenly into N slices
+            long stepMillis = upper.minus(lower).asMillis() / TARGET_NUMBER_OF_STEPS;
 
-        LOG.debug("Querying database for resource {}, from {} to {}", resource, lower.minus(resolution), upper);
+            // But every step must be a multiple of the interval
+            long intervalMillis = descriptor.getInterval().asMillis();
 
-        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(resolution), upper), descriptor.getSourceNames());
-        Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, resolution).process(driverAdapter);
+            // If the interval is greater than the target step, use the 2 * interval as the step
+            if (intervalMillis >= stepMillis) {
+                step = descriptor.getInterval().times(2);
+            } else {
+                // Otherwise, round stepMillis up to the closest multiple of intervalMillis
+                long remainderMillis = stepMillis % intervalMillis;
+                if (remainderMillis != 0) {
+                    stepMillis = stepMillis + intervalMillis - remainderMillis;
+                }
+
+                step = Duration.millis(stepMillis);
+            }
+        }
+
+        LOG.debug("Querying database for resource {}, from {} to {}", resource, lower.minus(step), upper);
+
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(step), upper), descriptor.getSourceNames());
+        Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, step).process(driverAdapter);
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
 
@@ -234,7 +261,7 @@ public class CassandraSampleRepository implements SampleRepository {
         }
     }
 
-    // Use only in tests!
+    @VisibleForTesting
     void setResourceShard(Duration resourceShard) {
         m_resourceShard = resourceShard;
     }

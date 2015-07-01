@@ -51,8 +51,8 @@ class Query {
         return Optional.of(m_end);
     }
 
-    Duration getResolution() {
-        return m_resolution;
+    Optional<Duration> getResolution() {
+        return Optional.of(m_resolution);
     }
 
 }
