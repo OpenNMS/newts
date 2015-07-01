@@ -27,6 +27,7 @@ import org.opennms.newts.api.Duration;
 
 public class DurationParamTest {
 
+    private static final Duration MILLI = Duration.millis(1);
     private static final Duration MINUTE = Duration.seconds(60);
     private static final Duration HOUR = MINUTE.times(60);
     private static final Duration DAY = HOUR.times(24);
@@ -45,6 +46,7 @@ public class DurationParamTest {
     @Test
     public void test() {
 
+        assertThat(param("1ms"), is(MILLI));
         assertThat(param("60"), is(MINUTE));
         assertThat(param("60s"), is(MINUTE));
         assertThat(param("1m"), is(MINUTE));

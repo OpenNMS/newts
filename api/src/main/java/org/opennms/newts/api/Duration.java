@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class Duration implements Comparable<Duration>, Serializable {
     private static final long serialVersionUID = -6758879321662337772L;
 
-    private static final Pattern s_pattern = Pattern.compile("([\\d]+)([wdhms]|ms)");
+    private static final Pattern s_pattern = Pattern.compile("([\\d]+)(ms|[wdhms])");
 
     private final long m_duration;
     private final TimeUnit m_unit;
@@ -73,41 +73,54 @@ public class Duration implements Comparable<Duration>, Serializable {
     public static Duration parse(String durationSpec) {
         checkNotNull(durationSpec, "durationSpec argument");
 
-        Matcher matcher = s_pattern.matcher(durationSpec);
-
-        if (!matcher.matches()) {
+        // If we replace every matched term with an empty string, the result should be
+        // an empty string, otherwise there are invalid characters in the given duration
+        if (!"".equals(s_pattern.matcher(durationSpec).replaceAll(""))) {
             throw new IllegalArgumentException(String.format("%s is not a valid duration", durationSpec));
         }
 
-        Integer value = Integer.parseInt(matcher.group(1));
-        String unit = matcher.group(2);
+        Matcher matcher = s_pattern.matcher(durationSpec);
 
-        Duration r;
+        Duration tally = null;
 
-        switch (unit) {
-            case "w":
-                r = Duration.days(value * 7);
-                break;
-            case "d":
-                r = Duration.days(value);
-                break;
-            case "h":
-                r = Duration.hours(value);
-                break;
-            case "m":
-                r = Duration.minutes(value);
-                break;
-            case "s":
-                r = Duration.seconds(value);
-                break;
-            case "ms":
-                r = Duration.millis(value);
-                break;
-            default:
-                throw new RuntimeException(String.format("%s is an unknown unit; this is a bug!", unit));
+        while (matcher.find()) {
+            Integer value = Integer.parseInt(matcher.group(1));
+            String unit = matcher.group(2);
+
+            Duration r;
+
+            switch (unit) {
+                case "w":
+                    r = Duration.days(value * 7);
+                    break;
+                case "d":
+                    r = Duration.days(value);
+                    break;
+                case "h":
+                    r = Duration.hours(value);
+                    break;
+                case "m":
+                    r = Duration.minutes(value);
+                    break;
+                case "s":
+                    r = Duration.seconds(value);
+                    break;
+                case "ms":
+                    r = Duration.millis(value);
+                    break;
+                default:
+                    throw new RuntimeException(String.format("%s is an unknown unit; this is a bug!", unit));
+            }
+
+            tally = tally != null ? tally.plus(r) : r;
         }
 
-        return r;
+        if (tally == null) {
+            // We didn't find any terms
+            throw new IllegalArgumentException(String.format("%s is not a valid duration", durationSpec));
+        }
+
+        return tally;
     }
 
     public long getDuration() {
