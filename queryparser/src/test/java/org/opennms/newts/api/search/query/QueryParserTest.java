@@ -108,6 +108,19 @@ public class QueryParserTest {
         assertThat(parse("meat:be\\:ef\\:"), equalTo(query));
     }
 
+    @Test
+    public void canParseQueriesWithSpecialCharacters() throws ParseException {
+        char specialCharacters[] = new char[] {
+                '-', '+', '!', '~', '*', '?', '^', '[',
+                ']', '{', '}'
+        };
+        for (char specialChar :specialCharacters) {
+            Query query = new TermQuery(new Term("meat", "ground" + specialChar + "beef"));
+            assertThat(parse(query), equalTo((Query)query));
+            assertThat(parse("meat:ground" + specialChar + "beef"), equalTo(query));
+        }
+    }
+
     private static Query parse(Query query) throws ParseException {
         return parse(query.toString());
     }
