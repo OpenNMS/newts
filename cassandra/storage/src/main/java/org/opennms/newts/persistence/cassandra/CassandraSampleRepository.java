@@ -42,6 +42,7 @@ import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Results.Row;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
@@ -54,7 +55,6 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.codahale.metrics.Timer.Context;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
@@ -96,6 +96,7 @@ public class CassandraSampleRepository implements SampleRepository {
         m_processorService = processorService;
 
         Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
+        select.where(eq(SchemaConstants.F_CONTEXT, bindMarker(SchemaConstants.F_CONTEXT)));
         select.where(eq(SchemaConstants.F_PARTITION, bindMarker(SchemaConstants.F_PARTITION)));
         select.where(eq(SchemaConstants.F_RESOURCE, bindMarker(SchemaConstants.F_RESOURCE)));
 
@@ -113,7 +114,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution) {
 
-        Context context = m_measurementSelectTimer.time();
+        Timer.Context context = m_measurementSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -162,7 +163,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public Results<Sample> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
-        Context context = m_sampleSelectTimer.time();
+        Timer.Context context = m_sampleSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -196,7 +197,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public void insert(Collection<Sample> samples, boolean calculateTimeToLive) {
 
-        Context context = m_insertTimer.time();
+        Timer.Context context = m_insertTimer.time();
         Timestamp now = Timestamp.now();
 
         Batch batch = unloggedBatch();
@@ -213,6 +214,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
+                        .value(SchemaConstants.F_CONTEXT, Context.DEFAULT_CONTEXT.getId())
                         .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
                         .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
@@ -245,6 +247,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
         for (Timestamp partition : new IntervalGenerator(lower, upper, m_resourceShard)) {
             BoundStatement bindStatement = m_selectStatement.bind();
+            bindStatement.setString(SchemaConstants.F_CONTEXT, Context.DEFAULT_CONTEXT.getId());
             bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
             bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
             bindStatement.setDate("start", start.asDate());
