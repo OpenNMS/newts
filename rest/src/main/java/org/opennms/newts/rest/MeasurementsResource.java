@@ -29,6 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.SampleRepository;
@@ -79,7 +80,7 @@ public class MeasurementsResource {
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, step));
+        return Transform.measurementDTOs(m_repository.select(Context.DEFAULT_CONTEXT, resource, lower, upper, rDescriptor, step));
     }
 
     @GET

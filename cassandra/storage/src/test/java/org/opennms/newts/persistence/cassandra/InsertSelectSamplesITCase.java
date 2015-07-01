@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
 import org.opennms.newts.api.Resource;
@@ -59,7 +60,8 @@ public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
         getRepository().insert(samples);
 
         Timestamp start = Timestamp.fromEpochMillis(0), end = Timestamp.fromEpochMillis(rows * 1000);
-        Iterator<Row<Sample>> results = getRepository().select(resource, Optional.of(start), Optional.of(end)).iterator();
+        Iterator<Row<Sample>> results = getRepository().select(Context.DEFAULT_CONTEXT, resource,
+                Optional.of(start), Optional.of(end)).iterator();
 
         for (int i = 1; i <= rows; i++) {
             assertTrue("Insufficient number of results", results.hasNext());

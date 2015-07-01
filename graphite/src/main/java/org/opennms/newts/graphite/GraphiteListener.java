@@ -13,6 +13,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
@@ -67,13 +68,13 @@ public class GraphiteListener implements Runnable {
         new GraphiteListener(new GraphiteInitializer(new SampleRepository() {
 
             @Override
-            public Results<Measurement> select(Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2,
+            public Results<Measurement> select(Context context, Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2,
                     ResultDescriptor arg3, Optional<Duration> arg4) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public Results<Sample> select(Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2) {
+            public Results<Sample> select(Context context, Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2) {
                 throw new UnsupportedOperationException();
             }
 

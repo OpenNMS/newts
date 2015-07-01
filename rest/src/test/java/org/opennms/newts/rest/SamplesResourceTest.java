@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
@@ -63,6 +64,7 @@ public class SamplesResourceTest {
 
         when(
                 m_repository.select(
+                        eq(Context.DEFAULT_CONTEXT),
                         eq(new Resource("localhost")),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900003600))))

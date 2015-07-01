@@ -27,6 +27,7 @@ import java.util.List;
 import org.junit.Test;
 import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.MetricType;
@@ -98,6 +99,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
+                Context.DEFAULT_CONTEXT,
                 new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),
@@ -156,6 +158,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
+                Context.DEFAULT_CONTEXT,
                 new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),
@@ -214,6 +217,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
+                Context.DEFAULT_CONTEXT,
                 new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),
@@ -272,6 +276,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
+                Context.DEFAULT_CONTEXT,
                 new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),
@@ -335,6 +340,7 @@ public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
         writeSamples(testSamples);
 
         Results<Measurement> results = getRepository().select(
+                Context.DEFAULT_CONTEXT,
                 new Resource("localhost"),
                 Optional.of(Timestamp.fromEpochSeconds(900003600)),
                 Optional.of(Timestamp.fromEpochSeconds(900007200)),

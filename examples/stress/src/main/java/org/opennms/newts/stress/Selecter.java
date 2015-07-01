@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.nio.channels.Selector;
 import java.util.concurrent.BlockingQueue;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.SampleRepository;
@@ -83,6 +84,7 @@ public class Selecter extends Worker {
                         query.getResource(),
                         query.getResolution());
                 Results<Measurement> results = m_repository.select(
+                        Context.DEFAULT_CONTEXT,
                         query.getResource(),
                         query.getStart(),
                         query.getEnd(),

@@ -30,6 +30,7 @@ import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
@@ -64,6 +65,7 @@ public class MeasurementsResourceTest {
 
         when(
                 m_repository.select(
+                        eq(Context.DEFAULT_CONTEXT),
                         eq(new Resource("localhost")),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
                         eq(Optional.of(Timestamp.fromEpochSeconds(900003600))),

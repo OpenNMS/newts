@@ -18,7 +18,6 @@ package org.opennms.newts.api;
 
 import java.util.Collection;
 
-
 public interface SampleProcessor {
     public void submit(Collection<Sample> samples);
 }

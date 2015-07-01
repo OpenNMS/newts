@@ -30,6 +30,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
@@ -65,7 +66,7 @@ public class SamplesResource {
         Optional<Timestamp> lower = Transform.toTimestamp(start);
         Optional<Timestamp> upper = Transform.toTimestamp(end);
 
-        return Transform.sampleDTOs(m_sampleRepository.select(resource, lower, upper));
+        return Transform.sampleDTOs(m_sampleRepository.select(Context.DEFAULT_CONTEXT, resource, lower, upper));
     }
 
 }

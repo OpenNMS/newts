@@ -112,9 +112,9 @@ public class CassandraSampleRepository implements SampleRepository {
     }
 
     @Override
-    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution) {
+    public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution) {
 
-        Timer.Context context = m_measurementSelectTimer.time();
+        Timer.Context timer = m_measurementSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -146,7 +146,8 @@ public class CassandraSampleRepository implements SampleRepository {
 
         LOG.debug("Querying database for resource {}, from {} to {}", resource, lower.minus(step), upper);
 
-        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower.minus(step), upper), descriptor.getSourceNames());
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(context, resource,lower.minus(step), upper),
+                descriptor.getSourceNames());
         Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, step).process(driverAdapter);
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
@@ -155,15 +156,15 @@ public class CassandraSampleRepository implements SampleRepository {
             return results;
         }
         finally {
-            context.stop();
+            timer.stop();
         }
 
     }
 
     @Override
-    public Results<Sample> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end) {
+    public Results<Sample> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end) {
 
-        Timer.Context context = m_sampleSelectTimer.time();
+        Timer.Context timer = m_sampleSelectTimer.time();
 
         validateSelect(start, end);
 
@@ -173,7 +174,7 @@ public class CassandraSampleRepository implements SampleRepository {
         LOG.debug("Querying database for resource {}, from {} to {}", resource, lower, upper);
 
         Results<Sample> samples = new Results<Sample>();
-        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(resource, lower, upper));
+        DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(context, resource, lower, upper));
 
         for (Row<Sample> row : driverAdapter) {
             samples.addRow(row);
@@ -185,7 +186,7 @@ public class CassandraSampleRepository implements SampleRepository {
             return samples;
         }
         finally {
-            context.stop();
+            timer.stop();
         }
     }
 
@@ -197,7 +198,7 @@ public class CassandraSampleRepository implements SampleRepository {
     @Override
     public void insert(Collection<Sample> samples, boolean calculateTimeToLive) {
 
-        Timer.Context context = m_insertTimer.time();
+        Timer.Context timer = m_insertTimer.time();
         Timestamp now = Timestamp.now();
 
         Batch batch = unloggedBatch();
@@ -214,7 +215,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
-                        .value(SchemaConstants.F_CONTEXT, Context.DEFAULT_CONTEXT.getId())
+                        .value(SchemaConstants.F_CONTEXT, m.getContext().getId())
                         .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
                         .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
@@ -233,12 +234,13 @@ public class CassandraSampleRepository implements SampleRepository {
             }
         }
         finally {
-            context.stop();
+            timer.stop();
         }
 
     }
 
-    private Iterator<com.datastax.driver.core.Row> cassandraSelect(Resource resource, Timestamp start, Timestamp end) {
+    private Iterator<com.datastax.driver.core.Row> cassandraSelect(Context context, Resource resource,
+            Timestamp start, Timestamp end) {
 
         List<Future<ResultSet>> futures = Lists.newArrayList();
 
@@ -247,7 +249,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
         for (Timestamp partition : new IntervalGenerator(lower, upper, m_resourceShard)) {
             BoundStatement bindStatement = m_selectStatement.bind();
-            bindStatement.setString(SchemaConstants.F_CONTEXT, Context.DEFAULT_CONTEXT.getId());
+            bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
             bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
             bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
             bindStatement.setDate("start", start.asDate());

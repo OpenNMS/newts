@@ -27,7 +27,9 @@ public interface SampleRepository {
 
     /**
      * Query measurements.
-     * 
+     *
+     * @param context
+     *            context to query
      * @param resource
      *            name of the sampled resource
      * @param start
@@ -40,11 +42,13 @@ public interface SampleRepository {
      *            temporal resolution of results (defaults to a value resulting in 1-10 measurements, if absent)
      * @return query results
      */
-    public Results<Measurement> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution);
+    public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution);
 
     /**
      * Read stored samples.
-     * 
+     *
+     * @param context
+     *            context to query
      * @param resource
      *            name of the sampled resource
      * @param start
@@ -53,12 +57,13 @@ public interface SampleRepository {
      *            query end time (defaults to current time if absent)
      * @return query results
      */
-    public Results<Sample> select(Resource resource, Optional<Timestamp> start, Optional<Timestamp> end);
+    public Results<Sample> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end);
 
     /**
      * Write (store) samples.
-     * 
+     *
      * @param samples
+     *            samples to insert
      */
     public void insert(Collection<Sample> samples);
 
@@ -66,7 +71,9 @@ public interface SampleRepository {
      * Write (store) samples.
      *
      * @param samples
+     *            samples to insert
      * @param calculateTimeToLive
+     *            true if the effective TTL should be calculated using the sample timestamps
      */
     public void insert(Collection<Sample> samples, boolean calculateTimeToLive);
 
