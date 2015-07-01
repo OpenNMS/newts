@@ -20,8 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.opennms.newts.api.Measurement;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
@@ -165,19 +163,7 @@ class Transform {
         return wrapped.get();
     }
 
-    /**
-     * Parse an {@link Optional} String to {@link Timestamp}.
-     * <p>
-     * Parsing is done with {@link TimestampParam} which will raise the appropriate
-     * {@link WebApplicationException} if a validation error occurs.
-     * </p>
-     *
-     * @param value
-     *            the string to parse
-     * @return the timestamp wrapped in {@link Optional}
-     */
-    static Optional<Timestamp> timestampFromString(Optional<String> value) {
-        return value.isPresent() ? Optional.of(new TimestampParam(value.get()).get()) : Optional.<Timestamp>absent();
+    static Optional<Timestamp> toTimestamp(Optional<TimestampParam> value) {
+        return value.isPresent() ? Optional.of(value.get().get()) : Optional.<Timestamp>absent();
     }
-
 }

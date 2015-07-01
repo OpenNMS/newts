@@ -62,46 +62,31 @@ public class MeasurementsResource {
     public Collection<Collection<MeasurementDTO>> getMeasurements(
             ResultDescriptorDTO descriptorDTO,
             @PathParam("resource") Resource resource,
-            @QueryParam("start") Optional<String> start,
-            @QueryParam("end") Optional<String> end,
-            @QueryParam("resolution") Optional<String> resolutionParam) {
+            @QueryParam("start") Optional<TimestampParam> start,
+            @QueryParam("end") Optional<TimestampParam> end,
+            @QueryParam("resolution") Optional<DurationParam> resolution) {
 
-        /*
-         * XXX: This resource method should accept a DurationParam instance for the resolution query
-         * parameter, and TimestampParam for start/end. However, for reasons I cannot not (yet) fathom,
-         * Jersey bitches about a missing dependency at startup, and the resource is not loaded. 
-         *
-         * ERROR [2014-03-19 20:20:31,705] com.sun.jersey.spi.inject.Errors: The following errors and
-         * warnings have been detected with resource and/or provider classes:
-         *    SEVERE: Missing dependency for method public java.util.Collection org.opennms.newts.rest.MeasurementsResource.getMeasurements(java.lang.String,java.lang.String,com.google.common.base.Optional,com.google.common.base.Optional,org.opennms.newts.rest.DurationParam)
-         * at parameter at index 4
-         *
-         * ETOOMUCHMAGIC
-         *
-         */
-        Optional<Timestamp> lower = Transform.timestampFromString(start);
-        Optional<Timestamp> upper = Transform.timestampFromString(end);
+        Optional<Timestamp> lower = Transform.toTimestamp(start);
+        Optional<Timestamp> upper = Transform.toTimestamp(end);
 
-        if (!resolutionParam.isPresent()) {
+        if (!resolution.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.BAD_REQUEST)
                             .entity("the 'resolution' query argument is mandatory (for the time being)")
                             .build());
         }
 
-        DurationParam resolution = new DurationParam(resolutionParam.get());
-
         LOG.debug(
                 "Retrieving measurements for resource {}, from {} to {} w/ resolution {} and w/ report {}",
                 resource,
                 lower,
                 upper,
-                resolution.get(),
+                resolution.get().get(),
                 descriptorDTO);
 
         ResultDescriptor rDescriptor = Transform.resultDescriptor(descriptorDTO);
 
-        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, resolution.get()));
+        return Transform.measurementDTOs(m_repository.select(resource, lower, upper, rDescriptor, resolution.get().get()));
     }
 
     @GET
@@ -110,9 +95,9 @@ public class MeasurementsResource {
     public Collection<Collection<MeasurementDTO>> getMeasurements(
             @PathParam("report") String report,
             @PathParam("resource") Resource resource,
-            @QueryParam("start") Optional<String> start,
-            @QueryParam("end") Optional<String> end,
-            @QueryParam("resolution") Optional<String> resolutionParam) {
+            @QueryParam("start") Optional<TimestampParam> start,
+            @QueryParam("end") Optional<TimestampParam> end,
+            @QueryParam("resolution") Optional<DurationParam> resolution) {
 
         ResultDescriptorDTO descriptorDTO = m_reports.get(report);
 
@@ -121,7 +106,7 @@ public class MeasurementsResource {
             return null;
         }
 
-        return getMeasurements(descriptorDTO, resource, start, end, resolutionParam);
+        return getMeasurements(descriptorDTO, resource, start, end, resolution);
     }
 
 }

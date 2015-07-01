@@ -60,21 +60,12 @@ public class SamplesResource {
     @Timed
     @Path("/{resource}")
     public Collection<Collection<SampleDTO>> getSamples(@PathParam("resource") Resource resource,
-            @QueryParam("start") Optional<String> start, @QueryParam("end") Optional<String> end) {
+            @QueryParam("start") Optional<TimestampParam> start, @QueryParam("end") Optional<TimestampParam> end) {
 
-        /*
-         * XXX: This resource method should use TimestampParam as the type for the start and end
-         * arguments, but some of these custom parameters are causing Jersey fits, and so for
-         * consistency sake we'll eschew them all for the time being.
-         * 
-         * Transform#timestampFromString uses TimestampParam to parse the String parameter, and so
-         * appropriately excepts on validation failures (resulting in 400 Bad Request responses).
-         */
-        Optional<Timestamp> lower = Transform.timestampFromString(start);
-        Optional<Timestamp> upper = Transform.timestampFromString(end);
+        Optional<Timestamp> lower = Transform.toTimestamp(start);
+        Optional<Timestamp> upper = Transform.toTimestamp(end);
 
         return Transform.sampleDTOs(m_sampleRepository.select(resource, lower, upper));
-
     }
 
 }

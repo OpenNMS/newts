@@ -71,8 +71,8 @@ public class SamplesResourceTest {
         assertThat(
                 m_resource.getSamples(
                         new Resource("localhost"),
-                        Optional.of("1998-07-09T11:00:00-0500"),
-                        Optional.of("1998-07-09T12:00:00-0500")),
+                        Optional.of(new TimestampParam("1998-07-09T11:00:00-0500")),
+                        Optional.of(new TimestampParam("1998-07-09T12:00:00-0500"))),
                 CoreMatchers.instanceOf(Collection.class));
 
     }
