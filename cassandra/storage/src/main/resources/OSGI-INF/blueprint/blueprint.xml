@@ -30,11 +30,14 @@
     <argument value="${processor.threadCount}" />
   </bean>
 
+  <bean id="contextConfigurations" class="org.opennms.newts.persistence.cassandra.ContextConfigurations" />
+
   <bean id="cassandraSampleRepository" class="org.opennms.newts.persistence.cassandra.CassandraSampleRepository">
     <argument index="0" ref="cassandraSession" />
     <argument index="1" value="${cassandra.time-to-live}" />
     <argument index="2" ref="metricRegistry" />
     <argument index="3" ref="sampleProcessorService" />
+    <argument index="4" ref="contextConfigurations" />
   </bean>
 
   <service ref="cassandraSampleRepository" interface="org.opennms.newts.api.SampleRepository">
