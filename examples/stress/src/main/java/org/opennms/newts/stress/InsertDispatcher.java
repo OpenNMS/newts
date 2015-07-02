@@ -25,6 +25,7 @@ import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
+import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,8 @@ class InsertDispatcher extends Dispatcher {
                 session,
                 Config.CASSANDRA_TTL,
                 new MetricRegistry(),
-                new SampleProcessorService(1));
+                new SampleProcessorService(1),
+                new ContextConfigurations());
 
         m_samplesQueue = Queues.newArrayBlockingQueue(config.getThreads() * 10);
 

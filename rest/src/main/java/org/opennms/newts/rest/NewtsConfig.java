@@ -41,6 +41,10 @@ public class NewtsConfig extends Configuration {
     private CassandraConfig m_cassandraConfig = new CassandraConfig();
 
     @Valid
+    @JsonProperty("contexts")
+    private Map<String, ContextConfig> m_contextConfigs = Collections.emptyMap();
+
+    @Valid
     @JsonProperty("reports")
     private Map<String, ResultDescriptorDTO> m_reports = Collections.emptyMap();
 
@@ -82,6 +86,10 @@ public class NewtsConfig extends Configuration {
 
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
+    }
+
+    public Map<String, ContextConfig> getContextConfigs() {
+        return m_contextConfigs;
     }
 
     public AuthenticationConfig getAuthenticationConfig() {

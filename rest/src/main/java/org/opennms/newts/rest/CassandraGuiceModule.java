@@ -27,6 +27,7 @@ import org.opennms.newts.cassandra.search.CassandraSearcher;
 import org.opennms.newts.cassandra.search.GuavaResourceMetadataCache;
 import org.opennms.newts.cassandra.search.ResourceMetadataCache;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
+import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -70,6 +71,12 @@ public class CassandraGuiceModule extends AbstractModule {
             processors.addBinding().to(CassandraIndexerSampleProcessor.class);
         }
 
+        // Pull in context specific attributes
+        ContextConfigurations contextConfigurations = new ContextConfigurations();
+        for (ContextConfig contextConfig : m_newtsConf.getContextConfigs().values()) {
+            contextConfigurations.addContextConfig(contextConfig.getContext(), contextConfig.getResourceShard());
+        }
+        bind(ContextConfigurations.class).toInstance(contextConfigurations);
     }
 
 }

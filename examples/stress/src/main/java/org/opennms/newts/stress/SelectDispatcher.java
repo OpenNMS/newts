@@ -27,6 +27,7 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.StandardAggregationFunctions;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
+import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Queues;
@@ -57,7 +58,8 @@ public class SelectDispatcher extends Dispatcher {
                 session,
                 Config.CASSANDRA_TTL,
                 new MetricRegistry(),
-                new SampleProcessorService(1));
+                new SampleProcessorService(1),
+                new ContextConfigurations());
 
         m_queryQueue = Queues.newArrayBlockingQueue(config.getThreads() * 10);
 

@@ -10,6 +10,14 @@ cassandra:
   time-to-live: 31536000
   compression: none
 
+# Context specific configuration
+# Note that the resource shard is used to calculate partition indices and changing
+# his value on an existing context may result in samples being no longer accessible
+contexts:
+  default:
+    id: G
+    resource-shard: 7d
+
 # Resource search indexing
 search:
   enabled: true

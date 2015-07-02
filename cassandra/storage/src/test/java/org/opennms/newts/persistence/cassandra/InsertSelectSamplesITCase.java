@@ -55,7 +55,7 @@ public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
         }
 
         // Override the shard period to ensure we test query concurrency
-        getRepository().setResourceShard(Duration.seconds(1));
+        m_contextConfigurations.addContextConfig(Context.DEFAULT_CONTEXT, Duration.seconds(1));
 
         getRepository().insert(samples);
 

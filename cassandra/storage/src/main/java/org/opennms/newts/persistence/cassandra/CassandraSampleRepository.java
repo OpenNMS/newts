@@ -61,7 +61,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -82,10 +81,10 @@ public class CassandraSampleRepository implements SampleRepository {
     private final Timer m_measurementSelectTimer;
     private final Timer m_insertTimer;
 
-    private Duration m_resourceShard = Duration.seconds(600000);
+    private final ContextConfigurations m_contextConfigurations;
 
     @Inject
-    public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, MetricRegistry registry, SampleProcessorService processorService) {
+    public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, MetricRegistry registry, SampleProcessorService processorService, ContextConfigurations contextConfigurations) {
 
         m_session = checkNotNull(session, "session argument");
         checkArgument(ttl >= 0, "Negative Cassandra column TTL");
@@ -94,6 +93,8 @@ public class CassandraSampleRepository implements SampleRepository {
 
         checkNotNull(registry, "metric registry argument");
         m_processorService = processorService;
+
+        m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
         Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
         select.where(eq(SchemaConstants.F_CONTEXT, bindMarker(SchemaConstants.F_CONTEXT)));
@@ -104,7 +105,7 @@ public class CassandraSampleRepository implements SampleRepository {
         select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
 
         m_selectStatement = m_session.prepare(select.toString());
-        
+
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
         m_insertTimer = registry.timer(metricName("insert-timer"));
@@ -134,7 +135,7 @@ public class CassandraSampleRepository implements SampleRepository {
             if (intervalMillis >= stepMillis) {
                 step = descriptor.getInterval().times(2);
             } else {
-                // Otherwise, round stepMillis up to the closest multiple of intervalMillis
+                // Otherwise, round stepMillkeyis up to the closest multiple of intervalMillis
                 long remainderMillis = stepMillis % intervalMillis;
                 if (remainderMillis != 0) {
                     stepMillis = stepMillis + intervalMillis - remainderMillis;
@@ -213,10 +214,11 @@ public class CassandraSampleRepository implements SampleRepository {
                 }
             }
 
+            Duration resourceShard = m_contextConfigurations.getResourceShard(m.getContext());
             batch.add(
                     insertInto(SchemaConstants.T_SAMPLES)
                         .value(SchemaConstants.F_CONTEXT, m.getContext().getId())
-                        .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(m_resourceShard).asSeconds())
+                        .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(resourceShard).asSeconds())
                         .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
                         .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
                         .value(SchemaConstants.F_METRIC_NAME, m.getName())
@@ -244,10 +246,11 @@ public class CassandraSampleRepository implements SampleRepository {
 
         List<Future<ResultSet>> futures = Lists.newArrayList();
 
-        Timestamp lower = start.stepFloor(m_resourceShard);
-        Timestamp upper = end.stepFloor(m_resourceShard);
+        Duration resourceShard = m_contextConfigurations.getResourceShard(context);
+        Timestamp lower = start.stepFloor(resourceShard);
+        Timestamp upper = end.stepFloor(resourceShard);
 
-        for (Timestamp partition : new IntervalGenerator(lower, upper, m_resourceShard)) {
+        for (Timestamp partition : new IntervalGenerator(lower, upper, resourceShard)) {
             BoundStatement bindStatement = m_selectStatement.bind();
             bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
             bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
@@ -267,10 +270,6 @@ public class CassandraSampleRepository implements SampleRepository {
         }
     }
 
-    @VisibleForTesting
-    void setResourceShard(Duration resourceShard) {
-        m_resourceShard = resourceShard;
-    }
 
     private String metricName(String suffix) {
         return name("repository", suffix);

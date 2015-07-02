@@ -49,6 +49,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected static final String SCHEMA_RESOURCE = "/samples_schema.cql";
 
     protected CassandraSampleRepository m_repository;
+    protected ContextConfigurations m_contextConfigurations = new ContextConfigurations();
 
     public AbstractCassandraTestCase() {
         super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
@@ -62,7 +63,8 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
                 session,
                 CASSANDRA_TTL,
                 new MetricRegistry(),
-                mock(SampleProcessorService.class));
+                mock(SampleProcessorService.class),
+                m_contextConfigurations);
     }
 
     @After
