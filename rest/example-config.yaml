@@ -23,6 +23,8 @@ search:
   enabled: true
   # Cache of resource metadata; Used to avoid redundant indexing
   maxCacheEntries: 1000000
+  # Index additional terms that allow the resource tree to be discovered
+  hierarchical-indexing: true
 
 # Optional Graphite listener
 graphite:

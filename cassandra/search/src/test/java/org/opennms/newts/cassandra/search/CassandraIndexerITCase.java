@@ -15,7 +15,7 @@
  */
 package org.opennms.newts.cassandra.search;
 
-
+import static org.opennms.newts.api.search.QueryBuilder.matchKeyAndValue;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -27,7 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,11 +44,13 @@ import org.opennms.newts.api.search.BooleanQuery;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.api.search.Operator;
 import org.opennms.newts.api.search.QueryBuilder;
+import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.SearchResults.Result;
 import org.opennms.newts.api.search.Term;
 import org.opennms.newts.api.search.TermQuery;
 import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.search.CassandraResourceTreeWalker.SearchResultVisitor;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
@@ -76,7 +80,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
         MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry);
+        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, false);
 
         indexer.update(samples);
 
@@ -130,13 +134,90 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
     }
 
     @Test
+    public void canWalkTheResourceTree() {
+
+        Map<String, String> base = map("meat", "people", "bread", "beer");
+        List<Sample> samples = Lists.newArrayList();
+        samples.add(sampleFor(new Resource("a:b:c", Optional.of(base)), "m0"));
+        samples.add(sampleFor(new Resource("a:b", Optional.of(base)), "m1"));
+        samples.add(sampleFor(new Resource("x:b:z", Optional.of(base)), "m2"));
+
+        CassandraSession session = getCassandraSession();
+
+        ResourceMetadataCache mockCache = mock(ResourceMetadataCache.class);
+        when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+        MetricRegistry registry = new MetricRegistry();
+
+        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, true);
+
+        indexer.update(samples);
+
+        CassandraSearcher searcher = new CassandraSearcher(session, registry);
+
+        // Verify specific search results
+        SearchResults results = searcher.search(Context.DEFAULT_CONTEXT, matchKeyAndValue("_parent", "_root"));
+        Iterator<Result> it = results.iterator();
+        Result result = it.next();
+        assertThat(result.getResource().getId(), equalTo("a"));
+        // a is a resource with no metrics
+        assertThat(result.getMetrics().size(), equalTo(0));
+        result = it.next();
+        assertThat(result.getResource().getId(), equalTo("x"));
+        // x is a resource with no metrics
+        assertThat(result.getMetrics().size(), equalTo(0));
+
+        results = searcher.search(Context.DEFAULT_CONTEXT, matchKeyAndValue("_parent", "a"));
+        result = results.iterator().next();
+        assertThat(result.getResource().getId(), equalTo("a:b"));
+        assertThat(result.getMetrics().size(), equalTo(1));
+
+        results = searcher.search(Context.DEFAULT_CONTEXT, matchKeyAndValue("_parent", "a:b"));
+        result = results.iterator().next();
+        assertThat(result.getResource().getId(), equalTo("a:b:c"));
+        assertThat(result.getMetrics().size(), equalTo(1));
+
+        results = searcher.search(Context.DEFAULT_CONTEXT, matchKeyAndValue("_parent", "a:b:c"));
+        assertThat(results.iterator().hasNext(), equalTo(false));
+
+        // Walk the tree via BFS
+        LoggingResourceVisitor visitor = new LoggingResourceVisitor();
+        CassandraResourceTreeWalker resourceTreeWalker = new CassandraResourceTreeWalker(searcher);
+        resourceTreeWalker.breadthFirstSearch(Context.DEFAULT_CONTEXT, visitor);
+        assertThat(visitor.getResourceIds(), equalTo(Lists.newArrayList(
+                "a", "x", "a:b", "x:b", "a:b:c", "x:b:z")));
+
+        // Walk the tree via DFS
+        visitor = new LoggingResourceVisitor();
+        resourceTreeWalker.depthFirstSearch(Context.DEFAULT_CONTEXT, visitor);
+        assertThat(visitor.getResourceIds(), equalTo(Lists.newArrayList(
+                "a", "a:b", "a:b:c", "x", "x:b", "x:b:z")));
+    }
+
+    private static class LoggingResourceVisitor implements SearchResultVisitor {
+        private List<Result> results = Lists.newArrayList();
+
+        @Override
+        public boolean visit(Result result) {
+            return results.add(result);
+        }
+
+        public ArrayList<String> getResourceIds() {
+            ArrayList<String> resourceIds = Lists.newArrayList();
+            for (Result result : results) {
+                resourceIds.add(result.getResource().getId());
+            }
+            return resourceIds;
+        }
+    };
+
+    @Test
     public void testCache() {
 
         ResourceMetadataCache cache = mock(ResourceMetadataCache.class);
         when(cache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
         MetricRegistry registry = new MetricRegistry();
 
-        Indexer indexer = new CassandraIndexer(getCassandraSession(), 86400, cache, registry);
+        Indexer indexer = new CassandraIndexer(getCassandraSession(), 86400, cache, registry, false);
 
         Sample s = sampleFor(new Resource("aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));

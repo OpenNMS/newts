@@ -36,4 +36,8 @@ public class QueryBuilder {
         }
         return query;
     }
+
+    public static Query matchKeyAndValue(String key, String value) {
+        return new TermQuery(new Term(key, value));
+    }
 }

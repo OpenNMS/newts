@@ -30,12 +30,19 @@ public class SearchConfig {
     @JsonProperty("maxCacheEntries")
     private long m_maxCacheEntries = 1000000;
 
+    @JsonProperty("hierarchical-indexing")
+    private boolean m_isHierarchicalIndexingEnabled = true;
+
     public boolean isEnabled() {
         return m_isEnabled;
     }
 
     public long getMaxCacheEntries() {
         return m_maxCacheEntries;
+    }
+
+    public boolean isHierarchicalIndexingEnabled() {
+        return m_isHierarchicalIndexingEnabled;
     }
 
 }

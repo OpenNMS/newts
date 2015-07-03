@@ -53,13 +53,16 @@ public class CassandraIndexer implements Indexer {
     private final int m_ttl;
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
+    private final boolean m_isHierarchicalIndexingEnabled;
 
     @Inject
-    public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry) {
+    public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry,
+            @Named("search.hierarical-indexing") boolean isHierarchicalIndexingEnabled) {
         m_session = checkNotNull(session, "session argument");
         m_ttl = ttl;
         m_cache = checkNotNull(cache, "cache argument");
         checkNotNull(registry, "registry argument");
+        m_isHierarchicalIndexingEnabled = isHierarchicalIndexingEnabled;
 
         m_updateTimer = registry.timer(name("search", "update"));
 
@@ -98,6 +101,41 @@ public class CassandraIndexer implements Indexer {
 
     }
 
+    private void recursivelyIndexResourceElements(List<RegularStatement> statement, Context context, String resourceId) {
+        List<String> elements = s_pathSplitter.splitToList(resourceId);
+        int numElements = elements.size();
+        if (numElements == 1) {
+            // Tag the top level elements with _parent:_root
+            statement.add(insertInto(Constants.Schema.T_TERMS)
+                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
+                    .value(Constants.Schema.C_TERMS_VALUE, Constants.TOP_LEVEL_PARENT_TERM_VALUE)
+                    .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
+                    .using(ttl(m_ttl)));
+        } else {
+            // Construct the parent's resource id
+            StringBuilder parentResourceIdBuilder = new StringBuilder();
+            for (int i = 0; i < numElements - 1; i++) {
+                if (i > 0) {
+                    parentResourceIdBuilder.append(":");
+                }
+                parentResourceIdBuilder.append(elements.get(i));
+            }
+            String parentResourceId = parentResourceIdBuilder.toString();
+
+            // Tag the resource with its parent's id
+            statement.add(insertInto(Constants.Schema.T_TERMS)
+                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
+                    .value(Constants.Schema.C_TERMS_VALUE, parentResourceId)
+                    .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
+                    .using(ttl(m_ttl)));
+
+            // Recurse
+            recursivelyIndexResourceElements(statement, context, parentResourceId);
+        }
+    }
+
     private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
         if (!m_cache.get(context, resource).isPresent()) {
             for (String s : s_pathSplitter.split(resource.getId())) {
@@ -109,6 +147,9 @@ public class CassandraIndexer implements Indexer {
                             .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
                             .using(ttl(m_ttl))
                 );
+            }
+            if (m_isHierarchicalIndexingEnabled) {
+                recursivelyIndexResourceElements(statement, context, resource.getId());
             }
 
             getOrCreateResourceMetadata(context, resource, cacheQueue);

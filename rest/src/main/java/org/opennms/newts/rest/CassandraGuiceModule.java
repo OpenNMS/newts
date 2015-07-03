@@ -57,8 +57,9 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("search.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("sampleProcessor.maxThreads")).toInstance(m_newtsConf.getMaxSampleProcessorThreads());
-        
+
         bind(Long.class).annotatedWith(named("search.resourceMetadata.maxCacheEntries")).toInstance(m_newtsConf.getSearchConfig().getMaxCacheEntries());
+        bind(Boolean.class).annotatedWith(named("search.hierarical-indexing")).toInstance(m_newtsConf.getSearchConfig().isHierarchicalIndexingEnabled());
 
         bind(ResourceMetadataCache.class).to(GuavaResourceMetadataCache.class);
         bind(Searcher.class).to(CassandraSearcher.class);

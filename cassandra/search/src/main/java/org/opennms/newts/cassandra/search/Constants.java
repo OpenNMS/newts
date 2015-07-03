@@ -20,6 +20,10 @@ class Constants {
 
     static String DEFAULT_TERM_FIELD = "_all";
 
+    // Used for hierarchical indexing
+    static final String PARENT_TERM_FIELD = "_parent";
+    static final String TOP_LEVEL_PARENT_TERM_VALUE = "_root";
+
     static class Schema {
         // Terms storage
         static final String T_TERMS = "terms";
