@@ -10,4 +10,4 @@ Build with::
 
 Run with::
 
-    $ java -jar target/newts-stress-${version}-jar-with-dependencies.jar
+    $ java -jar target/newts-stress-jar-with-dependencies.jar

@@ -60,6 +60,7 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
 	<configuration>
+          <finalName>newts-stress</finalName>
           <archive>
             <manifest>
               <mainClass>org.opennms.newts.stress.Main</mainClass>
