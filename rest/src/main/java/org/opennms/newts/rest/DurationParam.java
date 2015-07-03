@@ -28,7 +28,7 @@ import io.dropwizard.jersey.params.AbstractParam;
  */
 public class DurationParam extends AbstractParam<Duration> {
 
-    protected DurationParam(String input) {
+    public DurationParam(String input) {
         super(input);
     }
 
