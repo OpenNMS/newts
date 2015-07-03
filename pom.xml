@@ -55,7 +55,7 @@
     <cassandraDriverVersion>2.1.6</cassandraDriverVersion>
     <guavaVersion>17.0</guavaVersion>
     <guiceVersion>4.0-beta4</guiceVersion>
-    <jacksonVersion>2.3.5</jacksonVersion>
+    <jacksonVersion>2.5.4</jacksonVersion>
     <junitVersion>4.12</junitVersion>
     <logbackVersion>1.1.3</logbackVersion>
     <metricsVersion>3.0.2</metricsVersion>
