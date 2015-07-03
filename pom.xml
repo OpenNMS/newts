@@ -56,11 +56,11 @@
     <guavaVersion>17.0</guavaVersion>
     <guiceVersion>4.0-beta4</guiceVersion>
     <jacksonVersion>2.3.5</jacksonVersion>
-    <junitVersion>4.11</junitVersion>
-    <logbackVersion>1.0.10</logbackVersion>
-    <metricsVersion>3.0.1</metricsVersion>
-    <mockitoVersion>1.9.5</mockitoVersion>
-    <slf4jVersion>1.7.3</slf4jVersion>
+    <junitVersion>4.12</junitVersion>
+    <logbackVersion>1.1.3</logbackVersion>
+    <metricsVersion>3.0.2</metricsVersion>
+    <mockitoVersion>1.10.19</mockitoVersion>
+    <slf4jVersion>1.7.12</slf4jVersion>
     <jexlVersion>2.1.1</jexlVersion>
   </properties>
 
