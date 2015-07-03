@@ -46,7 +46,7 @@ To import the included data, run:
 
 .. code:: sh
 
-	java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
+	java -cp target/newts-gsod-jar-with-dependencies.jar \
 		org.opennms.newts.gsod.ImportRunner -p 100 \
 		ftp.ncdc.noaa.gov/pub/data/gsod/1988
 
@@ -56,7 +56,7 @@ changing this argument accordingly:
 
 .. code:: sh
 
-	java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
+	java -cp target/newts-gsod-jar-with-dependencies.jar \ 
 		org.opennms.newts.gsod.ImportRunner -p 100 \
 		/path/to/additional/data
 
@@ -67,14 +67,14 @@ properties.  For example:
 .. code:: sh
 
 	java -Dcassandra.keyspace=newts -Dcassandra.host=localhost -Dcassandra.port=9042 \
-		-cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
+		-cp target/newts-gsod-jar-with-dependencies.jar \
 		org.opennms.newts.gsod.ImportRunner -p 100 \
 		ftp.ncdc.noaa.gov/pub/data/gsod/1988
 
 Usage for Importer
 ~~~~~~~~~~~~~~~~~~
 
-java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.newts.gsod.ImportRunner2 [options] sourceDir
+java -cp target/newts-gsod-jar-with-dependencies.jar org.opennms.newts.gsod.ImportRunner [options] sourceDir
 
  sourceDir                              : the source directory that contains
                                           gsod data to import. These must be
@@ -99,7 +99,7 @@ Issue the following to start the web server:
 
 .. code:: sh
 
-   java -cp target/newts-gsod-1.0.0-SNAPSHOT-jar-with-dependencies.jar org.opennms.newts.gsod.Web
+   java -cp target/newts-gsod-jar-with-dependencies.jar org.opennms.newts.gsod.Web
 
 View Examples
 ~~~~~~~~~~~~~

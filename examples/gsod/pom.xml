@@ -122,6 +122,7 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
 	<configuration>
+          <finalName>newts-gsod</finalName>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
