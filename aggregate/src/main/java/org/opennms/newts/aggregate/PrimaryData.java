@@ -18,6 +18,7 @@ package org.opennms.newts.aggregate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -33,6 +34,8 @@ import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.Datasource;
 import org.opennms.newts.api.query.ResultDescriptor;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
@@ -104,25 +107,23 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
     private final Resource m_resource;
     private final Iterator<Timestamp> m_timestamps;
     private final Duration m_interval;
-    private final Iterator<Row<Sample>> m_input;
-    private final Map<String, Sample> m_lastUpdates = Maps.newHashMap();
+    private Timestamp lastIntervalCeiling = null;
+    private final ArrayList<Row<Sample>> m_samples = Lists.newArrayList();
+    private final Map<String, Integer> m_lastSampleIndex = Maps.newHashMap();
     private final Map<String, Accumulation> m_accumulation = Maps.newHashMap();
-
-    private Row<Sample> m_current = null;
 
     PrimaryData(Resource resource, Timestamp start, Timestamp end, ResultDescriptor resultDescriptor, Iterator<Row<Sample>> input) {
         m_resultDescriptor = checkNotNull(resultDescriptor, "result descriptor argument");
         m_resource = checkNotNull(resource, "resource argument");
         checkNotNull(start, "start argument");
         checkNotNull(end, "end argument");
-        m_input = checkNotNull(input, "input argument");
-
         m_interval = resultDescriptor.getInterval();
 
         m_timestamps = new IntervalGenerator(start.stepFloor(m_interval), end.stepCeiling(m_interval), m_interval);
 
-        if (m_input.hasNext()) m_current = m_input.next();
-
+        // Gather the whole collection of rows.
+        // We need these since the next sample for a given metric may only appear a few rows ahead
+        Iterators.addAll(m_samples, checkNotNull(input, "input argument"));
     }
 
     @Override
@@ -132,29 +133,65 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
 
     @Override
     public Row<Measurement> next() {
-
         if (!hasNext()) throw new NoSuchElementException();
 
-        Row<Measurement> output = new Row<>(m_timestamps.next(), m_resource);
+        Timestamp intervalCeiling = m_timestamps.next();
+        Row<Measurement> output = new Row<>(intervalCeiling, m_resource);
 
-        while (m_current != null) {
-            accumulate(m_current, output.getTimestamp());
-
-            if (m_current.getTimestamp().gte(output.getTimestamp())) {
-                break;
-            }
-
-            if (m_input.hasNext()) {
-                m_current = m_input.next();
-            }
-            else m_current = null;
-
-        }
-
-        // Go time; We've accumulated enough to produce the output row
         for (Datasource ds : m_resultDescriptor.getDatasources().values()) {
-
             Accumulation accumulation = getOrCreateAccumulation(ds.getSource());
+            accumulation.reset();
+
+            int lastSampleIdx = 0;
+            if (m_lastSampleIndex.containsKey(ds.getSource())) {
+                lastSampleIdx = m_lastSampleIndex.get(ds.getSource());
+            }
+
+            Sample last = null;
+            for (int sampleIdx = lastSampleIdx; sampleIdx < m_samples.size(); sampleIdx++) {
+                Row<Sample> row = m_samples.get(sampleIdx);
+                Sample current;
+
+                current = row.getElement(ds.getSource());
+
+                // Skip the row if it does not contain a sample for the current datasource
+                if (current == null) {
+                    continue;
+                }
+
+                if (last == null) {
+                    last = current;
+                    lastSampleIdx = sampleIdx;
+                    continue;
+                }
+
+                // Accumulate nothing when samples are beyond this interval
+                if (intervalCeiling.lt(last.getTimestamp())) {
+                    break;
+                }
+
+                Timestamp lowerBound = last.getTimestamp();
+                if (lastIntervalCeiling != null && lastIntervalCeiling.gt(lowerBound)) {
+                    lowerBound = lastIntervalCeiling;
+                }
+
+                Timestamp upperBound = current.getTimestamp();
+                if (intervalCeiling.lt(upperBound)) {
+                    upperBound = intervalCeiling;
+                }
+                if (lowerBound.gt(upperBound)) {
+                    lowerBound = upperBound;
+                }
+
+                Duration elapsed = upperBound.minus(lowerBound);
+
+                m_lastSampleIndex.put(ds.getSource(), lastSampleIdx);
+                accumulation.accumulateValue(elapsed, ds.getHeartbeat(), current.getValue())
+                    .accumlateAttrs(current.getAttributes());
+
+                last = current;
+                lastSampleIdx = sampleIdx;
+            }
 
             // Add sample with accumulated value to output row
             output.addElement(new Measurement(
@@ -163,73 +200,10 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                     ds.getSource(),
                     accumulation.getAverage(),
                     accumulation.getAttributes()));
-
-            // If input is greater than row, accumulate remainder for next row
-            if (m_current != null) {
-
-                accumulation.reset();
-
-                Sample sample = m_current.getElement(ds.getSource());
-
-                if (sample == null) {
-                    continue;
-                }
-
-                if (m_current.getTimestamp().gt(output.getTimestamp())) {
-                    Duration elapsed = m_current.getTimestamp().minus(output.getTimestamp());
-                    accumulation.accumulateValue(elapsed, ds.getHeartbeat(), sample.getValue());
-                    accumulation.accumlateAttrs(sample.getAttributes());
-                }
-
-            } else {
-                accumulation.reset();
-            }
         }
 
+        lastIntervalCeiling = intervalCeiling;
         return output;
-    }
-
-    private void accumulate(Row<Sample> row, Timestamp intervalCeiling) {
-
-        for (Datasource ds : m_resultDescriptor.getDatasources().values()) {
-            Sample current, last;
-
-            current = row.getElement(ds.getSource());
-
-            if (current == null) {
-                continue;
-            }
-
-            last = m_lastUpdates.get(current.getName());
-
-            if (last == null) {
-                m_lastUpdates.put(current.getName(), current);
-                continue;
-            }
-
-            // Accumulate nothing when samples are beyond this interval
-            if (intervalCeiling.lt(last.getTimestamp())) {
-                continue;
-            }
-
-            Duration elapsed;
-
-            if (current.getTimestamp().gt(intervalCeiling)) {
-                elapsed = intervalCeiling.minus(last.getTimestamp());
-            }
-            else {
-                elapsed = current.getTimestamp().minus(last.getTimestamp());
-            }
-
-            getOrCreateAccumulation(current.getName())
-                    .accumulateValue(elapsed, ds.getHeartbeat(), current.getValue())
-                    .accumlateAttrs(current.getAttributes());
-
-            // Postpone storing as lastUpdate, we'll need this sample again...
-            if (!current.getTimestamp().gt(intervalCeiling.plus(m_interval))) {
-                m_lastUpdates.put(current.getName(), current);
-            }
-        }
     }
 
     private Accumulation getOrCreateAccumulation(String name) {

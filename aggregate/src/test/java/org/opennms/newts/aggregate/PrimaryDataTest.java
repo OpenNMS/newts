@@ -40,6 +40,7 @@ public class PrimaryDataTest {
 
         // Missing a couple leading samples
         Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
+                .row(900000300).element("m0", 0)
                 .row(900000600).element("m0", 1)
                 .row(900000900).element("m0", 2)
                 .row(900001200).element("m0", 3)
@@ -132,8 +133,6 @@ public class PrimaryDataTest {
                 rDescriptor,
                 testData);
 
-        
-
         assertRowsEqual(expected, primaryData);
 
     }
@@ -156,7 +155,7 @@ public class PrimaryDataTest {
 
         // Expected results
         Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
-                .row(300).element("m0", 1.00000000).element("m1", 2.16666667)
+                .row(300).element("m0", 1.33333333).element("m1", 2.16666667)
                 .row(600).element("m0", 3.00000000).element("m1", 3.16666667)
                 .row(900).element("m0", 3.00000000).element("m1", 4.00000000)
                 .build();
@@ -375,7 +374,7 @@ public class PrimaryDataTest {
                     .element("m1", 2)
                 .row( 600)
                     .element("m0", 2)
-                    .element("m1", Double.NaN) // FIXMEL this is wrong!!!! should be 4.0 as in the oneSample test above
+                    .element("m1", 4)
                 .row( 900)
                     .element("m0", 3)
                     .element("m1", 4)
@@ -391,26 +390,5 @@ public class PrimaryDataTest {
         assertRowsEqual(expected, primaryData);
 
     }
-    /*
-     *
-     * 
-with m0
-1: acc Duration[300, SECONDS]  with value 2.0 for ds: m1
-1: acc Duration[300, SECONDS]  with value 1.0 for ds: m0
-1: acc Duration[0, SECONDS]  with value 2.0 for ds: m1
-1: acc Duration[0, SECONDS]  with value 1.0 for ds: m0
-1: acc Duration[300, SECONDS]  with value 2.0 for ds: m0
-
-
-without m0
-1: acc Duration[300, SECONDS]  with value 2.0 for ds: m1
-1: acc Duration[0, SECONDS]  with value 2.0 for ds: m1
-1: acc Duration[300, SECONDS]  with value 4.0 for ds: m1
-2: acc Duration[300, SECONDS]  with value 4.0 for ds: m1
-1: acc Duration[0, SECONDS]  with value 4.0 for ds: m1
-
-
-*/
-     
 
 }

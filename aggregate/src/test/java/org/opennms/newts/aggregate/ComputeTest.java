@@ -38,6 +38,7 @@ public class ComputeTest {
 
     static {
         PLUS = new BinaryFunction() {
+            private static final long serialVersionUID = 0L;
 
             @Override
             public double apply(double a, double b) {
@@ -46,6 +47,8 @@ public class ComputeTest {
         };
         
         DIVIDE = new BinaryFunction() {
+            private static final long serialVersionUID = 0L;
+
             @Override
             public double apply(double a, double b) {
                 return a / b;

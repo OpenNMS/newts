@@ -68,6 +68,7 @@ public class ResultProcessorTest {
 
         // Function to add two values
         BinaryFunction sum = new BinaryFunction() {
+            private static final long serialVersionUID = 0L;
 
             @Override
             public double apply(double a, double b) {
