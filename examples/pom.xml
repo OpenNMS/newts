@@ -20,10 +20,6 @@
     <module>stress</module>
   </modules>
 
-  <properties>
-    <args4jVersion>2.0.25</args4jVersion>
-  </properties>
-  
   <dependencyManagement>
     <dependencies>
       <dependency>

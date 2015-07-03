@@ -59,7 +59,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.4</version>
 	<configuration>
           <archive>
             <manifest>

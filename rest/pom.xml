@@ -17,6 +17,10 @@
 
   <name>New Timeseries Datastore :: REST</name>
 
+  <properties>
+    <dropwizardVersion>0.7.1</dropwizardVersion>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.opennms.newts</groupId>
@@ -64,7 +68,7 @@
     <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-core</artifactId>
-      <version>0.7.1</version>
+      <version>${dropwizardVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.skife.gressil</groupId>
@@ -74,12 +78,12 @@
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
-      <version>2.0.29</version>
+      <version>${args4jVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
-      <version>1.1.1.6</version>
+      <version>1.1.1.7</version>
     </dependency>
     <dependency>
       <groupId>net.jpountz.lz4</groupId>
@@ -105,7 +109,7 @@
     <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-assets</artifactId>
-      <version>0.7.1</version>
+      <version>${dropwizardVersion}</version>
     </dependency>
   </dependencies>
 
@@ -117,7 +121,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>2.3</version>
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <filters>
