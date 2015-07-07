@@ -124,11 +124,11 @@ public class NewtsReporter extends ScheduledReporter {
             this.name = name;
             return this;
         }
+
         /**
-         * Builds a {@link NewtsReporter} with the given properties, writing {@code .csv} files to the
-         * given directory.
+         * Builds a {@link NewtsReporter} with the given properties.
          *
-         * @param directory the directory in which the {@code .csv} files will be created
+         * @param repository used to persist the generated samples
          * @return a {@link NewtsReporter}
          */
         public NewtsReporter build(SampleRepository repository) {
