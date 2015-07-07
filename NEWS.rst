@@ -1,3 +1,14 @@
+1.3.0
+~~~~~
+
+Added a Graphite protocol listener. You can now push samples to Newts using
+Graphite's _plain text protocol.
+
+Added support for hierarchical indexing. When enabled, resources are tagged with
+ additional attributes that allows the resource tree to be walked.
+
+Added support for storing and retrieving samples in named contexts.
+
 1.2.0
 ~~~~~
 
@@ -26,3 +37,4 @@ Update any dependencies accordingly.
 .. _AngularJS: http://angularjs.org
 .. _Karaf: http://karaf.apache.org
 .. _Maven: http://maven.apache.org
+ .. _plain text protocol: http://graphite.readthedocs.org/en/latest/feeding-carbon.html#the-plaintext-protocol
