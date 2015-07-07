@@ -36,7 +36,7 @@ import com.google.common.collect.Queues;
 /**
  * Walks the resource tree by searching for the appropriate _parent attributes.
  *
- * @author jwhite <jesse@opennms.org>
+ * @author jwhite
  */
 public class CassandraResourceTreeWalker {
 
