@@ -111,9 +111,10 @@ public class CassandraSearcher implements Searcher {
                 ResultSetFuture metricsFuture = fetchMetricNames(context, id);
 
                 try {
-                    Optional<Map<String, String>> attrs = getResourceAttributesFromResults(attrsFuture);
+                    Map<String, String> attrs = getResourceAttributesFromResults(attrsFuture);
                     Collection<String> metrics = getMetricNamesFromResults(metricsFuture);
-                    searchResults.addResult(new Resource(id, attrs), metrics);
+                    Resource resource = attrs.size() > 0 ? new Resource(id, Optional.of(attrs)) : new Resource(id);
+                    searchResults.addResult(resource, metrics);
                 } catch (ExecutionException|InterruptedException e) {
                     throw Throwables.propagate(e);
                 }
@@ -123,6 +124,22 @@ public class CassandraSearcher implements Searcher {
         }
         finally {
             ctx.stop();
+        }
+    }
+
+    public Map<String, String> getResourceAttributes(Context context, String resourceId) {
+        try {
+            return getResourceAttributesFromResults(fetchResourceAttributes(context, resourceId));
+        } catch (ExecutionException|InterruptedException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    public Collection<String> getMetricNames(Context context, String resourceId) {
+        try {
+            return getMetricNamesFromResults(fetchMetricNames(context, resourceId));
+        } catch (ExecutionException|InterruptedException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -190,14 +207,14 @@ public class CassandraSearcher implements Searcher {
         return m_session.executeAsync(bindStatement);
     }
 
-    private Optional<Map<String, String>> getResourceAttributesFromResults(ResultSetFuture results) throws InterruptedException, ExecutionException {
+    private Map<String, String> getResourceAttributesFromResults(ResultSetFuture results) throws InterruptedException, ExecutionException {
         Map<String, String> attributes = Maps.newHashMap();
 
         for (Row row : results.get()) {
             attributes.put(row.getString(Schema.C_ATTRS_ATTR), row.getString(Schema.C_ATTRS_VALUE));
         }
 
-        return attributes.size() > 0 ? Optional.of(attributes) : Optional.<Map<String, String>>absent();
+        return attributes;
     }
 
     private ResultSetFuture fetchMetricNames(Context context, String resourceId) {
