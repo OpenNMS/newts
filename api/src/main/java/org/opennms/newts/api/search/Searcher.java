@@ -18,5 +18,8 @@ package org.opennms.newts.api.search;
 import org.opennms.newts.api.Context;
 
 public interface Searcher {
+
     public SearchResults search(Context context, Query query);
+
+    public SearchResults search(Context context, Query query, boolean populateMetricsAndAttributes);
 }

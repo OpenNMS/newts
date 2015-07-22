@@ -22,6 +22,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,6 +88,11 @@ public class CassandraSearcher implements Searcher {
 
     @Override
     public SearchResults search(Context context, Query query) {
+        return search(context, query, true);
+    }
+
+    @Override
+    public SearchResults search(Context context, Query query, boolean populateMetricsAndAttributes) {
         checkNotNull(context, "context argument");
         checkNotNull(query, "query argument");
 
@@ -106,17 +112,23 @@ public class CassandraSearcher implements Searcher {
             }
 
             for (final String id : ids) {
-                // Fetch the metric names and attributes concurrently
-                ResultSetFuture attrsFuture = fetchResourceAttributes(context, id);
-                ResultSetFuture metricsFuture = fetchMetricNames(context, id);
+                if (!populateMetricsAndAttributes) {
+                    Resource resource = new Resource(id);
+                    List<String> emptyList = Collections.emptyList();
+                    searchResults.addResult(resource, emptyList);
+                } else {
+                    // Fetch the metric names and attributes concurrently
+                    ResultSetFuture attrsFuture = fetchResourceAttributes(context, id);
+                    ResultSetFuture metricsFuture = fetchMetricNames(context, id);
 
-                try {
-                    Map<String, String> attrs = getResourceAttributesFromResults(attrsFuture);
-                    Collection<String> metrics = getMetricNamesFromResults(metricsFuture);
-                    Resource resource = attrs.size() > 0 ? new Resource(id, Optional.of(attrs)) : new Resource(id);
-                    searchResults.addResult(resource, metrics);
-                } catch (ExecutionException|InterruptedException e) {
-                    throw Throwables.propagate(e);
+                    try {
+                        Map<String, String> attrs = getResourceAttributesFromResults(attrsFuture);
+                        Collection<String> metrics = getMetricNamesFromResults(metricsFuture);
+                        Resource resource = attrs.size() > 0 ? new Resource(id, Optional.of(attrs)) : new Resource(id);
+                        searchResults.addResult(resource, metrics);
+                    } catch (ExecutionException|InterruptedException e) {
+                        throw Throwables.propagate(e);
+                    }
                 }
             }
 
@@ -234,4 +246,5 @@ public class CassandraSearcher implements Searcher {
 
         return metricNames;
     }
+
 }
