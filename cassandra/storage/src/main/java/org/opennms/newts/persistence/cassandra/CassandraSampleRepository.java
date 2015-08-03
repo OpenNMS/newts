@@ -59,6 +59,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.base.Optional;
@@ -215,17 +216,21 @@ public class CassandraSampleRepository implements SampleRepository {
             }
 
             Duration resourceShard = m_contextConfigurations.getResourceShard(m.getContext());
-            batch.add(
-                    insertInto(SchemaConstants.T_SAMPLES)
-                        .value(SchemaConstants.F_CONTEXT, m.getContext().getId())
-                        .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(resourceShard).asSeconds())
-                        .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
-                        .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
-                        .value(SchemaConstants.F_METRIC_NAME, m.getName())
-                        .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()))
-                        .value(SchemaConstants.F_ATTRIBUTES, m.getAttributes())
-                        .using(ttl(ttl))
-            );
+
+            Insert insert = insertInto(SchemaConstants.T_SAMPLES)
+                    .value(SchemaConstants.F_CONTEXT, m.getContext().getId())
+                    .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(resourceShard).asSeconds())
+                    .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
+                    .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
+                    .value(SchemaConstants.F_METRIC_NAME, m.getName())
+                    .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()));
+
+            // Inserting a column with a null value inserts a tombstone (a deletion marker); Skip the attributes
+            // for any sample that has not specified them.
+            if (m.getAttributes() != null)
+                insert.value(SchemaConstants.F_ATTRIBUTES, m.getAttributes());
+
+            batch.add(insert.using(ttl(ttl)));
         }
 
         try {
