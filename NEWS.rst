@@ -1,6 +1,9 @@
 1.3.1
 ~~~~~
 
+The *cassandra.host* option can now be used to specify a comma separated list
+of hosts.
+
 Resource id separators can now be escaped. When enabled, colons prefixed with
 a backslash will be treated as literal characters. This can be enabled
 by setting the *separatorEscaping* flag.

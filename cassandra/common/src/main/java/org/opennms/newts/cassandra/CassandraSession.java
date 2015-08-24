@@ -60,7 +60,7 @@ public class CassandraSession {
         Cluster cluster = Cluster
                 .builder()
                 .withPort(port)
-                .addContactPoint(hostname)
+                .addContactPoints(hostname.split(","))
                 .withCompression(Compression.valueOf(compression.toUpperCase()))
                 .build();
 
