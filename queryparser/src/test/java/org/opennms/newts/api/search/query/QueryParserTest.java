@@ -102,10 +102,10 @@ public class QueryParserTest {
 
     @Test
     public void canEscapeColons() throws ParseException {
-        Query query = new TermQuery(new Term("meat", "be:ef:"));
+        Query query = new TermQuery(new Term("meat", "be:ef\\"));
 
         assertThat(parse(query), equalTo((Query)query));
-        assertThat(parse("meat:be\\:ef\\:"), equalTo(query));
+        assertThat(parse("meat:be\\:ef\\\\"), equalTo(query));
     }
 
     @Test

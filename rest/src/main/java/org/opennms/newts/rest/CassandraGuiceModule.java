@@ -24,8 +24,11 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
 import org.opennms.newts.cassandra.search.CassandraSearcher;
+import org.opennms.newts.cassandra.search.EscapableResourceIdSplitter;
 import org.opennms.newts.cassandra.search.GuavaResourceMetadataCache;
+import org.opennms.newts.cassandra.search.ResourceIdSplitter;
 import org.opennms.newts.cassandra.search.ResourceMetadataCache;
+import org.opennms.newts.cassandra.search.SimpleResourceIdSplitter;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 
@@ -66,6 +69,12 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
 
         Multibinder<SampleProcessor> processors = Multibinder.newSetBinder(binder(), SampleProcessor.class);
+
+        if (m_newtsConf.getSearchConfig().isSeparatorEscapingEnabled()) {
+            bind(ResourceIdSplitter.class).to(EscapableResourceIdSplitter.class);
+        } else {
+            bind(ResourceIdSplitter.class).to(SimpleResourceIdSplitter.class);
+        }
 
         // Only add the search indexer if search is enabled
         if (m_newtsConf.getSearchConfig().isEnabled()) {

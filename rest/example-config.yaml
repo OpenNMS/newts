@@ -25,6 +25,8 @@ search:
   maxCacheEntries: 1000000
   # Index additional terms that allow the resource tree to be discovered
   hierarchical-indexing: true
+  # Allows resource id separators (:) to be escaped using a backslash (\:)
+  separatorEscaping: false
 
 # Optional Graphite listener
 graphite:

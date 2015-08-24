@@ -33,6 +33,9 @@ public class SearchConfig {
     @JsonProperty("hierarchical-indexing")
     private boolean m_isHierarchicalIndexingEnabled = true;
 
+    @JsonProperty("separatorEscaping")
+    private boolean m_isSeparatorEscapingEnabled = false;
+
     public boolean isEnabled() {
         return m_isEnabled;
     }
@@ -45,4 +48,7 @@ public class SearchConfig {
         return m_isHierarchicalIndexingEnabled;
     }
 
+    public boolean isSeparatorEscapingEnabled() {
+        return m_isSeparatorEscapingEnabled;
+    }
 }

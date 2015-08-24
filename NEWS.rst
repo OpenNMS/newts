@@ -1,3 +1,10 @@
+1.3.1
+~~~~~
+
+Resource id separators can now be escaped. When enabled, colons prefixed with
+a backslash will be treated as literal characters. This can be enabled
+by setting the *separatorEscaping* flag.
+
 1.3.0
 ~~~~~
 

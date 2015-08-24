@@ -40,29 +40,29 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.RegularStatement;
 import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
 public class CassandraIndexer implements Indexer {
 
-    private static Splitter s_pathSplitter = Splitter.on(':').omitEmptyStrings().trimResults();
-
     private final CassandraSession m_session;
     private final int m_ttl;
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
     private final boolean m_isHierarchicalIndexingEnabled;
+    private final ResourceIdSplitter m_resourceIdSplitter;
 
     @Inject
     public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry,
-            @Named("search.hierarical-indexing") boolean isHierarchicalIndexingEnabled) {
+            @Named("search.hierarical-indexing") boolean isHierarchicalIndexingEnabled,
+            ResourceIdSplitter resourceIdSplitter) {
         m_session = checkNotNull(session, "session argument");
         m_ttl = ttl;
         m_cache = checkNotNull(cache, "cache argument");
         checkNotNull(registry, "registry argument");
         m_isHierarchicalIndexingEnabled = isHierarchicalIndexingEnabled;
+        m_resourceIdSplitter = checkNotNull(resourceIdSplitter, "resourceIdSplitter argument");
 
         m_updateTimer = registry.timer(name("search", "update"));
 
@@ -102,7 +102,7 @@ public class CassandraIndexer implements Indexer {
     }
 
     private void recursivelyIndexResourceElements(List<RegularStatement> statement, Context context, String resourceId) {
-        List<String> elements = s_pathSplitter.splitToList(resourceId);
+        List<String> elements = m_resourceIdSplitter.splitIdIntoElements(resourceId);
         int numElements = elements.size();
         if (numElements == 1) {
             // Tag the top level elements with _parent:_root
@@ -114,14 +114,7 @@ public class CassandraIndexer implements Indexer {
                     .using(ttl(m_ttl)));
         } else {
             // Construct the parent's resource id
-            StringBuilder parentResourceIdBuilder = new StringBuilder();
-            for (int i = 0; i < numElements - 1; i++) {
-                if (i > 0) {
-                    parentResourceIdBuilder.append(":");
-                }
-                parentResourceIdBuilder.append(elements.get(i));
-            }
-            String parentResourceId = parentResourceIdBuilder.toString();
+            String parentResourceId = m_resourceIdSplitter.joinElementsToId(elements.subList(0, numElements-1));
 
             // Tag the resource with its parent's id
             statement.add(insertInto(Constants.Schema.T_TERMS)
@@ -138,7 +131,7 @@ public class CassandraIndexer implements Indexer {
 
     private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
         if (!m_cache.get(context, resource).isPresent()) {
-            for (String s : s_pathSplitter.split(resource.getId())) {
+            for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
                 statement.add(
                         insertInto(Constants.Schema.T_TERMS)
                             .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
