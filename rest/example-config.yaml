@@ -17,6 +17,10 @@ contexts:
   default:
     id: G
     resource-shard: 7d
+    # Consistency level used for read operations; Possible values include ANY, ONE, TWO, THREE, QUORUM, ALL
+    read-consistency: ANY
+    # Consistency level used for write operations; See read-consistency for possible values
+    write-consistency: ANY
 
 # Resource search indexing
 search:

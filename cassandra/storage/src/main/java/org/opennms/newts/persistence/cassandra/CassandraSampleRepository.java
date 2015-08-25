@@ -50,6 +50,7 @@ import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.ContextConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +112,7 @@ public class CassandraSampleRepository implements SampleRepository {
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
         m_insertTimer = registry.timer(metricName("insert-timer"));
 
+        Integer.parseInt("");
     }
 
     @Override
@@ -230,6 +232,9 @@ public class CassandraSampleRepository implements SampleRepository {
             if (m.getAttributes() != null)
                 insert.value(SchemaConstants.F_ATTRIBUTES, m.getAttributes());
 
+            // Use the context specific consistency level
+            insert.setConsistencyLevel(m_contextConfigurations.getWriteConsistency(m.getContext()));
+
             batch.add(insert.using(ttl(ttl)));
         }
 
@@ -262,6 +267,8 @@ public class CassandraSampleRepository implements SampleRepository {
             bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
             bindStatement.setDate("start", start.asDate());
             bindStatement.setDate("end", end.asDate());
+            // Use the context specific consistency level
+            bindStatement.setConsistencyLevel(m_contextConfigurations.getReadConsistency(context));
 
             futures.add(m_session.executeAsync(bindStatement));
         }
@@ -274,7 +281,6 @@ public class CassandraSampleRepository implements SampleRepository {
             throw new IllegalArgumentException("start time must be less than end time");
         }
     }
-
 
     private String metricName(String suffix) {
         return name("repository", suffix);

@@ -35,9 +35,11 @@ import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.RegularStatement;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -52,17 +54,19 @@ public class CassandraIndexer implements Indexer {
     private final Timer m_updateTimer;
     private final boolean m_isHierarchicalIndexingEnabled;
     private final ResourceIdSplitter m_resourceIdSplitter;
+    private final ContextConfigurations m_contextConfigurations;
 
     @Inject
     public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry,
             @Named("search.hierarical-indexing") boolean isHierarchicalIndexingEnabled,
-            ResourceIdSplitter resourceIdSplitter) {
+            ResourceIdSplitter resourceIdSplitter, ContextConfigurations contextConfigurations) {
         m_session = checkNotNull(session, "session argument");
         m_ttl = ttl;
         m_cache = checkNotNull(cache, "cache argument");
         checkNotNull(registry, "registry argument");
         m_isHierarchicalIndexingEnabled = isHierarchicalIndexingEnabled;
         m_resourceIdSplitter = checkNotNull(resourceIdSplitter, "resourceIdSplitter argument");
+        m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
         m_updateTimer = registry.timer(name("search", "update"));
 
@@ -78,9 +82,10 @@ public class CassandraIndexer implements Indexer {
 
         // TODO: Deduplicate resources & metrics to minimize size of batch insert.
         for (Sample sample : samples) {
-            maybeIndexResource(cacheQueue, statements, sample.getContext(), sample.getResource());
-            maybeIndexResourceAttributes(cacheQueue, statements, sample.getContext(), sample.getResource());
-            maybeAddMetricName(cacheQueue, statements, sample.getContext(), sample.getResource(), sample.getName());
+            ConsistencyLevel writeConsistency = m_contextConfigurations.getWriteConsistency(sample.getContext());
+            maybeIndexResource(cacheQueue, statements, sample.getContext(), sample.getResource(), writeConsistency);
+            maybeIndexResourceAttributes(cacheQueue, statements, sample.getContext(), sample.getResource(), writeConsistency);
+            maybeAddMetricName(cacheQueue, statements, sample.getContext(), sample.getResource(), sample.getName(), writeConsistency);
         }
 
         try {
@@ -101,108 +106,112 @@ public class CassandraIndexer implements Indexer {
 
     }
 
-    private void recursivelyIndexResourceElements(List<RegularStatement> statement, Context context, String resourceId) {
+    private void recursivelyIndexResourceElements(List<RegularStatement> statement, Context context, String resourceId, ConsistencyLevel writeConsistencyLevel) {
         List<String> elements = m_resourceIdSplitter.splitIdIntoElements(resourceId);
         int numElements = elements.size();
         if (numElements == 1) {
             // Tag the top level elements with _parent:_root
-            statement.add(insertInto(Constants.Schema.T_TERMS)
-                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                    .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
-                    .value(Constants.Schema.C_TERMS_VALUE, Constants.TOP_LEVEL_PARENT_TERM_VALUE)
-                    .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
-                    .using(ttl(m_ttl)));
+            RegularStatement insert = insertInto(Constants.Schema.T_TERMS)
+                .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
+                .value(Constants.Schema.C_TERMS_VALUE, Constants.TOP_LEVEL_PARENT_TERM_VALUE)
+                .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
+                .using(ttl(m_ttl));
+            insert.setConsistencyLevel(writeConsistencyLevel);
+            statement.add(insert);
         } else {
             // Construct the parent's resource id
             String parentResourceId = m_resourceIdSplitter.joinElementsToId(elements.subList(0, numElements-1));
 
             // Tag the resource with its parent's id
-            statement.add(insertInto(Constants.Schema.T_TERMS)
-                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                    .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
-                    .value(Constants.Schema.C_TERMS_VALUE, parentResourceId)
-                    .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
-                    .using(ttl(m_ttl)));
+            RegularStatement insert = insertInto(Constants.Schema.T_TERMS)
+                .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                .value(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD)
+                .value(Constants.Schema.C_TERMS_VALUE, parentResourceId)
+                .value(Constants.Schema.C_TERMS_RESOURCE, resourceId)
+                .using(ttl(m_ttl));
+            insert.setConsistencyLevel(writeConsistencyLevel);
+            statement.add(insert);
 
             // Recurse
-            recursivelyIndexResourceElements(statement, context, parentResourceId);
+            recursivelyIndexResourceElements(statement, context, parentResourceId, writeConsistencyLevel);
         }
     }
 
-    private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
+    private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistencyLevel) {
         if (!m_cache.get(context, resource).isPresent()) {
             for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
-                statement.add(
-                        insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
-                            .value(Constants.Schema.C_TERMS_VALUE, s)
-                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-                            .using(ttl(m_ttl))
-                );
+                RegularStatement insert = insertInto(Constants.Schema.T_TERMS)
+                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                    .value(Constants.Schema.C_TERMS_VALUE, s)
+                    .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                    .using(ttl(m_ttl));
+                insert.setConsistencyLevel(writeConsistencyLevel);
+                statement.add(insert);
             }
             if (m_isHierarchicalIndexingEnabled) {
-                recursivelyIndexResourceElements(statement, context, resource.getId());
+                recursivelyIndexResourceElements(statement, context, resource.getId(), writeConsistencyLevel);
             }
 
             getOrCreateResourceMetadata(context, resource, cacheQueue);
         }
     }
 
-    private void maybeIndexResourceAttributes(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource) {
+    private void maybeIndexResourceAttributes(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
 
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
-        
+
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
             if (!(cached.isPresent() && cached.get().containsAttribute(field.getKey(), field.getValue()))) {
                 // Search indexing
-                statement.add(
-                        insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                            .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
-                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-                            .using(ttl(m_ttl))
-                );
-                statement.add(
-                        insertInto(Constants.Schema.T_TERMS)
-                            .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
-                            .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
-                            .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
-                            .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
-                            .using(ttl(m_ttl))
-                );
+                RegularStatement insert = insertInto(Constants.Schema.T_TERMS)
+                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD)
+                    .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                    .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                    .using(ttl(m_ttl));
+                insert.setConsistencyLevel(writeConsistency);
+                statement.add(insert);
+                insert = insertInto(Constants.Schema.T_TERMS)
+                    .value(Constants.Schema.C_TERMS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_TERMS_FIELD, field.getKey())
+                    .value(Constants.Schema.C_TERMS_VALUE, field.getValue())
+                    .value(Constants.Schema.C_TERMS_RESOURCE, resource.getId())
+                    .using(ttl(m_ttl));
+                insert.setConsistencyLevel(writeConsistency);
+                statement.add(insert);
                 // Storage
-                statement.add(
-                        insertInto(Constants.Schema.T_ATTRS)
-                            .value(Constants.Schema.C_ATTRS_CONTEXT, context.getId())
-                            .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
-                            .value(Constants.Schema.C_ATTRS_ATTR, field.getKey())
-                            .value(Constants.Schema.C_ATTRS_VALUE, field.getValue())
-                            .using(ttl(m_ttl))
-                );
+                insert = insertInto(Constants.Schema.T_ATTRS)
+                    .value(Constants.Schema.C_ATTRS_CONTEXT, context.getId())
+                    .value(Constants.Schema.C_ATTRS_RESOURCE, resource.getId())
+                    .value(Constants.Schema.C_ATTRS_ATTR, field.getKey())
+                    .value(Constants.Schema.C_ATTRS_VALUE, field.getValue())
+                    .using(ttl(m_ttl));
+                insert.setConsistencyLevel(writeConsistency);
+                statement.add(insert);
 
                 getOrCreateResourceMetadata(context, resource, cacheQueue).putAttribute(field.getKey(), field.getValue());
             }
         }
     }
 
-    private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, String name) {
+    private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, String name, ConsistencyLevel writeConsistency) {
 
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
 
         if (!(cached.isPresent() && cached.get().containsMetric(name))) {
-            statement.add(
-                    insertInto(Constants.Schema.T_METRICS)
-                        .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
-                        .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
-                        .value(Constants.Schema.C_METRICS_NAME, name)
-                        .using(ttl(m_ttl))
-            );
-            
+            RegularStatement insert = insertInto(Constants.Schema.T_METRICS)
+                .value(Constants.Schema.C_METRICS_CONTEXT, context.getId())
+                .value(Constants.Schema.C_METRICS_RESOURCE, resource.getId())
+                .value(Constants.Schema.C_METRICS_NAME, name)
+                .using(ttl(m_ttl));
+            insert.setConsistencyLevel(writeConsistency);
+            statement.add(insert);
+
             getOrCreateResourceMetadata(context, resource, cacheQueue).putMetric(name);
         }
     }

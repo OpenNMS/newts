@@ -26,8 +26,8 @@ import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.api.query.StandardAggregationFunctions;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
-import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Queues;

@@ -39,11 +39,13 @@ import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.api.search.TermQuery;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.Constants.Schema;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
@@ -59,15 +61,17 @@ public class CassandraSearcher implements Searcher {
 
     private final CassandraSession m_session;
     private final Timer m_searchTimer;
+    private final ContextConfigurations m_contextConfigurations;
 
     private final PreparedStatement m_searchStatement;
     private final PreparedStatement m_selectAttributesStatement;
     private final PreparedStatement m_selectMetricNamesStatement;
 
     @Inject
-    public CassandraSearcher(CassandraSession session, MetricRegistry registry) {
+    public CassandraSearcher(CassandraSession session, MetricRegistry registry, ContextConfigurations contextConfigurations) {
         m_session = checkNotNull(session, "session argument");
         m_searchTimer = registry.timer(name("search", "search"));
+        m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
         Select select = QueryBuilder.select(Schema.C_TERMS_RESOURCE).from(Schema.T_TERMS);
         select.where(eq(Schema.C_TERMS_CONTEXT, bindMarker(Schema.C_TERMS_CONTEXT)))
@@ -97,6 +101,7 @@ public class CassandraSearcher implements Searcher {
         checkNotNull(query, "query argument");
 
         Timer.Context ctx = m_searchTimer.time();
+        ConsistencyLevel readConsistency = m_contextConfigurations.getReadConsistency(context);
 
         SearchResults searchResults = new SearchResults();
 
@@ -104,9 +109,9 @@ public class CassandraSearcher implements Searcher {
             Set<String> ids;
             Query q = query.rewrite();
             if (q instanceof BooleanQuery) {
-                ids = searchForIds(context, (BooleanQuery)q);
+                ids = searchForIds(context, (BooleanQuery)q, readConsistency);
             } else if (q instanceof TermQuery) {
-                ids = searchForIds(context, (TermQuery)q);
+                ids = searchForIds(context, (TermQuery)q, readConsistency);
             } else {
                 throw new IllegalStateException("Unsupported query: " + q);
             }
@@ -118,8 +123,8 @@ public class CassandraSearcher implements Searcher {
                     searchResults.addResult(resource, emptyList);
                 } else {
                     // Fetch the metric names and attributes concurrently
-                    ResultSetFuture attrsFuture = fetchResourceAttributes(context, id);
-                    ResultSetFuture metricsFuture = fetchMetricNames(context, id);
+                    ResultSetFuture attrsFuture = fetchResourceAttributes(context, id, readConsistency);
+                    ResultSetFuture metricsFuture = fetchMetricNames(context, id, readConsistency);
 
                     try {
                         Map<String, String> attrs = getResourceAttributesFromResults(attrsFuture);
@@ -141,7 +146,8 @@ public class CassandraSearcher implements Searcher {
 
     public Map<String, String> getResourceAttributes(Context context, String resourceId) {
         try {
-            return getResourceAttributesFromResults(fetchResourceAttributes(context, resourceId));
+            ConsistencyLevel readConsistency = m_contextConfigurations.getReadConsistency(context);
+            return getResourceAttributesFromResults(fetchResourceAttributes(context, resourceId, readConsistency));
         } catch (ExecutionException|InterruptedException e) {
             throw Throwables.propagate(e);
         }
@@ -149,7 +155,8 @@ public class CassandraSearcher implements Searcher {
 
     public Collection<String> getMetricNames(Context context, String resourceId) {
         try {
-            return getMetricNamesFromResults(fetchMetricNames(context, resourceId));
+            ConsistencyLevel readConsistency = m_contextConfigurations.getReadConsistency(context);
+            return getMetricNamesFromResults(fetchMetricNames(context, resourceId, readConsistency));
         } catch (ExecutionException|InterruptedException e) {
             throw Throwables.propagate(e);
         }
@@ -159,13 +166,14 @@ public class CassandraSearcher implements Searcher {
      * Returns the set of resource ids that match the given
      * term query.
      */
-    private Set<String> searchForIds(Context context, TermQuery query) {
+    private Set<String> searchForIds(Context context, TermQuery query, ConsistencyLevel readConsistency) {
         Set<String> ids = Sets.newTreeSet();
 
         BoundStatement bindStatement = m_searchStatement.bind();
         bindStatement.setString(Schema.C_TERMS_CONTEXT, context.getId());
         bindStatement.setString(Schema.C_TERMS_FIELD, query.getTerm().getField(Constants.DEFAULT_TERM_FIELD));
         bindStatement.setString(Schema.C_TERMS_VALUE, query.getTerm().getValue());
+        bindStatement.setConsistencyLevel(readConsistency);
 
         for (Row row : m_session.execute(bindStatement)) {
             ids.add(row.getString(Constants.Schema.C_TERMS_RESOURCE));
@@ -181,7 +189,7 @@ public class CassandraSearcher implements Searcher {
      * Separate clauses are performed with separate database queries and their
      * results are joined in memory.
      */
-    private Set<String> searchForIds(Context context, BooleanQuery query) {
+    private Set<String> searchForIds(Context context, BooleanQuery query, ConsistencyLevel readConsistency) {
         Set<String> ids = Sets.newTreeSet();
 
         for (BooleanClause clause : query.getClauses()) {
@@ -189,9 +197,9 @@ public class CassandraSearcher implements Searcher {
 
             Query subQuery = clause.getQuery();
             if (subQuery instanceof BooleanQuery) {
-                subQueryIds = searchForIds(context, (BooleanQuery)subQuery);
+                subQueryIds = searchForIds(context, (BooleanQuery)subQuery, readConsistency);
             } else if (subQuery instanceof TermQuery) {
-                subQueryIds = searchForIds(context, (TermQuery)subQuery);
+                subQueryIds = searchForIds(context, (TermQuery)subQuery, readConsistency);
             } else {
                 throw new IllegalStateException("Unsupported query: " + subQuery);
             }
@@ -211,10 +219,11 @@ public class CassandraSearcher implements Searcher {
         return ids;
     }
 
-    private ResultSetFuture fetchResourceAttributes(Context context, String resourceId) {
+    private ResultSetFuture fetchResourceAttributes(Context context, String resourceId, ConsistencyLevel readConsistency) {
         BoundStatement bindStatement = m_selectAttributesStatement.bind();
         bindStatement.setString(Schema.C_ATTRS_CONTEXT, context.getId());
         bindStatement.setString(Schema.C_ATTRS_RESOURCE, resourceId);
+        bindStatement.setConsistencyLevel(readConsistency);
 
         return m_session.executeAsync(bindStatement);
     }
@@ -229,10 +238,11 @@ public class CassandraSearcher implements Searcher {
         return attributes;
     }
 
-    private ResultSetFuture fetchMetricNames(Context context, String resourceId) {
+    private ResultSetFuture fetchMetricNames(Context context, String resourceId, ConsistencyLevel readConsistency) {
         BoundStatement bindStatement = m_selectMetricNamesStatement.bind();
         bindStatement.setString(Schema.C_METRICS_CONTEXT, context.getId());
         bindStatement.setString(Schema.C_METRICS_RESOURCE, resourceId);
+        bindStatement.setConsistencyLevel(readConsistency);
 
         return m_session.executeAsync(bindStatement);
     }

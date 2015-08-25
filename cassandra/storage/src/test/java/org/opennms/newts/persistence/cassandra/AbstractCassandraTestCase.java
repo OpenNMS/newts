@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;

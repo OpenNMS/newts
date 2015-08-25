@@ -33,6 +33,7 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -55,7 +56,8 @@ public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
         }
 
         // Override the shard period to ensure we test query concurrency
-        m_contextConfigurations.addContextConfig(Context.DEFAULT_CONTEXT, Duration.seconds(1));
+        m_contextConfigurations.addContextConfig(Context.DEFAULT_CONTEXT,
+                Duration.seconds(1), ConsistencyLevel.ALL, ConsistencyLevel.ALL);
 
         getRepository().insert(samples);
 

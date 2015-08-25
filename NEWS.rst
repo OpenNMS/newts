@@ -1,6 +1,10 @@
 1.3.1
 ~~~~~
 
+The consistency levels used for reading and writing values from Casssandra
+can now be controlled on a per context basis. Use the *read-consistency* and
+*write-consistency* context options to set these.
+
 The *cassandra.host* option can now be used to specify a comma separated list
 of hosts.
 

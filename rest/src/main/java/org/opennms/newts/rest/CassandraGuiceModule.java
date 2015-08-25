@@ -22,6 +22,7 @@ import static com.google.inject.name.Names.named;
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Searcher;
+import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
 import org.opennms.newts.cassandra.search.CassandraSearcher;
 import org.opennms.newts.cassandra.search.EscapableResourceIdSplitter;
@@ -30,7 +31,6 @@ import org.opennms.newts.cassandra.search.ResourceIdSplitter;
 import org.opennms.newts.cassandra.search.ResourceMetadataCache;
 import org.opennms.newts.cassandra.search.SimpleResourceIdSplitter;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
-import org.opennms.newts.persistence.cassandra.ContextConfigurations;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -84,7 +84,8 @@ public class CassandraGuiceModule extends AbstractModule {
         // Pull in context specific attributes
         ContextConfigurations contextConfigurations = new ContextConfigurations();
         for (ContextConfig contextConfig : m_newtsConf.getContextConfigs().values()) {
-            contextConfigurations.addContextConfig(contextConfig.getContext(), contextConfig.getResourceShard());
+            contextConfigurations.addContextConfig(contextConfig.getContext(), contextConfig.getResourceShard(),
+                    contextConfig.getReadConsistency(), contextConfig.getWriteConsistency());
         }
         bind(ContextConfigurations.class).toInstance(contextConfigurations);
     }
