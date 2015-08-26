@@ -13,7 +13,7 @@ public class ContextConfigurations {
 
     private static final Duration DEFAULT_RESOURCE_SHARD = Duration.days(7);
 
-    private static final ConsistencyLevel DEFAULT_READ_CONSISTENCY = ConsistencyLevel.ANY;
+    private static final ConsistencyLevel DEFAULT_READ_CONSISTENCY = ConsistencyLevel.ONE;
 
     private static final ConsistencyLevel DEFAULT_WRITE_CONSISTENCY = ConsistencyLevel.ANY;
 
