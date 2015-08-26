@@ -111,8 +111,6 @@ public class CassandraSampleRepository implements SampleRepository {
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
         m_insertTimer = registry.timer(metricName("insert-timer"));
-
-        Integer.parseInt("");
     }
 
     @Override
