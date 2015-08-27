@@ -18,6 +18,7 @@ package org.opennms.newts.cassandra.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,14 +28,16 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 
-public class ResourceMetadata {
+public class ResourceMetadata implements Serializable {
+
+    private static final long serialVersionUID = 2103401685689076369L;
 
     private final Set<String> m_metrics = Sets.newConcurrentHashSet();
     private final Map<String, String> m_attributes = Maps.newConcurrentMap();
-    private final Optional<Meter> m_metricReqs;
-    private final Optional<Meter> m_attributeReqs;
-    private final Optional<Meter> m_metricMisses;
-    private final Optional<Meter> m_attributeMisses;
+    private final transient Optional<Meter> m_metricReqs;
+    private final transient Optional<Meter> m_attributeReqs;
+    private final transient Optional<Meter> m_metricMisses;
+    private final transient Optional<Meter> m_attributeMisses;
 
     public ResourceMetadata(Meter metricReqs, Meter attributeReqs, Meter metricMisses, Meter attributeMisses) {
         m_metricReqs = Optional.of(checkNotNull(metricReqs, "metricsReqs argument"));
