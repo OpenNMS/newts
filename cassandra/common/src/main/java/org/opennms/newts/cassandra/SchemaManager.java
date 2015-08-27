@@ -43,7 +43,7 @@ public class SchemaManager implements AutoCloseable {
     @Inject
     public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port) {
         m_keyspace = keyspace;
-        m_cluster = Cluster.builder().withPort(port).addContactPoint(host).build();
+        m_cluster = Cluster.builder().withPort(port).addContactPoints(host.split(",")).build();
         m_session = m_cluster.connect();
     }
 
