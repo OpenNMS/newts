@@ -77,9 +77,19 @@ public class ResourceMetadata implements Serializable {
         return this;
     }
 
-    public void merge(ResourceMetadata other) {
-        m_metrics.addAll(other.m_metrics);
+    /**
+     * Merges the metrics and attributes from the given instance, to the current instance.
+     *
+     * @param other a {@link ResourceMetadata} object
+     * @return true if the meta-data was modified as a result of the merge, false otherwise
+     */
+    public boolean merge(ResourceMetadata other) {
+        boolean modified = m_metrics.addAll(other.m_metrics);
+        if (!modified) {
+            modified = !m_attributes.equals(other.m_attributes);
+        }
         m_attributes.putAll(other.m_attributes);
+        return modified;
     }
 
     @Override
