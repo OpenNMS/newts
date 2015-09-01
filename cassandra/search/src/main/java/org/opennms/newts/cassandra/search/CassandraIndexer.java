@@ -53,6 +53,7 @@ public class CassandraIndexer implements Indexer {
     private final int m_ttl;
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
+    private final Timer m_deleteTimer;
     private final boolean m_isHierarchicalIndexingEnabled;
     private final ResourceIdSplitter m_resourceIdSplitter;
     private final ContextConfigurations m_contextConfigurations;
@@ -70,6 +71,7 @@ public class CassandraIndexer implements Indexer {
         m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
         m_updateTimer = registry.timer(name("search", "update"));
+        m_deleteTimer = registry.timer(name("search", "delete"));
 
     }
 
@@ -109,7 +111,7 @@ public class CassandraIndexer implements Indexer {
 
     @Override
     public void delete(final Context context, final Resource resource) {
-        final Timer.Context ctx = m_updateTimer.time();
+        final Timer.Context ctx = m_deleteTimer.time();
 
         final ConsistencyLevel writeConsistency = m_contextConfigurations.getWriteConsistency(context);
 
