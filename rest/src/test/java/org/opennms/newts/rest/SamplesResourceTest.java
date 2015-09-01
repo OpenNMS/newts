@@ -39,12 +39,14 @@ import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 
 import com.google.common.base.Optional;
+import org.opennms.newts.cassandra.search.CassandraIndexer;
 
 
 public class SamplesResourceTest {
 
     private final SampleRepository m_repository = mock(SampleRepository.class);
-    private final SamplesResource m_resource = new SamplesResource(m_repository);
+    private final CassandraIndexer m_indexer = mock(CassandraIndexer.class);
+    private final SamplesResource m_resource = new SamplesResource(m_repository, m_indexer);
 
     @Test
     public void testWriteSamples() {
