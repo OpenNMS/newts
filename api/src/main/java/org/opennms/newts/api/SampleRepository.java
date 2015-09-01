@@ -77,4 +77,12 @@ public interface SampleRepository {
      */
     public void insert(Collection<Sample> samples, boolean calculateTimeToLive);
 
+    /**
+     * Delete stored samples.
+     *
+     * @param context context to delete from
+     * @param resource name of the resource to delete from
+     */
+    public void delete(Context context, Resource resource);
+
 }

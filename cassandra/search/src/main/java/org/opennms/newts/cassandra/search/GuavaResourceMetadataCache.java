@@ -63,6 +63,11 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
         return (r != null) ? Optional.of(r) : Optional.<ResourceMetadata>absent();
     }
 
+    @Override
+    public void delete(Context context, Resource resourceId) {
+        m_cache.invalidate(key(context, resourceId));
+    }
+
     private String key(Context context, Resource resource) {
         return m_keyJoiner.join(context.getId(), resource.getId());
     }

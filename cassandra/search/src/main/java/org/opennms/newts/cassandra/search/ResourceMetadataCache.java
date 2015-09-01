@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 
 
 public interface ResourceMetadataCache {
+
     /**
      * Merges the contents of a {@link ResourceMetadata} with the cached instance corresponding to
      * <code>context</code> and <code>resource</code>. If no such {@link ResourceMetadata} instance
@@ -48,4 +49,14 @@ public interface ResourceMetadataCache {
      * @return resource metadata corresponding to <code>context</code> and <code>resource</code>
      */
     Optional<ResourceMetadata> get(Context context, Resource resource);
+
+    /**
+     * Deletes an cached entry for the given context and resource ID.
+     *
+     * @param context
+     *              application context of the resource metadata
+     * @param resourceId
+     *            the resource
+     */
+    void delete(Context context, Resource resourceId);
 }

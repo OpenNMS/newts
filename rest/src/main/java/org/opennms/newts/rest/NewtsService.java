@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.graphite.GraphiteListener;
 import org.slf4j.Logger;
@@ -104,10 +105,11 @@ public class NewtsService extends Application<NewtsConfig> {
         });
 
         SampleRepository repository = injector.getInstance(SampleRepository.class);
+        Indexer indexer = injector.getInstance(Indexer.class);
 
         // Rest resources
         environment.jersey().register(new MeasurementsResource(repository, config.getReports()));
-        environment.jersey().register(new SamplesResource(repository));
+        environment.jersey().register(new SamplesResource(repository, indexer));
 
         // Add search resource only if search is enabled
         if (config.getSearchConfig().isEnabled()) {

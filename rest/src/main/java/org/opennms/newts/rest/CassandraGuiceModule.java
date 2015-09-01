@@ -21,8 +21,10 @@ import static com.google.inject.name.Names.named;
 
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.opennms.newts.cassandra.search.CassandraIndexer;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
 import org.opennms.newts.cassandra.search.CassandraSearcher;
 import org.opennms.newts.cassandra.search.EscapableResourceIdSplitter;
@@ -67,6 +69,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(ResourceMetadataCache.class).to(GuavaResourceMetadataCache.class);
         bind(Searcher.class).to(CassandraSearcher.class);
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
+        bind(Indexer.class).to(CassandraIndexer.class);
 
         Multibinder<SampleProcessor> processors = Multibinder.newSetBinder(binder(), SampleProcessor.class);
 

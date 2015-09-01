@@ -58,6 +58,8 @@ public class SearchResults implements Iterable<SearchResults.Result> {
     public int size() {
         return m_results.size();
     }
+
+    public boolean isEmpty() { return m_results.isEmpty(); }
     
     @Override
     public Iterator<Result> iterator() {

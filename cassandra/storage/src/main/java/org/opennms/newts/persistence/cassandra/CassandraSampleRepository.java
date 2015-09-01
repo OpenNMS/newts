@@ -30,11 +30,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.datastax.driver.core.querybuilder.Delete;
+import com.google.common.base.Throwables;
 import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
 import org.opennms.newts.api.Duration;
@@ -78,6 +82,7 @@ public class CassandraSampleRepository implements SampleRepository {
     private final int m_ttl;
     private final SampleProcessorService m_processorService;
     private final PreparedStatement m_selectStatement;
+    private final PreparedStatement m_deleteStatement;
 
     private final Timer m_sampleSelectTimer;
     private final Timer m_measurementSelectTimer;
@@ -107,6 +112,13 @@ public class CassandraSampleRepository implements SampleRepository {
         select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
 
         m_selectStatement = m_session.prepare(select.toString());
+
+        Delete delete = QueryBuilder.delete().from(SchemaConstants.T_SAMPLES);
+        delete.where(eq(SchemaConstants.F_CONTEXT, bindMarker(SchemaConstants.F_CONTEXT)));
+        delete.where(eq(SchemaConstants.F_PARTITION, bindMarker(SchemaConstants.F_PARTITION)));
+        delete.where(eq(SchemaConstants.F_RESOURCE, bindMarker(SchemaConstants.F_RESOURCE)));
+
+        m_deleteStatement = m_session.prepare(delete.toString());
 
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
@@ -247,6 +259,35 @@ public class CassandraSampleRepository implements SampleRepository {
             timer.stop();
         }
 
+    }
+
+    @Override
+    public void delete(Context context, Resource resource) {
+        final Timestamp start = Timestamp.now().minus(m_ttl, TimeUnit.SECONDS);
+        final Timestamp end = Timestamp.now();
+
+        final Duration resourceShard = m_contextConfigurations.getResourceShard(context);
+
+        final List<Future<ResultSet>> futures = Lists.newArrayList();
+        for (Timestamp partition : new IntervalGenerator(start.stepFloor(resourceShard),
+                                                         end.stepFloor(resourceShard),
+                                                         resourceShard)) {
+            BoundStatement bindStatement = m_deleteStatement.bind();
+            bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
+            bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
+            bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
+
+            futures.add(m_session.executeAsync(bindStatement));
+        }
+
+        for (final Future<ResultSet> future : futures) {
+            try {
+                future.get();
+
+            } catch (final InterruptedException | ExecutionException e) {
+                throw Throwables.propagate(e);
+            }
+        }
     }
 
     private Iterator<com.datastax.driver.core.Row> cassandraSelect(Context context, Resource resource,

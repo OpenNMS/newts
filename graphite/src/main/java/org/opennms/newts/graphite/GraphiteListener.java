@@ -87,6 +87,11 @@ public class GraphiteListener implements Runnable {
             public void insert(Collection<Sample> arg0) {
                 System.out.printf("MOCK INSERT! (%d samples)%n", arg0.size());
             }
+
+            @Override
+            public void delete(Context context, Resource resource) {
+                throw new UnsupportedOperationException();
+            }
         }, new MetricRegistry()), 2003).run();
     }
 

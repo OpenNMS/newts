@@ -17,8 +17,12 @@ package org.opennms.newts.api.search;
 
 import java.util.Collection;
 
+import org.opennms.newts.api.Context;
+import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
 
 public interface Indexer {
     public void update(Collection<Sample> samples);
+
+    void delete(Context context, Resource resource);
 }
