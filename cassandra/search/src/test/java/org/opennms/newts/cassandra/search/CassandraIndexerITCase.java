@@ -136,6 +136,37 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
     }
 
     @Test
+    public void testDelete() {
+        ResourceMetadataCache cache = mock(ResourceMetadataCache.class);
+        when(cache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
+        MetricRegistry registry = new MetricRegistry();
+        ContextConfigurations contextConfigurations = new ContextConfigurations();
+
+        CassandraSession session = getCassandraSession();
+
+        Indexer indexer = new CassandraIndexer(session, 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
+        CassandraSearcher searcher = new CassandraSearcher(session, registry, contextConfigurations);
+
+        Map<String, String> base = map("meat", "people", "bread", "beer");
+        List<Sample> samples = Lists.newArrayList();
+        samples.add(sampleFor(new Resource("aaa", Optional.of(base)), "m0"));
+        samples.add(sampleFor(new Resource("aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
+        samples.add(sampleFor(new Resource("aac:aaa", Optional.of(map(base, "music", "country"))), "m0"));
+        indexer.update(samples);
+
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aaa")).size(), equalTo(2));
+
+        indexer.delete(Context.DEFAULT_CONTEXT, new Resource("aaa", Optional.of(base)));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aaa")).size(), equalTo(1));
+
+        indexer.delete(Context.DEFAULT_CONTEXT, new Resource("aaa", Optional.of(base)));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aaa")).size(), equalTo(1));
+
+        indexer.delete(Context.DEFAULT_CONTEXT, new Resource("aac:aaa", Optional.of(base)));
+        assertThat(searcher.search(Context.DEFAULT_CONTEXT, QueryBuilder.matchAnyValue("aaa")).size(), equalTo(0));
+    }
+
+    @Test
     public void canWalkTheResourceTree() {
 
         Map<String, String> base = map("meat", "people", "bread", "beer");
