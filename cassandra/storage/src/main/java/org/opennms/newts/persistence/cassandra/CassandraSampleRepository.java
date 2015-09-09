@@ -54,6 +54,7 @@ import org.opennms.newts.cassandra.ContextConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.BoundStatement;
@@ -82,6 +83,8 @@ public class CassandraSampleRepository implements SampleRepository {
     private final Timer m_sampleSelectTimer;
     private final Timer m_measurementSelectTimer;
     private final Timer m_insertTimer;
+    private final Meter m_samplesInserted;
+    private final Meter m_samplesSelected;
 
     private final ContextConfigurations m_contextConfigurations;
 
@@ -111,6 +114,8 @@ public class CassandraSampleRepository implements SampleRepository {
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
         m_measurementSelectTimer = registry.timer(metricName("measurement-select-timer"));
         m_insertTimer = registry.timer(metricName("insert-timer"));
+        m_samplesInserted = registry.meter(metricName("samples-inserted"));
+        m_samplesSelected = registry.meter(metricName("samples-selected"));
     }
 
     @Override
@@ -153,6 +158,7 @@ public class CassandraSampleRepository implements SampleRepository {
         Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, step).process(driverAdapter);
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
+        m_samplesSelected.mark(driverAdapter.getResultCount());
 
         try {
             return results;
@@ -183,6 +189,7 @@ public class CassandraSampleRepository implements SampleRepository {
         }
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
+        m_samplesSelected.mark(driverAdapter.getResultCount());
 
         try {
             return samples;
@@ -242,6 +249,8 @@ public class CassandraSampleRepository implements SampleRepository {
             if (m_processorService != null) {
                 m_processorService.submit(samples);
             }
+
+            m_samplesInserted.mark(samples.size());
         }
         finally {
             timer.stop();
