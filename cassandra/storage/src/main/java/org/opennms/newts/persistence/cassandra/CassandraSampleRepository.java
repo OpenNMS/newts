@@ -300,19 +300,13 @@ public class CassandraSampleRepository implements SampleRepository {
                 }
             }
         } else {
-            /**
-             * Choose (now - one year) till now...
-             */
+            // Choose (now - one year) till now...
             Timestamp end = Timestamp.now();
             Timestamp start = end.minus(DELETION_INTERVAL, TimeUnit.DAYS);
 
-            /**
-             * ... and check whether samples exist for this period of time.
-             */
+            // ... and check whether samples exist for this period of time.
             while (cassandraSelect(context, resource, start, end).hasNext()) {
-                /**
-                 * Now delete the samples...
-                 */
+                // Now delete the samples...
                 final Duration resourceShard = m_contextConfigurations.getResourceShard(context);
 
                 final List<Future<ResultSet>> futures = Lists.newArrayList();
@@ -335,15 +329,11 @@ public class CassandraSampleRepository implements SampleRepository {
                     }
                 }
 
-                /**
-                 * ...set end to start and start to (end - one year)
-                 */
+                // ...set end to start and start to (end - one year)
                 end = start;
                 start = end.minus(DELETION_INTERVAL, TimeUnit.DAYS);
 
-                /**
-                 * and start over again until no more samples are found
-                 */
+                // and start over again until no more samples are found
             }
         }
     }
