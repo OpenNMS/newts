@@ -49,7 +49,7 @@
             <descriptor>src/assembly/src.xml</descriptor>
           </descriptors>
           <finalName>newts-${project.version}</finalName>
-          <tarLongFileMode>gnu</tarLongFileMode>
+          <tarLongFileMode>posix</tarLongFileMode>
         </configuration>
         <executions>
           <execution>
