@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,6 +38,7 @@ import org.opennms.newts.api.Timestamp;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Optional;
+import org.opennms.newts.api.search.Indexer;
 
 
 @Path("/samples")
@@ -45,9 +47,12 @@ import com.google.common.base.Optional;
 public class SamplesResource {
 
     private final SampleRepository m_sampleRepository;
+    private final Indexer m_indexer;
 
-    public SamplesResource(SampleRepository sampleRepository) {
+    public SamplesResource(SampleRepository sampleRepository,
+                           Indexer indexer) {
         m_sampleRepository = checkNotNull(sampleRepository, "sample repository");
+        m_indexer = checkNotNull(indexer, "indexer");
     }
 
     @POST
@@ -71,4 +76,16 @@ public class SamplesResource {
         return Transform.sampleDTOs(m_sampleRepository.select(context, resource, lower, upper));
     }
 
+    @DELETE
+    @Timed
+    @Path("/{resource}")
+    public void deleteSamples(@PathParam("resource") Resource resource,
+                              @QueryParam("context") Optional<String> contextId) {
+        final Context context = contextId.isPresent()
+                                ? new Context(contextId.get())
+                                : Context.DEFAULT_CONTEXT;
+
+        m_sampleRepository.delete(context, resource);
+        m_indexer.delete(context, resource);
+    }
 }

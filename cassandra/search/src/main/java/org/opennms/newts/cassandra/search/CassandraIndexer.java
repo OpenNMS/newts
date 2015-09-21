@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Sample;
@@ -52,6 +53,7 @@ public class CassandraIndexer implements Indexer {
     private final int m_ttl;
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
+    private final Timer m_deleteTimer;
     private final boolean m_isHierarchicalIndexingEnabled;
     private final ResourceIdSplitter m_resourceIdSplitter;
     private final ContextConfigurations m_contextConfigurations;
@@ -69,6 +71,7 @@ public class CassandraIndexer implements Indexer {
         m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
         m_updateTimer = registry.timer(name("search", "update"));
+        m_deleteTimer = registry.timer(name("search", "delete"));
 
     }
 
@@ -104,6 +107,28 @@ public class CassandraIndexer implements Indexer {
             ctx.stop();
         }
 
+    }
+
+    @Override
+    public void delete(final Context context, final Resource resource) {
+        final Timer.Context ctx = m_deleteTimer.time();
+
+        final ConsistencyLevel writeConsistency = m_contextConfigurations.getWriteConsistency(context);
+
+        final List<RegularStatement> statements = Lists.newArrayList();
+        definitelyUnindexResource(statements, context, resource, writeConsistency);
+        definitelyUnindexResourceAttributes(statements, context, resource, writeConsistency);
+        definitelyRemoveMetricName(statements, context, resource, writeConsistency);
+
+        try {
+            if (statements.size() > 0) {
+                m_session.execute(batch(statements.toArray(new RegularStatement[statements.size()])));
+            }
+
+            m_cache.delete(context, resource);
+        } finally {
+            ctx.stop();
+        }
     }
 
     private void recursivelyIndexResourceElements(List<RegularStatement> statement, Context context, String resourceId, ConsistencyLevel writeConsistencyLevel) {
@@ -158,6 +183,54 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
+    private void recursivelyUnindexResourceElements(List<RegularStatement> statement, Context context, String resourceId, ConsistencyLevel writeConsistencyLevel) {
+        List<String> elements = m_resourceIdSplitter.splitIdIntoElements(resourceId);
+        int numElements = elements.size();
+        if (numElements == 1) {
+            // Tag the top level elements with _parent:_root
+            RegularStatement delete = QueryBuilder.delete()
+                    .from(Constants.Schema.T_TERMS)
+                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, Constants.TOP_LEVEL_PARENT_TERM_VALUE))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resourceId));
+            delete.setConsistencyLevel(writeConsistencyLevel);
+            statement.add(delete);
+        } else {
+            // Construct the parent's resource id
+            String parentResourceId = m_resourceIdSplitter.joinElementsToId(elements.subList(0, numElements-1));
+
+            // Tag the resource with its parent's id
+            RegularStatement delete = QueryBuilder.delete()
+                    .from(Constants.Schema.T_TERMS)
+                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, parentResourceId))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resourceId));
+            delete.setConsistencyLevel(writeConsistencyLevel);
+            statement.add(delete);
+
+            // Recurse
+            recursivelyUnindexResourceElements(statement, context, parentResourceId, writeConsistencyLevel);
+        }
+    }
+
+    private void definitelyUnindexResource(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistencyLevel) {
+        for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
+            RegularStatement delete = QueryBuilder.delete()
+                .from(Constants.Schema.T_TERMS)
+                .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
+                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD))
+                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, s))
+                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
+            delete.setConsistencyLevel(writeConsistencyLevel);
+            statement.add(delete);
+        }
+        if (m_isHierarchicalIndexingEnabled) {
+            recursivelyIndexResourceElements(statement, context, resource.getId(), writeConsistencyLevel);
+        }
+    }
+
     private void maybeIndexResourceAttributes(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
         if (!resource.getAttributes().isPresent()) {
             return;
@@ -199,6 +272,37 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
+    private void definitelyUnindexResourceAttributes(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
+        if (!resource.getAttributes().isPresent()) {
+            return;
+        }
+
+        for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
+            // Search unindexing
+            RegularStatement delete = QueryBuilder.delete().from(Constants.Schema.T_TERMS)
+                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, field.getValue()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
+            delete.setConsistencyLevel(writeConsistency);
+            statement.add(delete);
+            delete = QueryBuilder.delete().from(Constants.Schema.T_TERMS)
+                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, field.getKey()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, field.getValue()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
+            delete.setConsistencyLevel(writeConsistency);
+            statement.add(delete);
+            // Storage
+            delete = QueryBuilder.delete().from(Constants.Schema.T_ATTRS)
+                    .where(QueryBuilder.eq(Constants.Schema.C_ATTRS_CONTEXT, context.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_ATTRS_RESOURCE, resource.getId()))
+                    .and(QueryBuilder.eq(Constants.Schema.C_ATTRS_ATTR, field.getKey()));
+            delete.setConsistencyLevel(writeConsistency);
+            statement.add(delete);
+        }
+    }
+
     private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, List<RegularStatement> statement, Context context, Resource resource, String name, ConsistencyLevel writeConsistency) {
 
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
@@ -214,6 +318,14 @@ public class CassandraIndexer implements Indexer {
 
             getOrCreateResourceMetadata(context, resource, cacheQueue).putMetric(name);
         }
+    }
+
+    private void definitelyRemoveMetricName(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
+        RegularStatement delete = QueryBuilder.delete().from(Constants.Schema.T_METRICS)
+                .where(QueryBuilder.eq(Constants.Schema.C_METRICS_CONTEXT, context.getId()))
+                .and(QueryBuilder.eq(Constants.Schema.C_METRICS_RESOURCE, resource.getId()));
+        delete.setConsistencyLevel(writeConsistency);
+        statement.add(delete);
     }
 
     private static ResourceMetadata getOrCreateResourceMetadata(Context context, Resource resource, Map<Context, Map<Resource, ResourceMetadata>> map) {

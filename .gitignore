@@ -8,3 +8,5 @@ target/
 # Idea project files
 /.idea
 *.iml
+*.iws
+*.ipr
