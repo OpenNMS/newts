@@ -227,7 +227,7 @@ public class CassandraIndexer implements Indexer {
             statement.add(delete);
         }
         if (m_isHierarchicalIndexingEnabled) {
-            recursivelyIndexResourceElements(statement, context, resource.getId(), writeConsistencyLevel);
+            recursivelyUnindexResourceElements(statement, context, resource.getId(), writeConsistencyLevel);
         }
     }
 
