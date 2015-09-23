@@ -49,6 +49,8 @@ import com.google.common.collect.Maps;
 
 public class CassandraIndexer implements Indexer {
 
+    private static final int MAX_BATCH_SIZE = 16;
+
     private final CassandraSession m_session;
     private final int m_ttl;
     private final ResourceMetadataCache m_cache;
@@ -93,7 +95,10 @@ public class CassandraIndexer implements Indexer {
 
         try {
             if (statements.size() > 0) {
-                m_session.execute(batch(statements.toArray(new RegularStatement[statements.size()])));
+                // Limit the size of the batch; See NEWTS-67
+                for (List<RegularStatement> partition : Lists.partition(statements, MAX_BATCH_SIZE)) {
+                    m_session.execute(batch(partition.toArray(new RegularStatement[partition.size()])));
+                }
             }
 
             // Order matters here; We want the cache updated only after a successful Cassandra write.
