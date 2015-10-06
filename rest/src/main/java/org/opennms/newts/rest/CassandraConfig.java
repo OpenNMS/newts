@@ -45,6 +45,12 @@ public class CassandraConfig {
     @JsonProperty("compression")
     private String m_compression = "NONE"; 
 
+    @JsonProperty("username")
+    private String m_username;
+
+    @JsonProperty("password")
+    private String m_password;
+
     public String getKeyspace() {
         return m_keyspace;
     }
@@ -65,4 +71,11 @@ public class CassandraConfig {
         return m_compression;
     }
 
+    public String getUsername() {
+        return m_username;
+    }
+
+    public String getPassword() {
+        return m_password;
+    }
 }

@@ -44,6 +44,8 @@ class Config {
     private int m_cassandraPort = 9042;
     private String m_cassandraKeyspace = "newts";
     private String m_cassandraCompression = "NONE";
+    private String m_cassandraUsername;
+    private String m_cassandraPassword;
     private Timestamp m_start = Timestamp.fromEpochSeconds(900000000);
     private Timestamp m_end = Timestamp.fromEpochSeconds(931536000);
     private Duration m_interval = Duration.seconds(300);
@@ -95,6 +97,16 @@ class Config {
         m_cassandraKeyspace = keyspace;
     }
 
+    @Option(name = "-U", aliases = "--cassandra-username", metaVar = "<username>", usage = "Cassandra username.")
+    void setCassandraUsername(String username) {
+        m_cassandraUsername = username;
+    }
+
+    @Option(name = "-P", aliases = "--cassandra-password", metaVar = "<password>", usage = "Cassandra password.")
+    void setCassandraPassword(String password) {
+        m_cassandraPassword = password;
+    }
+
     @Option(name = "-s", aliases = "--start", metaVar = "<start>", usage = "ISO8601 formatted start time.")
     void setStart(Timestamp start) {
         m_start = start;
@@ -136,6 +148,14 @@ class Config {
 
     String getCassandraCompression() {
         return m_cassandraCompression;
+    }
+
+    String getCassandraUsername() {
+        return m_cassandraUsername;
+    }
+
+    String getCassandraPassword() {
+        return m_cassandraPassword;
     }
 
     Command getCommand() {

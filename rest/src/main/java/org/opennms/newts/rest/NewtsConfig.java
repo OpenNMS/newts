@@ -84,6 +84,14 @@ public class NewtsConfig extends Configuration {
         return m_cassandraConfig.getCompression();
     }
 
+    public String getCassandraUsername() {
+        return m_cassandraConfig.getUsername();
+    }
+
+    public String getCassandraPassword() {
+        return m_cassandraConfig.getPassword();
+    }
+
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
     }

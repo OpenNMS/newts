@@ -7,6 +7,8 @@ cassandra:
   keyspace: newts
   host: localhost
   port: 9042
+  username: cassandra
+  password: cassandra
   time-to-live: 31536000
   compression: none
 

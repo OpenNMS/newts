@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.driver.core.CloseFuture;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Cluster.Builder;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolOptions.Compression;
 import com.datastax.driver.core.RegularStatement;
@@ -49,7 +50,10 @@ public class CassandraSession {
     private final Session m_session;
 
     @Inject
-    public CassandraSession(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname, @Named("cassandra.port") int port, @Named("cassandra.compression") String compression) {
+    public CassandraSession(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
+            @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
+            @Named("cassandra.username") String username, @Named("cassandra.password") String password) {
+
         checkNotNull(keyspace, "keyspace argument");
         checkNotNull(hostname, "hostname argument");
         checkArgument(port > 0 && port < 65535, "not a valid port number: %d", port);
@@ -57,15 +61,18 @@ public class CassandraSession {
 
         LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
 
-        Cluster cluster = Cluster
+        Builder builder = Cluster
                 .builder()
                 .withPort(port)
                 .addContactPoints(hostname.split(","))
-                .withCompression(Compression.valueOf(compression.toUpperCase()))
-                .build();
+                .withCompression(Compression.valueOf(compression.toUpperCase()));
 
-        m_session = cluster.connect(keyspace);
+        if (username != null && password != null) {
+            LOG.info("Using username: {} and password: XXXXXXXX", username);
+            builder.withCredentials(username, password);
+        }
 
+        m_session = builder.build().connect(keyspace);
     }
 
     public PreparedStatement prepare(String statement) {

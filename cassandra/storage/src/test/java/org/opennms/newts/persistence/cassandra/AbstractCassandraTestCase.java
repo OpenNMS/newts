@@ -43,6 +43,8 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     public static final String CASSANDRA_HOST = "localhost";
     public static final int CASSANDRA_PORT = 9043;
     public static final String CASSANDRA_COMPRESSION = "NONE";
+    public static final String CASSANDRA_USERNAME = "cassandra";
+    public static final String CASSANDRA_PASSWORD = "cassandra";
     public static final int CASSANDRA_TTL = 86400;
     public static final String KEYSPACE_NAME = "newts";
 
@@ -59,7 +61,9 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     @Before
     public void setUp() throws Exception {
         super.before();
-        CassandraSession session = new CassandraSession(KEYSPACE_NAME, CASSANDRA_HOST, CASSANDRA_PORT, CASSANDRA_COMPRESSION);
+        CassandraSession session = new CassandraSession(KEYSPACE_NAME, CASSANDRA_HOST,
+                CASSANDRA_PORT, CASSANDRA_COMPRESSION,
+                CASSANDRA_USERNAME, CASSANDRA_PASSWORD);
         m_repository = new CassandraSampleRepository(
                 session,
                 CASSANDRA_TTL,

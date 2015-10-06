@@ -58,7 +58,9 @@ class InsertDispatcher extends Dispatcher {
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),
-                config.getCassandraCompression());
+                config.getCassandraCompression(),
+                config.getCassandraUsername(),
+                config.getCassandraPassword());
         m_repository = new CassandraSampleRepository(
                 session,
                 Config.CASSANDRA_TTL,

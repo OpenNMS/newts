@@ -36,6 +36,8 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected static final int    CASSANDRA_PORT        = 9043;
     protected static final String CASSANDRA_COMPRESSION = "NONE";
     protected static final String CASSANDRA_KEYSPACE    = "newts";
+    public static final String CASSANDRA_USERNAME = "cassandra";
+    public static final String CASSANDRA_PASSWORD = "cassandra";
 
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
 
