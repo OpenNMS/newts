@@ -10,3 +10,7 @@ target/
 *.iml
 *.iws
 *.ipr
+
+# Jekyll
+Gemfile.lock
+_site
