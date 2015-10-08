@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.3.1"
+date: "2015-10-08 10:34:02 -0500"
+author: j-white
+version: 1.3.1
+categories: [release]
+---
+
+Newts 1.3.1 is now available! We added support for configurable consistency levels and the ability to escape colons in resource ids. Check out the [release notes](https://github.com/OpenNMS/newts/blob/1.3.1/NEWS.rst) for a complete list of what's changed.
+
