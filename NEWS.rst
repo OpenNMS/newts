@@ -5,12 +5,15 @@ The consistency levels used for reading and writing values from Casssandra
 can now be controlled on a per context basis. Use the *read-consistency* and
 *write-consistency* context options to set these.
 
-The *cassandra.host* option can now be used to specify a comma separated list
-of hosts.
-
 Resource id separators can now be escaped. When enabled, colons prefixed with
 a backslash will be treated as literal characters. This can be enabled
 by setting the *separatorEscaping* flag.
+
+The *cassandra.host* option can now be used to specify a comma separated list
+of hosts.
+
+A username and password can be set for connecting to Cassandra with basic
+authentication.
 
 1.3.0
 ~~~~~
