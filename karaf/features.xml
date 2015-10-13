@@ -1,4 +1,4 @@
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="newts-1.0.0-SNAPSHOT">    
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="newts-1.3.2-SNAPSHOT">    
 
     <feature name="netty" description="Netty IO library" version="4.0.29.Final">
       <bundle dependency="true">mvn:io.netty/netty-handler/4.0.29.Final</bundle>
