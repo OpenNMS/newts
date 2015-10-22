@@ -391,4 +391,43 @@ public class PrimaryDataTest {
 
     }
 
+    @Test
+    public void testHeartbeatNaNs() {
+
+        // Test for NEWTS-70
+        Iterator<Row<Sample>> testData = new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE)
+                .row(   0).element("m1", 1)
+                .row( 300).element("m1", 2)
+                .row(1800).element("m1", 8)
+                .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor().step(Duration.seconds(300))
+                .datasource("m1", "m1", Duration.seconds(600), null);
+
+        // Expected results
+        Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost"))
+                .row( 300)
+                    .element("m1", 2)
+                .row( 600)
+                    .element("m1", Double.NaN)
+                .row( 900)
+                    .element("m1", Double.NaN)
+                .row(1200)
+                    .element("m1", Double.NaN)
+                .row(1500)
+                    .element("m1", Double.NaN)
+                .row(1800)
+                    .element("m1", Double.NaN)
+                .build();
+
+        PrimaryData primaryData = new PrimaryData(
+                new Resource("localhost"),
+                Timestamp.fromEpochSeconds(300),
+                Timestamp.fromEpochSeconds(1800),
+                rDescriptor,
+                testData);
+
+        assertRowsEqual(expected, primaryData);
+
+    }
 }
