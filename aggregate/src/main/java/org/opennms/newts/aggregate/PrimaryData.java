@@ -55,13 +55,13 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
             reset();
         }
 
-        private Accumulation accumulateValue(Duration elapsed, Duration heartbeat, ValueType<?> value) {
-            if (elapsed.lt(heartbeat)) {
-                m_known += elapsed.asMillis();
-                m_value = m_value.plus(value.times(elapsed.asMillis()));
+        private Accumulation accumulateValue(Duration elapsedWithinInterval, Duration elapsedBetweenSamples, Duration heartbeat, ValueType<?> value) {
+            if (elapsedBetweenSamples.lt(heartbeat)) {
+                m_known += elapsedWithinInterval.asMillis();
+                m_value = m_value.plus(value.times(elapsedWithinInterval.asMillis()));
             }
             else {
-                m_unknown += elapsed.asMillis();
+                m_unknown += elapsedWithinInterval.asMillis();
             }
             return this;
         }
@@ -183,10 +183,12 @@ class PrimaryData implements Iterator<Row<Measurement>>, Iterable<Row<Measuremen
                     lowerBound = upperBound;
                 }
 
-                Duration elapsed = upperBound.minus(lowerBound);
+                Duration elapsedWithinInterval = upperBound.minus(lowerBound);
+                Duration elapsedBetweenSamples = current.getTimestamp().minus(last.getTimestamp());
 
                 m_lastSampleIndex.put(ds.getSource(), lastSampleIdx);
-                accumulation.accumulateValue(elapsed, ds.getHeartbeat(), current.getValue())
+                accumulation.accumulateValue(elapsedWithinInterval, elapsedBetweenSamples,
+                        ds.getHeartbeat(), current.getValue())
                     .accumlateAttrs(current.getAttributes());
 
                 last = current;
