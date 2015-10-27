@@ -45,6 +45,27 @@ public interface SampleRepository {
     public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution);
 
     /**
+     * Query measurements.
+     *
+     * @param context
+     *            context to query
+     * @param resource
+     *            name of the sampled resource
+     * @param start
+     *            query start time (defaults to 24 hours less than {@code end}, if absent)
+     * @param end
+     *            query end time (defaults to current time if absent)
+     * @param descriptor
+     *            aggregation descriptor
+     * @param resolution
+     *            temporal resolution of results (defaults to a value resulting in 1-10 measurements, if absent)
+     * @param callback
+     *            callback
+     * @return query results
+     */
+    public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution, SampleSelectCallback callback);
+
+    /**
      * Read stored samples.
      *
      * @param context

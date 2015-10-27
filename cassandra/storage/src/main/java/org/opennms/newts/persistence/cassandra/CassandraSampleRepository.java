@@ -41,6 +41,7 @@ import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.SampleSelectCallback;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -129,8 +130,18 @@ public class CassandraSampleRepository implements SampleRepository {
         m_samplesSelected = registry.meter(metricName("samples-selected"));
     }
 
+    public Iterable<Results.Row<Sample>> select(Context context, Resource resource, Timestamp start, Timestamp end, ResultDescriptor descriptor, Duration step) {
+        return new DriverAdapter(cassandraSelect(context, resource, start.minus(step), end),
+                descriptor.getSourceNames());
+    }
+
     @Override
     public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution) {
+        return select(context, resource, start, end, descriptor, resolution, noopSampleSelectCallback);
+    }
+
+    @Override
+    public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start, Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution, SampleSelectCallback callback) {
 
         Timer.Context timer = m_measurementSelectTimer.time();
 
@@ -165,8 +176,15 @@ public class CassandraSampleRepository implements SampleRepository {
         LOG.debug("Querying database for resource {}, from {} to {}", resource, lower.minus(step), upper);
 
         DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(context, resource, lower.minus(step), upper),
-                descriptor.getSourceNames());
-        Results<Measurement> results = new ResultProcessor(resource, lower, upper, descriptor, step).process(driverAdapter);
+                    descriptor.getSourceNames());
+
+        Results<Measurement> results;
+        callback.beforeProcess();
+        try {
+            results = new ResultProcessor(resource, lower, upper, descriptor, step).process(driverAdapter);
+        } finally {
+            callback.afterProcess();
+        }
 
         LOG.debug("{} results returned from database", driverAdapter.getResultCount());
         m_samplesSelected.mark(driverAdapter.getResultCount());
@@ -373,4 +391,16 @@ public class CassandraSampleRepository implements SampleRepository {
         return name("repository", suffix);
     }
 
+    private static final SampleSelectCallback noopSampleSelectCallback = new SampleSelectCallback() {
+
+        @Override
+        public void beforeProcess() {
+            // pass
+        }
+
+        @Override
+        public void afterProcess() {
+            // pass
+        }
+    };
 }

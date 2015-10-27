@@ -20,6 +20,7 @@ import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.api.SampleSelectCallback;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
 import org.slf4j.Logger;
@@ -74,6 +75,13 @@ public class GraphiteListener implements Runnable {
             }
 
             @Override
+            public Results<Measurement> select(Context context, Resource resource, Optional<Timestamp> start,
+                    Optional<Timestamp> end, ResultDescriptor descriptor, Optional<Duration> resolution,
+                    SampleSelectCallback callback) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public Results<Sample> select(Context context, Resource arg0, Optional<Timestamp> arg1, Optional<Timestamp> arg2) {
                 throw new UnsupportedOperationException();
             }
@@ -92,6 +100,8 @@ public class GraphiteListener implements Runnable {
             public void delete(Context context, Resource resource) {
                 throw new UnsupportedOperationException();
             }
+
+
         }, new MetricRegistry()), 2003).run();
     }
 
