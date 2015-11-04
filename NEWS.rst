@@ -1,3 +1,9 @@
+1.3.2
+~~~~~
+
+Fixed an issue where the hearbeat period was not properly handled, leading to
+values that should have been NaNs being misrepresented.
+
 1.3.1
 ~~~~~
 
