@@ -55,7 +55,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected ContextConfigurations m_contextConfigurations = new ContextConfigurations();
 
     public AbstractCassandraTestCase() {
-        super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
+        super(CASSANDRA_CONFIG);
     }
 
     @Before

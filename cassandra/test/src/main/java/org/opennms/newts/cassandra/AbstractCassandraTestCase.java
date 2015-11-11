@@ -42,7 +42,7 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
 
     public AbstractCassandraTestCase() {
-        super(CASSANDRA_CONFIG, CASSANDRA_HOST, CASSANDRA_PORT);
+        super(CASSANDRA_CONFIG);
     }
 
     protected String getSchemaResource() {
