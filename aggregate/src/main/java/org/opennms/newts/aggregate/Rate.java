@@ -91,7 +91,7 @@ class Rate implements Iterator<Row<Sample>>, Iterable<Row<Sample>> {
 
         if (previous != null) {
             long elapsed = sample.getTimestamp().asSeconds() - previous.getTimestamp().asSeconds();
-            value = sample.getValue().delta(previous.getValue()).divideBy(elapsed);
+            value = new Gauge(sample.getValue().delta(previous.getValue()).doubleValue() / elapsed);
         }
 
         return new Sample(sample.getTimestamp(), sample.getResource(), sample.getName(), GAUGE, value, sample.getAttributes());

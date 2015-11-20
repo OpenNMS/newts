@@ -29,13 +29,16 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.opennms.newts.aggregate.Rate;
+import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Gauge;
+import org.opennms.newts.api.MetricType;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
+import org.opennms.newts.api.Results.Row;
 
 import com.google.common.collect.Sets;
 
@@ -132,6 +135,42 @@ public class RateTest {
             }
         }
 
+    }
+
+    /**
+     * Verifies that counters (unsigned long) values return doubles with proper decimals
+     * when converted to rates.
+     */
+    @Test
+    public void ratesWithDecimals() {
+        Iterator<Row<Sample>> samples = new SampleRowsBuilder(new Resource("localhost"), MetricType.COUNTER)
+                .row(1414598400).element("m1", 9223372034564703200.00)
+                .row(1414602000).element("m1", 9223372034601613300.00)
+                .row(1414605600).element("m1", 9223372034604530700.00)
+                .row(1414609200).element("m1", 9223372034608910300.00)
+                .row(1414612800).element("m1", 9223372034636612600.00)
+                .row(1414616400).element("m1", 9223372034639099900.00)
+                .row(1414620000).element("m1", 9223372034641185800.00)
+                .row(1414623600).element("m1", 9223372034642181100.00)
+                .build();
+
+        Iterator<Results.Row<Sample>> output = new Rate(samples, Sets.newHashSet("m1")).iterator();
+
+        double expectedRates[] = new double[] {
+                Double.NaN,
+                10252.800000,
+                810.382222,
+                1216.568889,
+                7695.075556,
+                690.915556,
+                579.413333,
+                276.480000
+        };
+
+        for (int i = 0; i < expectedRates.length; i++) {
+            double actualRate = output.next().getElement("m1").getValue().doubleValue();
+            assertEquals(expectedRates[i], actualRate, 0.0001);
+        }
     }
 
     private Set<String> getMetrics(int number) {
