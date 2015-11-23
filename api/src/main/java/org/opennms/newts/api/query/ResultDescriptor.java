@@ -161,7 +161,11 @@ public class ResultDescriptor implements Serializable {
     }
 
     public ResultDescriptor datasource(String name, String metricName, Duration heartbeat, AggregationFunction aggregationFunction) {
-        return datasource(new Datasource(name, metricName, heartbeat, DEFAULT_XFF, aggregationFunction));
+        return datasource(name, metricName, heartbeat, DEFAULT_XFF, aggregationFunction);
+    }
+
+    public ResultDescriptor datasource(String name, String metricName, Duration heartbeat, double xff, AggregationFunction aggregationFunction) {
+        return datasource(new Datasource(name, metricName, heartbeat, xff, aggregationFunction));
     }
 
     ResultDescriptor datasource(Datasource ds) {
