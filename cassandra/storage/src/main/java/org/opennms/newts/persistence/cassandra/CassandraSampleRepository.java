@@ -242,7 +242,7 @@ public class CassandraSampleRepository implements SampleRepository {
         for (Sample m : samples) {
             int ttl = m_ttl;
             if (calculateTimeToLive) {
-                ttl -= (int) now.minus(m.getTimestamp()).asSeconds();
+                ttl -= (int) (now.asSeconds() - m.getTimestamp().asSeconds());
                 if (ttl <= 0) {
                     LOG.debug("Skipping expired sample: {}", m);
                     continue;
