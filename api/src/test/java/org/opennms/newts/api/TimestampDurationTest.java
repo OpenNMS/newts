@@ -45,6 +45,7 @@ public class TimestampDurationTest {
     public void testDurationIsMultiple() {
         assertTrue(Duration.millis(50000).isMultiple(Duration.seconds(10)));
         assertFalse(Duration.seconds(5).isMultiple(Duration.seconds(2)));
+        assertTrue(Duration.seconds(5).isMultiple(Duration.seconds(5)));
     }
 
     @Test

@@ -147,7 +147,7 @@ public class Duration implements Comparable<Duration>, Serializable {
 
     public boolean isMultiple(Duration o) {
         TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
-        return (this.gt(o) && ((convert(u) % o.convert(u)) == 0));
+        return (this.gte(o) && ((convert(u) % o.convert(u)) == 0));
     }
 
     @Override
