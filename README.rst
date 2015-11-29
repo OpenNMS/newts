@@ -16,7 +16,8 @@ Searchable Metadata
 
 More information can be found in the project Wiki_, or the homepage_.
 
-.. |travisci| image:: https://travis-ci.org/OpenNMS/newts.svg?branch=master :target: https://travis-ci.org/OpenNMS/newts
+.. |travisci| image:: https://travis-ci.org/OpenNMS/newts.svg?branch=master
+       :target: https://travis-ci.org/OpenNMS/newts
 .. |codecov| image:: https://codecov.io/github/OpenNMS/newts/coverage.svg?branch=master
        :target: https://codecov.io/github/OpenNMS/newts?branch=master
 .. _Apache Cassandra: http://cassandra.apache.org
