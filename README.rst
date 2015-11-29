@@ -1,4 +1,4 @@
-Newts
+Newts |travisci|
 =====
 
 Newts is a time-series data store based on `Apache Cassandra`_.
@@ -16,6 +16,7 @@ Searchable Metadata
 
 More information can be found in the project Wiki_, or the homepage_.
 
+.. |travisci| image:: https://travis-ci.org/OpenNMS/newts.svg?branch=master :target: https://travis-ci.org/OpenNMS/newts
 .. _Apache Cassandra: http://cassandra.apache.org
 .. _Wiki: https://github.com/OpenNMS/newts/wiki
 .. _homepage: http://newts.io
