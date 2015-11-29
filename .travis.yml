@@ -1,0 +1,8 @@
+language: java
+sudo: false # faster builds
+
+before_install:
+  - pip install --user codecov
+
+after_success:
+  - codecov
