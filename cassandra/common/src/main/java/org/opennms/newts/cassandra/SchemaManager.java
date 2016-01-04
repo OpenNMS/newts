@@ -26,13 +26,19 @@ import java.io.InputStreamReader;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Cluster.Builder;
 import com.datastax.driver.core.exceptions.AlreadyExistsException;
 import com.datastax.driver.core.exceptions.SyntaxError;
 
 
 public class SchemaManager implements AutoCloseable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaManager.class);
 
     private static final String KEYSPACE = "$KEYSPACE$";
 
@@ -41,9 +47,19 @@ public class SchemaManager implements AutoCloseable {
     private Session m_session;
 
     @Inject
-    public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port) {
+    public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
+            @Named("cassandra.username") String username, @Named("cassandra.password") String password) {
         m_keyspace = keyspace;
-        m_cluster = Cluster.builder().withPort(port).addContactPoints(host.split(",")).build();
+
+        Builder builder = Cluster.builder()
+                .withPort(port)
+                .addContactPoints(host.split(","));
+        if (username != null && password != null) {
+            LOG.info("Using username: {} and password: XXXXXXXX", username);
+            builder.withCredentials(username, password);
+        }
+
+        m_cluster= builder.build();
         m_session = m_cluster.connect();
     }
 

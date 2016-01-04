@@ -170,7 +170,7 @@ public class HttpBasicAuthenticationFilter implements Filter {
             }
 
             try {
-                decoded = new String(Base64.decodeBase64(encoded), "UTF-8");
+                decoded = new String(Base64.decodeBase64(encoded.getBytes("UTF-8")), "UTF-8");
             }
             catch (UnsupportedEncodingException e) {
                 throw Throwables.propagate(e);
