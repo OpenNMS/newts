@@ -1,3 +1,11 @@
+1.3.3
+~~~~~
+
+Upgraded the Cassandra driver to 3.0.0-rc1.
+
+Fixed an issue where counters would loose precision when converted to rates
+for aggregation and a number of other minor bugs.
+
 1.3.2
 ~~~~~
 
