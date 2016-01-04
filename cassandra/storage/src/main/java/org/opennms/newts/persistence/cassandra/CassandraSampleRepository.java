@@ -370,8 +370,8 @@ public class CassandraSampleRepository implements SampleRepository {
             bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
             bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
             bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
-            bindStatement.setDate("start", start.asDate());
-            bindStatement.setDate("end", end.asDate());
+            bindStatement.setTimestamp("start", start.asDate());
+            bindStatement.setTimestamp("end", end.asDate());
             // Use the context specific consistency level
             bindStatement.setConsistencyLevel(m_contextConfigurations.getReadConsistency(context));
 

@@ -142,7 +142,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     }
 
     private static Timestamp getTimestamp(com.datastax.driver.core.Row row) {
-        return Timestamp.fromEpochMillis(row.getDate(SchemaConstants.F_COLLECTED).getTime());
+        return Timestamp.fromEpochMillis(row.getTimestamp(SchemaConstants.F_COLLECTED).getTime());
     }
 
     private static Resource getResource(com.datastax.driver.core.Row row) {
