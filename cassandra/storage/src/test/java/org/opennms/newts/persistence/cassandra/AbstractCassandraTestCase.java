@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -21,7 +21,8 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.IOException;
 
-import org.cassandraunit.AbstractCassandraUnit4CQLTestCase;
+import org.cassandraunit.CQLDataLoader;
+import org.cassandraunit.MyCassandraCQLUnit;
 import org.cassandraunit.dataset.CQLDataSet;
 import org.cassandraunit.dataset.cql.FileCQLDataSet;
 import org.junit.After;
@@ -29,15 +30,20 @@ import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.datastax.driver.core.CloseFuture;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 
-public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase {
+public class AbstractCassandraTestCase {
 
     public static final String CASSANDRA_CONFIG = "cassandra.yaml";
     public static final String CASSANDRA_HOST = "localhost";
@@ -54,13 +60,27 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     protected CassandraSampleRepository m_repository;
     protected ContextConfigurations m_contextConfigurations = new ContextConfigurations();
 
+
+    private static final Logger log = LoggerFactory.getLogger(CQLDataLoader.class);
+
+    private MyCassandraCQLUnit cassandraUnit;
+    private boolean initialized = false;
+    private Session session;
+    private Cluster cluster;
+
     public AbstractCassandraTestCase() {
-        super(CASSANDRA_CONFIG);
+        cassandraUnit = new MyCassandraCQLUnit(getDataSet(), CASSANDRA_CONFIG);
     }
 
     @Before
     public void setUp() throws Exception {
-        super.before();
+        if (!initialized) {
+            cassandraUnit.before();
+            session = cassandraUnit.session;
+            cluster = cassandraUnit.cluster;
+            initialized = true;
+        }
+
         CassandraSession session = new CassandraSession(KEYSPACE_NAME, CASSANDRA_HOST,
                 CASSANDRA_PORT, CASSANDRA_COMPRESSION,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD);
@@ -74,10 +94,17 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
 
     @After
     public void tearDown() throws Exception {
-        super.after();
+        if(session!=null){
+            log.debug("session shutdown");
+            CloseFuture closeFuture = session.closeAsync();
+            closeFuture.force();
+        }
+        if (cluster != null) {
+            log.debug("cluster shutdown");
+            cluster.close();
+        }
     }
 
-    @Override
     public CQLDataSet getDataSet() {
         try {
             String schema = Resources.toString(getClass().getResource(SCHEMA_RESOURCE), Charsets.UTF_8);
@@ -96,5 +123,4 @@ public class AbstractCassandraTestCase extends AbstractCassandraUnit4CQLTestCase
     public CassandraSampleRepository getRepository() {
         return m_repository;
     }
-
 }
