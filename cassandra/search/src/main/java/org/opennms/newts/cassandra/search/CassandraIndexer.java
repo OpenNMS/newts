@@ -17,6 +17,7 @@ package org.opennms.newts.cassandra.search;
 
 
 import static com.codahale.metrics.MetricRegistry.name;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
@@ -42,6 +43,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.RegularStatement;
+import com.datastax.driver.core.ResultSetFuture;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -95,9 +97,15 @@ public class CassandraIndexer implements Indexer {
 
         try {
             if (statements.size() > 0) {
+                List<ResultSetFuture> futures = Lists.newArrayList();
+
                 // Limit the size of the batch; See NEWTS-67
                 for (List<RegularStatement> partition : Lists.partition(statements, MAX_BATCH_SIZE)) {
-                    m_session.execute(batch(partition.toArray(new RegularStatement[partition.size()])));
+                    futures.add(m_session.executeAsync(unloggedBatch(partition.toArray(new RegularStatement[partition.size()]))));
+                }
+
+                for (ResultSetFuture future : futures) {
+                    future.getUninterruptibly();
                 }
             }
 
