@@ -17,7 +17,6 @@ package org.opennms.newts.cassandra.search;
 
 
 import static com.codahale.metrics.MetricRegistry.name;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
@@ -107,7 +106,7 @@ public class CassandraIndexer implements Indexer {
                 // Limit the size of the batches; See NEWTS-67
                 List<ResultSetFuture> futures = Lists.newArrayList();
                 for (List<RegularStatement> partition : Lists.partition(statements, MAX_BATCH_SIZE)) {
-                    futures.add(m_session.executeAsync(unloggedBatch(partition.toArray(new RegularStatement[partition.size()]))));
+                    futures.add(m_session.executeAsync(batch(partition.toArray(new RegularStatement[partition.size()]))));
                 }
 
                 for (ResultSetFuture future : futures) {
