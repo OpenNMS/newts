@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,7 +88,6 @@ public class CassandraIndexer implements Indexer {
         List<RegularStatement> statements = Lists.newArrayList();
         Map<Context, Map<Resource, ResourceMetadata>> cacheQueue = Maps.newHashMap();
 
-        // TODO: Deduplicate resources & metrics to minimize size of batch insert.
         for (Sample sample : samples) {
             ConsistencyLevel writeConsistency = m_contextConfigurations.getWriteConsistency(sample.getContext());
             maybeIndexResource(cacheQueue, statements, sample.getContext(), sample.getResource(), writeConsistency);
@@ -97,9 +97,15 @@ public class CassandraIndexer implements Indexer {
 
         try {
             if (statements.size() > 0) {
-                List<ResultSetFuture> futures = Lists.newArrayList();
+                // Deduplicate the insert statements by keying off the effective query strings
+                TreeMap<String, RegularStatement> cqlToStatementMap = new TreeMap<String, RegularStatement>();
+                for (RegularStatement statement : statements) {
+                    cqlToStatementMap.put(statement.toString(), statement);
+                }
+                statements = Lists.newArrayList(cqlToStatementMap.values());
 
-                // Limit the size of the batch; See NEWTS-67
+                // Limit the size of the batches; See NEWTS-67
+                List<ResultSetFuture> futures = Lists.newArrayList();
                 for (List<RegularStatement> partition : Lists.partition(statements, MAX_BATCH_SIZE)) {
                     futures.add(m_session.executeAsync(unloggedBatch(partition.toArray(new RegularStatement[partition.size()]))));
                 }
