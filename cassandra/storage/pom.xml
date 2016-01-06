@@ -57,8 +57,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.cassandraunit</groupId>
-      <artifactId>cassandra-unit</artifactId>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-cassandra-test</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

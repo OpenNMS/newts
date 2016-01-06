@@ -42,7 +42,7 @@ import com.datastax.driver.core.ConsistencyLevel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-public class InsertSelectMeasurementsITCase extends AbstractCassandraTestCase {
+public class InsertSelectMeasurementsITCase extends NewtsSampleRepositoryTestCase {
 
     private void writeSamples(Iterator<Row<Sample>> samples) {
         List<Sample> writeSamples = Lists.newArrayList();

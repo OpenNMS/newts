@@ -22,6 +22,11 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.opennms.newts</groupId>
+      <artifactId>newts-cassandra-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>

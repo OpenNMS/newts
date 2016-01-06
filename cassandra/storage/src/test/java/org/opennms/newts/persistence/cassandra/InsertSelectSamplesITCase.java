@@ -38,7 +38,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 
-public class InsertSelectSamplesITCase extends AbstractCassandraTestCase {
+public class InsertSelectSamplesITCase extends NewtsSampleRepositoryTestCase {
 
     @Test
     public void test() {
