@@ -25,7 +25,7 @@ import com.datastax.driver.core.Cluster;
  * cassandra-unit package and need to override the load() method
  * to make things work.
  *
- * This shouldn't be necessary when upgrading to cassandra-unit >= 3.0.0
+ * This shouldn't be necessary when upgrading to cassandra-unit gt 3.0.0
  *
  * @author jwhite
  */
