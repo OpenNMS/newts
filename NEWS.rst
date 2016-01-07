@@ -1,3 +1,8 @@
+1.3.4
+~~~~~
+
+Performance improvements related to indexing.
+
 1.3.3
 ~~~~~
 
