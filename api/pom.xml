@@ -79,8 +79,12 @@
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>
     </dependency>
-    
 
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jacksonVersion}</version>
+    </dependency>
   </dependencies>
 
 </project>

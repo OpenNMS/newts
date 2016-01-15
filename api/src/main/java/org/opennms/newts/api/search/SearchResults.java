@@ -18,6 +18,9 @@ package org.opennms.newts.api.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +62,7 @@ public class SearchResults implements Iterable<SearchResults.Result> {
         return m_results.size();
     }
 
+    @JsonIgnore
     public boolean isEmpty() { return m_results.isEmpty(); }
     
     @Override
