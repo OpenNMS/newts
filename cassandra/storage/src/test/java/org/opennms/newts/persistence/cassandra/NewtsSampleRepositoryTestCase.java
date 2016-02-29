@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
@@ -40,7 +41,7 @@ public class NewtsSampleRepositoryTestCase extends AbstractCassandraTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        CassandraSession session = new CassandraSession(KEYSPACE_NAME, CASSANDRA_HOST,
+        CassandraSession session = new CassandraSessionImpl(KEYSPACE_NAME, CASSANDRA_HOST,
                 CASSANDRA_PORT, CASSANDRA_COMPRESSION,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD);
         m_repository = new CassandraSampleRepository(

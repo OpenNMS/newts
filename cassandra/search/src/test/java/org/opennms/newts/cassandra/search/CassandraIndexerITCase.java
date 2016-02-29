@@ -50,6 +50,7 @@ import org.opennms.newts.api.search.Term;
 import org.opennms.newts.api.search.TermQuery;
 import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.CassandraResourceTreeWalker.SearchResultVisitor;
 
@@ -265,7 +266,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
     }
 
     private CassandraSession getCassandraSession() {
-        return new CassandraSession(CASSANDRA_KEYSPACE, CASSANDRA_HOST,
+        return new CassandraSessionImpl(CASSANDRA_KEYSPACE, CASSANDRA_HOST,
                 CASSANDRA_PORT, CASSANDRA_COMPRESSION,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD);
     }

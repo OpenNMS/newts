@@ -14,7 +14,7 @@
 		http://aries.apache.org/schemas/blueprint-ext/blueprint-ext-1.1.xsd
 ">
 
-  <reference id="cassandraSession" ext:proxy-method="classes" interface="org.opennms.newts.cassandra.CassandraSession" />
+  <reference id="cassandraSession" interface="org.opennms.newts.cassandra.CassandraSession" />
 
   <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry" />
 
