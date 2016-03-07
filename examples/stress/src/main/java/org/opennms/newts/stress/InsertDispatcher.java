@@ -24,6 +24,7 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ class InsertDispatcher extends Dispatcher {
 
         m_config = config;
 
-        CassandraSession session = new CassandraSession(
+        CassandraSession session = new CassandraSessionImpl(
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),

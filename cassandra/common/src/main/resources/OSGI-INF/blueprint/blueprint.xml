@@ -24,7 +24,7 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="cassandraSession" class="org.opennms.newts.cassandra.CassandraSession" >
+  <bean id="cassandraSession" class="org.opennms.newts.cassandra.CassandraSessionImpl" >
     <argument index="0" value="${cassandra.keyspace}" />
     <argument index="1" value="${cassandra.hostname}" />
     <argument index="2" value="${cassandra.port}" />
