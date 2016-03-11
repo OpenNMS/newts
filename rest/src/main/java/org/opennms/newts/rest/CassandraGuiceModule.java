@@ -23,6 +23,8 @@ import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.api.search.Searcher;
+import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.CassandraIndexer;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
@@ -68,6 +70,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(Long.class).annotatedWith(named("search.resourceMetadata.maxCacheEntries")).toInstance(m_newtsConf.getSearchConfig().getMaxCacheEntries());
         bind(Boolean.class).annotatedWith(named("search.hierarical-indexing")).toInstance(m_newtsConf.getSearchConfig().isHierarchicalIndexingEnabled());
 
+        bind(CassandraSession.class).to(CassandraSessionImpl.class);
         bind(ResourceMetadataCache.class).to(GuavaResourceMetadataCache.class);
         bind(Searcher.class).to(CassandraSearcher.class);
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
