@@ -108,7 +108,7 @@ public class LineParser {
     }
 
     public boolean isDigit(char ch) {
-        return ('0' <= ch && ch <= '9');
+        return '0' <= ch && ch <= '9';
     }
     
     public String stringAt(String line, int index) {
@@ -194,7 +194,7 @@ public class LineParser {
     }
 
     public static Gauge valueFor(double value, double nan) {
-        return new Gauge((value == nan ? Double.NaN : value));
+        return new Gauge(value == nan ? Double.NaN : value);
     }
 
 }
