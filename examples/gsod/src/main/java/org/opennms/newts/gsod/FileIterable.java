@@ -40,6 +40,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 public class FileIterable {
+    
+    private FileIterable() {}
 
     public static FluentIterable<Path> fileTreeWalker(final Path root) {
         return FluentIterable.from(Iterables.concat(groupFilesByDir(root)));

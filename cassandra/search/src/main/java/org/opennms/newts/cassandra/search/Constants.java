@@ -17,6 +17,8 @@ package org.opennms.newts.cassandra.search;
 
 
 class Constants {
+    
+    private Constants() {}
 
     static String DEFAULT_TERM_FIELD = "_all";
 
