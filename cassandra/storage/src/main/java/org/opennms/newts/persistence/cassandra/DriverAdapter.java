@@ -118,7 +118,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     }
 
     private void addSample(Results.Row<Sample> row, Sample sample) {
-        if (m_metrics.size() == 0 || m_metrics.contains(sample.getName())) {
+        if (m_metrics.isEmpty() || m_metrics.contains(sample.getName())) {
             row.addElement(sample);
         }
     }
