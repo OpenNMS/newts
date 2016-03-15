@@ -22,6 +22,8 @@ import static org.opennms.newts.api.Duration.seconds;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.MAX;
 import static org.opennms.newts.api.query.StandardAggregationFunctions.MIN;
+import static org.opennms.newts.api.query.StandardAggregationFunctions.P95;
+import static org.opennms.newts.api.query.StandardAggregationFunctions.P99;
 
 import org.junit.Test;
 import org.opennms.newts.api.Duration;
@@ -142,6 +144,32 @@ public class ResultDescriptorTest {
         Datasource ds = descriptor.getDatasources().get("maxTemp");
         assertEquals(MAX, ds.getAggregationFuction());
         assertEquals("maxTemp", ds.getLabel());
+        assertEquals("temperature", ds.getSource());
+    }
+
+    @Test
+    public void testP95() {
+
+        ResultDescriptor descriptor;
+
+        descriptor = new ResultDescriptor().datasource("p95Temp", "temperature", P95);
+
+        Datasource ds = descriptor.getDatasources().get("p95Temp");
+        assertEquals(P95, ds.getAggregationFuction());
+        assertEquals("p95Temp", ds.getLabel());
+        assertEquals("temperature", ds.getSource());
+    }
+
+    @Test
+    public void testP99() {
+
+        ResultDescriptor descriptor;
+
+        descriptor = new ResultDescriptor().datasource("p99Temp", "temperature", P99);
+
+        Datasource ds = descriptor.getDatasources().get("p99Temp");
+        assertEquals(P99, ds.getAggregationFuction());
+        assertEquals("p99Temp", ds.getLabel());
         assertEquals("temperature", ds.getSource());
     }
 
