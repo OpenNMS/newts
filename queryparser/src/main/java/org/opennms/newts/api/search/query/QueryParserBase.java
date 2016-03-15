@@ -32,11 +32,7 @@ public abstract class QueryParserBase {
         try {
             Query q = TopLevelQuery();
             return q != null ? q : new BooleanQuery();
-        } catch (ParseException qpe) {
-            ParseException e = new ParseException("Cannot parse '" + query + "': " + qpe.getMessage());
-            e.initCause(qpe);
-            throw e;
-        } catch (TokenMgrError qpe) {
+        } catch (ParseException|TokenMgrError qpe) {
             ParseException e = new ParseException("Cannot parse '" + query + "': " + qpe.getMessage());
             e.initCause(qpe);
             throw e;

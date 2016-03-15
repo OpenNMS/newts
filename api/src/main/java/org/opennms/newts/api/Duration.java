@@ -91,7 +91,7 @@ public class Duration implements Comparable<Duration>, Serializable {
 
             switch (unit) {
                 case "w":
-                    r = Duration.days(value * 7);
+                    r = Duration.days((long)value * 7);
                     break;
                 case "d":
                     r = Duration.days(value);

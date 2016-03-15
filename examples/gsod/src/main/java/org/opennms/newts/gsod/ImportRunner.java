@@ -414,8 +414,7 @@ public class ImportRunner {
     private Observable<Boolean> parMap(Observable<List<Sample>> samples, ExecutorService executorSvc, final MetricRegistry metrics, final Func1<List<Sample>, Boolean> insert) {
         final ListeningExecutorService executor = MoreExecutors.listeningDecorator(executorSvc);
         
-        Observable<Boolean> o = samples
-                .lift(new Operator<ListenableFuture<Boolean>, List<Sample>>() {
+        return samples.lift(new Operator<ListenableFuture<Boolean>, List<Sample>>() {
 
             @Override
             public Subscriber<? super List<Sample>> call(final Subscriber<? super ListenableFuture<Boolean>> s) {
@@ -474,7 +473,6 @@ public class ImportRunner {
             
         });
 
-        return o;
     }
     
 
