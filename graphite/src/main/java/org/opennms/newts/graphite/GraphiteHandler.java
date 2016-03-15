@@ -43,7 +43,7 @@ public class GraphiteHandler extends SimpleChannelInboundHandler<String> {
     private AtomicInteger m_enQueued = new AtomicInteger(0);
 
     public GraphiteHandler(SampleRepository repository, GraphiteInitializer parent) {
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
         int concurrency = Runtime.getRuntime().availableProcessors();
         m_executor = new ThreadPoolExecutor(concurrency, concurrency, 0L, MILLISECONDS, queue);
         m_executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());

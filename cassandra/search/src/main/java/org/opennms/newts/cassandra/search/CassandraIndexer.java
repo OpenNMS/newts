@@ -97,7 +97,7 @@ public class CassandraIndexer implements Indexer {
         try {
             if (statements.size() > 0) {
                 // Deduplicate the insert statements by keying off the effective query strings
-                TreeMap<String, RegularStatement> cqlToStatementMap = new TreeMap<String, RegularStatement>();
+                TreeMap<String, RegularStatement> cqlToStatementMap = new TreeMap<>();
                 for (RegularStatement statement : statements) {
                     cqlToStatementMap.put(statement.toString(), statement);
                 }

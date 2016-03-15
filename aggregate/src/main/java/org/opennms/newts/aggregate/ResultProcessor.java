@@ -57,7 +57,7 @@ public class ResultProcessor {
         Compute compute = new Compute(m_resultDescriptor, aggregation);
         Export exports = new Export(m_resultDescriptor.getExports(), compute);
 
-        Results<Measurement> measurements = new Results<Measurement>();
+        Results<Measurement> measurements = new Results<>();
 
         for (Row<Measurement> row : exports) {
             measurements.addRow(row);

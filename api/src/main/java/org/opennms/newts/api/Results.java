@@ -99,7 +99,7 @@ public class Results<T extends Element<?>> implements Iterable<Results.Row<T>>, 
         Row<T> row = m_rows.get(sample.getTimestamp());
 
         if (row == null) {
-            row = new Row<T>(sample.getTimestamp(), sample.getResource());
+            row = new Row<>(sample.getTimestamp(), sample.getResource());
             addRow(row);
         }
 
