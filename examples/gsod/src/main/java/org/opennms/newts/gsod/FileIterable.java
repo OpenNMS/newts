@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -234,7 +235,7 @@ public class FileIterable {
             @Override
             public Iterator<String> iterator() {
                 try {
-                    return new LineIterator(new FileReader(path.toFile()));
+                    return new LineIterator(new InputStreamReader(new FileInputStream(path.toFile()), StandardCharsets.UTF_8));
                 } catch (FileNotFoundException e) {
                     throw Throwables.propagate(e);
                 }
