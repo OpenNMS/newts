@@ -105,7 +105,7 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
                     aggregatedAttrs.put(ds.getLabel(), metricAttrs);
                 }
 
-                if (metric.getAttributes() != null) {
+                if (metric != null && metric.getAttributes() != null) {
                     metricAttrs.putAll(metric.getAttributes());
                 }
 
