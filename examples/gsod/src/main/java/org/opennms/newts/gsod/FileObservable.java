@@ -35,6 +35,8 @@ import rx.functions.Func1;
 
 public class FileObservable {
     
+    private FileObservable() {}
+    
     public static Observable<Path> fileTreeWalker(final Path root) {
         
         return Observable.create(new OnSubscribe<Path>() {

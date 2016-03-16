@@ -17,6 +17,9 @@ package org.opennms.newts.persistence.cassandra;
 
 
 public class SchemaConstants {
+    
+    private SchemaConstants() {}
+    
     public static final String T_SAMPLES = "samples";
 
     public static final String F_CONTEXT = "context";
