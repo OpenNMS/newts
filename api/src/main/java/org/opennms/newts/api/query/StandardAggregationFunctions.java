@@ -76,18 +76,7 @@ public enum StandardAggregationFunctions implements AggregationFunction {
 
         @Override
         public Double apply(Collection<Double> input) {
-            List<Double> sorted = new ArrayList<Double>();
-            for (Double item : input) {
-                if (!Double.isNaN(item)) {
-                    sorted.add(item);
-                }
-            }
-            if (sorted.isEmpty()) {
-                return Double.MAX_VALUE;
-            }
-            Collections.sort(sorted);
-            int p95Idx = (int) (0.95 * sorted.size());
-            return sorted.get(p95Idx);
+            return ntile(0.95, input);
         }
 
     },
@@ -95,21 +84,24 @@ public enum StandardAggregationFunctions implements AggregationFunction {
 
         @Override
         public Double apply(Collection<Double> input) {
-            List<Double> sorted = new ArrayList<Double>();
-            for (Double item : input) {
-                if (!Double.isNaN(item)) {
-                    sorted.add(item);
-                }
-            }
-            if (sorted.isEmpty()) {
-                return Double.MAX_VALUE;
-            }
-            Collections.sort(sorted);
-            int p99Idx = (int) (0.99 * sorted.size());
-            return sorted.get(p99Idx);
+            return ntile(0.99, input);
         }
 
-    },
+    };
 
+    private static Double ntile(double n, Collection<Double> input) {
+        List<Double> sorted = new ArrayList<Double>();
+        for (Double item : input) {
+            if (!Double.isNaN(item)) {
+                sorted.add(item);
+            }
+        }
+        if (sorted.isEmpty()) {
+            return Double.MAX_VALUE;
+        }
+        Collections.sort(sorted);
+        int ntileIdx = (int) (n * sorted.size());
+        return sorted.get(ntileIdx);
+    }
 
 }
