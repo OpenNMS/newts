@@ -188,7 +188,7 @@ public class ResultDescriptor implements Serializable {
         Set<String> missing = Sets.newHashSet(names);
         missing.removeAll(getLabels());
 
-        if (missing.size() > 0) {
+        if (!missing.isEmpty()) {
             throw new IllegalArgumentException(String.format("No such labels(s): %s", missing));
         }
     }

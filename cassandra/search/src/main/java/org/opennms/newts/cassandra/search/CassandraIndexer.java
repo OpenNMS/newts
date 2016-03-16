@@ -95,7 +95,7 @@ public class CassandraIndexer implements Indexer {
         }
 
         try {
-            if (statements.size() > 0) {
+            if (!statements.isEmpty()) {
                 // Deduplicate the insert statements by keying off the effective query strings
                 TreeMap<String, RegularStatement> cqlToStatementMap = new TreeMap<>();
                 for (RegularStatement statement : statements) {
@@ -139,7 +139,7 @@ public class CassandraIndexer implements Indexer {
         definitelyRemoveMetricName(statements, context, resource, writeConsistency);
 
         try {
-            if (statements.size() > 0) {
+            if (!statements.isEmpty()) {
                 m_session.execute(batch(statements.toArray(new RegularStatement[statements.size()])));
             }
 

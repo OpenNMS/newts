@@ -42,7 +42,7 @@ import com.google.common.base.Throwables;
 public class HttpBasicAuthenticationFilter implements Filter {
 
     private final static Logger LOG = LoggerFactory.getLogger(HttpBasicAuthenticationFilter.class);
-    private final static String m_realm = "Newts";
+    private final static String REALM = "Newts";
 
     private final NewtsConfig m_config;
 
@@ -102,7 +102,7 @@ public class HttpBasicAuthenticationFilter implements Filter {
     }
 
     private void sendUnauthorized(HttpServletResponse response, String msg) throws IOException {
-        response.setHeader("WWW-Authenticate", "Basic realm=\"" + m_realm + "\"");
+        response.setHeader("WWW-Authenticate", "Basic realm=\"" + REALM + "\"");
         response.sendError(401, msg);
     }
 
