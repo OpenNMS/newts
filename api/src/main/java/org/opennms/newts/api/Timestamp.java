@@ -85,7 +85,7 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
     }
 
     public boolean lte(Timestamp other) {
-        return (lt(other) || equals(other));
+        return lt(other) || equals(other);
     }
 
     public boolean gt(Timestamp other) {
@@ -93,7 +93,7 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
     }
 
     public boolean gte(Timestamp other) {
-        return (gt(other) || equals(other));
+        return gt(other) || equals(other);
     }
 
     public Timestamp stepFloor(long stepSize, TimeUnit units) {
