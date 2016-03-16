@@ -81,7 +81,7 @@ public class FileObservable {
             public void call(Subscriber<? super String> s) {
                 try (BufferedReader in = fileReader(path))
                 {
-                    String line = null;
+                    String line;
                     while ((line = in.readLine()) != null) {
                         if (s.isUnsubscribed()) return;
                         s.onNext(line);
@@ -103,7 +103,7 @@ public class FileObservable {
             public void call(Subscriber<? super String> s) {
                 try (BufferedReader in = zippedFileReader(path))
                 {
-                    String line = null;
+                    String line;
                     while ((line = in.readLine()) != null) {
                         if (s.isUnsubscribed()) return;
                         s.onNext(line);
