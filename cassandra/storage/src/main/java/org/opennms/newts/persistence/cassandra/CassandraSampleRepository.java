@@ -209,7 +209,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
         LOG.debug("Querying database for resource {}, from {} to {}", resource, lower, upper);
 
-        Results<Sample> samples = new Results<Sample>();
+        Results<Sample> samples = new Results<>();
         DriverAdapter driverAdapter = new DriverAdapter(cassandraSelect(context, resource, lower, upper));
 
         for (Row<Sample> row : driverAdapter) {

@@ -68,7 +68,7 @@ public class FileIterable {
     }
     
     private static KeyedIterable<Path, Path> children(File dir, FileFilter filter) {
-        return new KeyedIterable<Path, Path>(dir.toPath(), toPaths(dir.listFiles(filter)));
+        return new KeyedIterable<>(dir.toPath(), toPaths(dir.listFiles(filter)));
     }
 
     private static KeyedIterable<Path, Path> files(File dir) {
@@ -139,7 +139,7 @@ public class FileIterable {
         @Override
         protected KeyedIterable<Path, Path> computeNext() {
             if (m_dirStack == null) {
-                m_dirStack = new Stack<Iterator<Path>>();
+                m_dirStack = new Stack<>();
                 m_dirStack.push(subdirs(m_root).iterator());
                 return files(m_root);
             } 
