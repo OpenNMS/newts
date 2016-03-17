@@ -29,6 +29,8 @@ import com.google.common.collect.Maps;
 
 
 public class Web {
+    
+    private Web() {}
 
     private static final Map<String, String> STATION_IDS = Maps.newHashMap();
     private static final Map<String, String> STATION_NAMES = Maps.newTreeMap();

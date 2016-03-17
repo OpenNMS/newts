@@ -178,7 +178,7 @@ public class MergeSort {
     }
 
     private CmdLineParser createCmdLineParser() {
-        CmdLineParser parser = new CmdLineParser(this) {
+        return new CmdLineParser(this) {
 
             @SuppressWarnings("rawtypes")
             @Override
@@ -218,7 +218,6 @@ public class MergeSort {
                 super.addArgument(newSetter, a);
             }
         };
-        return parser;
     }
         
         

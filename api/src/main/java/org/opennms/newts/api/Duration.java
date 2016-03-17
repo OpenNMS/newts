@@ -91,7 +91,7 @@ public class Duration implements Comparable<Duration>, Serializable {
 
             switch (unit) {
                 case "w":
-                    r = Duration.days(value * 7);
+                    r = Duration.days((long)value * 7);
                     break;
                 case "d":
                     r = Duration.days(value);
@@ -147,7 +147,7 @@ public class Duration implements Comparable<Duration>, Serializable {
 
     public boolean isMultiple(Duration o) {
         TimeUnit u = Timestamp.finest(getUnit(), o.getUnit());
-        return (this.gte(o) && ((convert(u) % o.convert(u)) == 0));
+        return this.gte(o) && ((convert(u) % o.convert(u)) == 0);
     }
 
     @Override

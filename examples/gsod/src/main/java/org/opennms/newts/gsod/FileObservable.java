@@ -35,6 +35,8 @@ import rx.functions.Func1;
 
 public class FileObservable {
     
+    private FileObservable() {}
+    
     public static Observable<Path> fileTreeWalker(final Path root) {
         
         return Observable.create(new OnSubscribe<Path>() {
@@ -79,7 +81,7 @@ public class FileObservable {
             public void call(Subscriber<? super String> s) {
                 try (BufferedReader in = fileReader(path))
                 {
-                    String line = null;
+                    String line;
                     while ((line = in.readLine()) != null) {
                         if (s.isUnsubscribed()) return;
                         s.onNext(line);
@@ -101,7 +103,7 @@ public class FileObservable {
             public void call(Subscriber<? super String> s) {
                 try (BufferedReader in = zippedFileReader(path))
                 {
-                    String line = null;
+                    String line;
                     while ((line = in.readLine()) != null) {
                         if (s.isUnsubscribed()) return;
                         s.onNext(line);

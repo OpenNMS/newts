@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -72,7 +73,7 @@ public class SchemaManager implements AutoCloseable {
         checkNotNull(schema, "schema argument");
         InputStream stream = checkNotNull(schema.getInputStream(), "schema input stream");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
 
         String line, scrubbed;
         StringBuilder statement = new StringBuilder();

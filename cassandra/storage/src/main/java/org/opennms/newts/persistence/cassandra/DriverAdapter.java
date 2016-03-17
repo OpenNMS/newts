@@ -65,7 +65,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
 
         if (m_results.hasNext()) {
             Sample m = getNextSample();
-            m_next = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
+            m_next = new Results.Row<>(m.getTimestamp(), m.getResource());
             addSample(m_next, m);
         }
 
@@ -87,7 +87,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
             Sample m = getNextSample();
 
             if (m.getTimestamp().gt(m_next.getTimestamp())) {
-                nextNext = new Results.Row<Sample>(m.getTimestamp(), m.getResource());
+                nextNext = new Results.Row<>(m.getTimestamp(), m.getResource());
                 addSample(nextNext, m);
                 break;
             }
@@ -118,7 +118,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
     }
 
     private void addSample(Results.Row<Sample> row, Sample sample) {
-        if (m_metrics.size() == 0 || m_metrics.contains(sample.getName())) {
+        if (m_metrics.isEmpty() || m_metrics.contains(sample.getName())) {
             row.addElement(sample);
         }
     }

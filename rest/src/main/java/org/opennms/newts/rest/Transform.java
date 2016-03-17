@@ -38,6 +38,8 @@ import com.google.common.collect.Lists;
 
 
 class Transform {
+    
+    private Transform() {}
 
     private static final Function<SampleDTO, Sample> DTO_TO_SAMPLE;
 

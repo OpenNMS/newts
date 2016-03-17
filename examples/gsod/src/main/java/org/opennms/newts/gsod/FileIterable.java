@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +41,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 public class FileIterable {
+    
+    private FileIterable() {}
 
     public static FluentIterable<Path> fileTreeWalker(final Path root) {
         return FluentIterable.from(Iterables.concat(groupFilesByDir(root)));
@@ -68,7 +71,7 @@ public class FileIterable {
     }
     
     private static KeyedIterable<Path, Path> children(File dir, FileFilter filter) {
-        return new KeyedIterable<Path, Path>(dir.toPath(), toPaths(dir.listFiles(filter)));
+        return new KeyedIterable<>(dir.toPath(), toPaths(dir.listFiles(filter)));
     }
 
     private static KeyedIterable<Path, Path> files(File dir) {
@@ -139,7 +142,7 @@ public class FileIterable {
         @Override
         protected KeyedIterable<Path, Path> computeNext() {
             if (m_dirStack == null) {
-                m_dirStack = new Stack<Iterator<Path>>();
+                m_dirStack = new Stack<>();
                 m_dirStack.push(subdirs(m_root).iterator());
                 return files(m_root);
             } 
@@ -234,7 +237,7 @@ public class FileIterable {
             @Override
             public Iterator<String> iterator() {
                 try {
-                    return new LineIterator(new FileReader(path.toFile()));
+                    return new LineIterator(new InputStreamReader(new FileInputStream(path.toFile()), StandardCharsets.UTF_8));
                 } catch (FileNotFoundException e) {
                     throw Throwables.propagate(e);
                 }

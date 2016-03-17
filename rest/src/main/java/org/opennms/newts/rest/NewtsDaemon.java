@@ -26,6 +26,8 @@ import org.skife.gressil.Daemon;
 
 
 public class NewtsDaemon {
+    
+    private NewtsDaemon() {}
 
     private static class CommandLine {
         @Option(name = "-p", aliases = {"--pid"}, metaVar = "PIDFILE", usage = "Path to PID file (default: newtsd.pid)")
