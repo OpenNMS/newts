@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -62,6 +62,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(String.class).annotatedWith(named("cassandra.compression")).toInstance(m_newtsConf.getCassandraCompression());
         bind(String.class).annotatedWith(named("cassandra.username")).toInstance(m_newtsConf.getCassandraUsername());
         bind(String.class).annotatedWith(named("cassandra.password")).toInstance(m_newtsConf.getCassandraPassword());
+        bind(Boolean.class).annotatedWith(named("cassandra.ssl")).toInstance(m_newtsConf.getCassandraSsl());
 
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("search.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());

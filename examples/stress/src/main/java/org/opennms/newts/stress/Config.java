@@ -46,6 +46,7 @@ class Config {
     private String m_cassandraCompression = "NONE";
     private String m_cassandraUsername;
     private String m_cassandraPassword;
+    private boolean m_cassandraSsl = false;
     private Timestamp m_start = Timestamp.fromEpochSeconds(900000000);
     private Timestamp m_end = Timestamp.fromEpochSeconds(931536000);
     private Duration m_interval = Duration.seconds(300);
@@ -156,6 +157,10 @@ class Config {
 
     String getCassandraPassword() {
         return m_cassandraPassword;
+    }
+
+    boolean getCassandraSsl() {
+        return m_cassandraSsl;
     }
 
     Command getCommand() {

@@ -52,7 +52,8 @@ public class CassandraSessionImpl implements CassandraSession {
     @Inject
     public CassandraSessionImpl(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
             @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
-            @Named("cassandra.username") String username, @Named("cassandra.password") String password) {
+            @Named("cassandra.username") String username, @Named("cassandra.password") String password,
+            @Named("cassandra.ssl") boolean ssl) {
 
         checkNotNull(keyspace, "keyspace argument");
         checkNotNull(hostname, "hostname argument");
@@ -64,12 +65,18 @@ public class CassandraSessionImpl implements CassandraSession {
         Builder builder = Cluster
                 .builder()
                 .withPort(port)
+                .withSSL()
                 .addContactPoints(hostname.split(","))
                 .withCompression(Compression.valueOf(compression.toUpperCase()));
 
         if (username != null && password != null) {
             LOG.info("Using username: {} and password: XXXXXXXX", username);
             builder.withCredentials(username, password);
+        }
+
+        if (ssl) {
+            LOG.info("Enabling SSL.");
+            builder.withSSL();
         }
 
         m_session = builder.build().connect(keyspace);

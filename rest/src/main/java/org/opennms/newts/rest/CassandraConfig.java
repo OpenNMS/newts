@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -51,6 +51,9 @@ public class CassandraConfig {
     @JsonProperty("password")
     private String m_password;
 
+    @JsonProperty("ssl")
+    private boolean m_ssl = false;
+
     public String getKeyspace() {
         return m_keyspace;
     }
@@ -77,5 +80,9 @@ public class CassandraConfig {
 
     public String getPassword() {
         return m_password;
+    }
+
+    public boolean getSsl() {
+        return m_ssl;
     }
 }

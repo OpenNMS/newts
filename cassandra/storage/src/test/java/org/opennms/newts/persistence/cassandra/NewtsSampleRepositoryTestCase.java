@@ -43,7 +43,7 @@ public class NewtsSampleRepositoryTestCase extends AbstractCassandraTestCase {
 
         CassandraSession session = new CassandraSessionImpl(KEYSPACE_NAME, CASSANDRA_HOST,
                 CASSANDRA_PORT, CASSANDRA_COMPRESSION,
-                CASSANDRA_USERNAME, CASSANDRA_PASSWORD);
+                CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
         m_repository = new CassandraSampleRepository(
                 session,
                 CASSANDRA_TTL,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -90,6 +90,10 @@ public class NewtsConfig extends Configuration {
 
     public String getCassandraPassword() {
         return m_cassandraConfig.getPassword();
+    }
+
+    public boolean getCassandraSsl() {
+        return m_cassandraConfig.getSsl();
     }
 
     public Map<String, ResultDescriptorDTO> getReports() {

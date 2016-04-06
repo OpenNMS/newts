@@ -9,6 +9,7 @@ cassandra:
   port: 9042
   username: cassandra
   password: cassandra
+  ssl: false
   time-to-live: 31536000
   compression: none
 

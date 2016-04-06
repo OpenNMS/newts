@@ -56,7 +56,8 @@ public class SelectDispatcher extends Dispatcher {
                 config.getCassandraPort(),
                 config.getCassandraCompression(),
                 config.getCassandraUsername(),
-                config.getCassandraPassword());
+                config.getCassandraPassword(),
+                config.getCassandraSsl());
         m_repository = new CassandraSampleRepository(
                 session,
                 Config.CASSANDRA_TTL,
