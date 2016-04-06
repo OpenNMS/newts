@@ -17,4 +17,4 @@ else
     JAVA=java
 fi
 
-$JAVA org.opennms.newts.rest.NewtsDaemon $@
+$JAVA $JAVA_OPTS org.opennms.newts.rest.NewtsDaemon $@

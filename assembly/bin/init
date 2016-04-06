@@ -24,4 +24,4 @@ if [ ! -r "$CONF" ]; then
     exit 1
 fi
 
-$JAVA org.opennms.newts.rest.NewtsService init "$CONF"
+$JAVA $JAVA_OPTS org.opennms.newts.rest.NewtsService init "$CONF"
