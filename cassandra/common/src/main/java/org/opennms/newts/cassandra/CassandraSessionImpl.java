@@ -65,7 +65,6 @@ public class CassandraSessionImpl implements CassandraSession {
         Builder builder = Cluster
                 .builder()
                 .withPort(port)
-                .withSSL()
                 .addContactPoints(hostname.split(","))
                 .withCompression(Compression.valueOf(compression.toUpperCase()));
 

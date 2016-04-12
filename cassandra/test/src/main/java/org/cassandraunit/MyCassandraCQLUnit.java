@@ -16,39 +16,22 @@
 package org.cassandraunit;
 
 import org.cassandraunit.dataset.CQLDataSet;
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
-
-import com.datastax.driver.core.Cluster;
 
 /**
- * We currently use a newer driver than the one associated with the
- * cassandra-unit package and need to override the load() method
- * to make things work.
- *
- * This shouldn't be necessary when upgrading to cassandra-unit gt 3.0.0
+ * Used to make the after() and before() methods public.
  *
  * @author jwhite
  */
 public class MyCassandraCQLUnit extends CassandraCQLUnit {
-    private final CQLDataSet dataSet;
-
-    public MyCassandraCQLUnit(CQLDataSet dataSet, String configurationFileName) {
-        super(dataSet, configurationFileName);
-        this.dataSet = dataSet;
-    }
-
-    @Override
-    protected void load() {
-        String hostIp = EmbeddedCassandraServerHelper.getHost();
-        int port = EmbeddedCassandraServerHelper.getNativeTransportPort();
-        cluster = new Cluster.Builder().addContactPoint(hostIp).withPort(port).build();
-        session = cluster.connect();
-        CQLDataLoader dataLoader = new CQLDataLoader(session);
-        dataLoader.load(dataSet);
-        session = dataLoader.getSession();
+    public MyCassandraCQLUnit(CQLDataSet dataSet) {
+        super(dataSet);
     }
 
     public void before() throws Exception {
         super.before();
+    }
+
+    public void after()  {
+        super.after();
     }
 }

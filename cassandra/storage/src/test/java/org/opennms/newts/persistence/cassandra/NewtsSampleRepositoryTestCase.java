@@ -18,34 +18,27 @@ package org.opennms.newts.persistence.cassandra;
 import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.opennms.newts.api.SampleProcessorService;
-import org.opennms.newts.cassandra.AbstractCassandraTestCase;
-import org.opennms.newts.cassandra.CassandraSession;
-import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.opennms.newts.cassandra.NewtsInstance;
 
 import com.codahale.metrics.MetricRegistry;
 
-public class NewtsSampleRepositoryTestCase extends AbstractCassandraTestCase {
+public class NewtsSampleRepositoryTestCase {
 
+    @Rule
+    public NewtsInstance newtsInstance = new NewtsInstance();
+    
     public static final int CASSANDRA_TTL = 86400;
-    public static final String KEYSPACE_NAME = "newts";
-
-    protected static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
-    protected static final String SCHEMA_RESOURCE = "/samples_schema.cql";
 
     protected CassandraSampleRepository m_repository;
     protected ContextConfigurations m_contextConfigurations = new ContextConfigurations();
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        CassandraSession session = new CassandraSessionImpl(KEYSPACE_NAME, CASSANDRA_HOST,
-                CASSANDRA_PORT, CASSANDRA_COMPRESSION,
-                CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
         m_repository = new CassandraSampleRepository(
-                session,
+                newtsInstance.getCassandraSession(),
                 CASSANDRA_TTL,
                 new MetricRegistry(),
                 mock(SampleProcessorService.class),
@@ -54,10 +47,5 @@ public class NewtsSampleRepositoryTestCase extends AbstractCassandraTestCase {
 
     public CassandraSampleRepository getRepository() {
         return m_repository;
-    }
-
-    @Override
-    protected String getSchemaResource() {
-        return SCHEMA_RESOURCE;
     }
 }

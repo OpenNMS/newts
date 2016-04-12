@@ -16,17 +16,15 @@
 package org.opennms.newts.persistence.cassandra;
 
 
+import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 import static org.opennms.newts.persistence.cassandra.Utils.assertAttributes;
 import static org.opennms.newts.persistence.cassandra.Utils.assertRowsEqual;
 import static org.opennms.newts.persistence.cassandra.Utils.mapFor;
-import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
-import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
-import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Measurement;
@@ -37,6 +35,8 @@ import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
+import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 
 import com.datastax.driver.core.ConsistencyLevel;
 import com.google.common.base.Optional;

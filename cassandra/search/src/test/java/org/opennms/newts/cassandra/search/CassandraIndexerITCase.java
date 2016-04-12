@@ -15,7 +15,6 @@
  */
 package org.opennms.newts.cassandra.search;
 
-import static org.opennms.newts.api.search.QueryBuilder.matchKeyAndValue;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -26,6 +25,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.opennms.newts.api.search.QueryBuilder.matchKeyAndValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.MetricType;
@@ -48,10 +49,9 @@ import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.SearchResults.Result;
 import org.opennms.newts.api.search.Term;
 import org.opennms.newts.api.search.TermQuery;
-import org.opennms.newts.cassandra.AbstractCassandraTestCase;
 import org.opennms.newts.cassandra.CassandraSession;
-import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.opennms.newts.cassandra.NewtsInstance;
 import org.opennms.newts.cassandra.search.CassandraResourceTreeWalker.SearchResultVisitor;
 
 import com.codahale.metrics.MetricRegistry;
@@ -60,12 +60,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
-public class CassandraIndexerITCase extends AbstractCassandraTestCase {
+public class CassandraIndexerITCase {
 
-    @Override
-    protected String getSchemaResource() {
-        return "/search_schema.cql";
-    }
+    @Rule
+    public NewtsInstance newtsInstance = new NewtsInstance();
 
     @Test
     public void test() {
@@ -76,7 +74,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         samples.add(sampleFor(new Resource("aab", Optional.of(map(base, "music", "metal", "beverage", "beer"))), "m0"));
         samples.add(sampleFor(new Resource("aac:aaa", Optional.of(map(base, "music", "country"))), "m0"));
 
-        CassandraSession session = getCassandraSession();
+        CassandraSession session = newtsInstance.getCassandraSession();
 
         ResourceMetadataCache mockCache = mock(ResourceMetadataCache.class);
         when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
@@ -143,7 +141,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         MetricRegistry registry = new MetricRegistry();
         ContextConfigurations contextConfigurations = new ContextConfigurations();
 
-        CassandraSession session = getCassandraSession();
+        CassandraSession session = newtsInstance.getCassandraSession();
 
         Indexer indexer = new CassandraIndexer(session, 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
         CassandraSearcher searcher = new CassandraSearcher(session, registry, contextConfigurations);
@@ -176,7 +174,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         samples.add(sampleFor(new Resource("a:b", Optional.of(base)), "m1"));
         samples.add(sampleFor(new Resource("x:b:z", Optional.of(base)), "m2"));
 
-        CassandraSession session = getCassandraSession();
+        CassandraSession session = newtsInstance.getCassandraSession();
 
         ResourceMetadataCache mockCache = mock(ResourceMetadataCache.class);
         when(mockCache.get(any(Context.class), any(Resource.class))).thenReturn(Optional.<ResourceMetadata> absent());
@@ -253,7 +251,7 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         MetricRegistry registry = new MetricRegistry();
         ContextConfigurations contextConfigurations = new ContextConfigurations();
 
-        Indexer indexer = new CassandraIndexer(getCassandraSession(), 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
+        Indexer indexer = new CassandraIndexer(newtsInstance.getCassandraSession(), 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
 
         Sample s = sampleFor(new Resource("aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));
@@ -263,12 +261,6 @@ public class CassandraIndexerITCase extends AbstractCassandraTestCase {
         verify(cache, atLeast(1)).get(any(Context.class), any(Resource.class));
         verify(cache).merge(any(Context.class), any(Resource.class), eq(expected));
 
-    }
-
-    private CassandraSession getCassandraSession() {
-        return new CassandraSessionImpl(CASSANDRA_KEYSPACE, CASSANDRA_HOST,
-                CASSANDRA_PORT, CASSANDRA_COMPRESSION,
-                CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
     }
 
     /** Creates a sample (any sample), for a given resource and metric name. */
