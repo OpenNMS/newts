@@ -49,7 +49,7 @@ public class SchemaManager implements AutoCloseable {
 
     @Inject
     public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
-            @Named("cassandra.username") String username, @Named("cassandra.password") String password) {
+            @Named("cassandra.username") String username, @Named("cassandra.password") String password, @Named("cassandra.ssl") boolean ssl) {
         m_keyspace = keyspace;
 
         Builder builder = Cluster.builder()
@@ -60,6 +60,10 @@ public class SchemaManager implements AutoCloseable {
             builder.withCredentials(username, password);
         }
 
+        if (ssl) {
+            LOG.info("Using SSL.");
+            builder.withSSL();
+        }
         m_cluster= builder.build();
         m_session = m_cluster.connect();
     }
