@@ -1,7 +1,7 @@
 package org.opennms.newts.rest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.opennms.newts.api.MetricType.COUNTER;
 
 import java.util.Map;
@@ -15,9 +15,11 @@ import org.opennms.newts.api.Results;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
+import org.opennms.newts.api.search.SearchResults;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class ResultSerializationTest {
@@ -137,6 +139,28 @@ public class ResultSerializationTest {
                 + "]";
 
         assertThat(new ObjectMapper().writeValueAsString(Transform.sampleDTOs(data)), is(normalize(json)));
+
+    }
+
+    @Test
+    public void testSearchResults() throws JsonProcessingException {
+        SearchResults results = new SearchResults();
+        results.addResult(new Resource("localhost"), Lists.newArrayList("beer", "sausages"));
+
+        String json = "["
+                + "  {"
+                + "    \"resource\": {"
+                + "      \"id\":\"localhost\","
+                + "      \"attributes\":{}"
+                + "    },"
+                + "    \"metrics\":["
+                + "       \"beer\","
+                + "       \"sausages\""
+                + "    ]"
+                + "   }"
+                + "]";
+
+        assertThat(new ObjectMapper().writeValueAsString(Transform.searchResultDTOs(results)), is(normalize(json)));
 
     }
 

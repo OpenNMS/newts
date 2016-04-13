@@ -19,6 +19,8 @@ package org.opennms.newts.rest;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -30,7 +32,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.search.Query;
-import org.opennms.newts.api.search.SearchResults;
 import org.opennms.newts.api.search.Searcher;
 import org.opennms.newts.api.search.query.ParseException;
 import org.opennms.newts.api.search.query.QueryParser;
@@ -51,7 +52,7 @@ public class SearchResource {
 
     @GET
     @Timed
-    public SearchResults search(@QueryParam("q") Optional<String> query, @QueryParam("context") Optional<String> contextId) {
+    public Collection<SearchResultDTO> search(@QueryParam("q") Optional<String> query, @QueryParam("context") Optional<String> contextId) {
         checkArgument(query.isPresent(), "missing required query parameter (q=<argument>)");
         QueryParser qp = new QueryParser();
         Query parsedQuery;
@@ -61,7 +62,7 @@ public class SearchResource {
             throw new WebApplicationException(e, Response.status(Status.BAD_REQUEST).entity("Invalid query " + query.get()).build());
         }
         Context context = contextId.isPresent() ? new Context(contextId.get()) : Context.DEFAULT_CONTEXT;
-        return m_searcher.search(context, parsedQuery);
+        return Transform.searchResultDTOs(m_searcher.search(context, parsedQuery));
     }
 
 }

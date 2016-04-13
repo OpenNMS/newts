@@ -29,6 +29,8 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.api.search.SearchResults;
+import org.opennms.newts.api.search.SearchResults.Result;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -159,6 +161,24 @@ class Transform {
                                 input.getAttributes());
                     }
                 });
+            }
+        }));
+    }
+
+    /**
+     * Convert search results to {@link SearchResultDTO}s.
+     *
+     * @param results
+     *            search results to convert.
+     * @return converted search results.
+     */
+    public static Collection<SearchResultDTO> searchResultDTOs(SearchResults results) {
+        return Lists.newArrayList(Iterables.transform(results, new Function<SearchResults.Result, SearchResultDTO>() {
+            @Override
+            public SearchResultDTO apply(Result input) {
+                return new SearchResultDTO(
+                        new ResourceDTO(input.getResource().getId(), unwrapMap(input.getResource().getAttributes())),
+                        input.getMetrics());
             }
         }));
     }
