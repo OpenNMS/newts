@@ -1,7 +1,7 @@
 title: Newts
 description: "A time-series data store based on Apache Cassandra."
 markdown: kramdown
-highlighter: pygments
+highlighter: rouge
 permalink: pretty
 timezone: America/Montreal
 baseurl: "/newts"
