@@ -1,3 +1,21 @@
+1.3.5
+~~~~~
+
+Upgraded the Cassandra driver to 3.0.0.
+
+Upgraded cassandra-unit to 3.0.0.1. Running the integrations tests now require Java 8.
+
+Added support for connecting to Cassandra via SSL.
+
+Added support for passing custom JVM arguments to the *newts* and *init* scripts. This
+will be useful for handling custom trust store settings.
+
+Fixed the JSON output of the /search REST resource.
+
+Fixed the Karaf feature files and removed the default blueprints.
+
+Addressed a number of code lint issues. Thanks to @faisal-hameed from DevFactory.
+
 1.3.4
 ~~~~~
 
