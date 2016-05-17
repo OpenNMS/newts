@@ -1,3 +1,10 @@
+1.3.6
+~~~~~
+
+Upgraded the Cassandra driver to 3.0.1.
+
+Exposed the ability to set the replication factor when initializing the schema via the SchemaManager API.
+
 1.3.5
 ~~~~~
 
