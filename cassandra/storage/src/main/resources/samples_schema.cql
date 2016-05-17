@@ -1,6 +1,6 @@
 
 CREATE KEYSPACE $KEYSPACE$
-    WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+    WITH replication = {'class': 'SimpleStrategy', 'replication_factor': $REPLICATION_FACTOR$};
 
 CREATE TABLE $KEYSPACE$.samples (
     context text,

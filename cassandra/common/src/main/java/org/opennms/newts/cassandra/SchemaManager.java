@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2016, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Cluster.Builder;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AlreadyExistsException;
 import com.datastax.driver.core.exceptions.SyntaxError;
 
@@ -41,11 +41,15 @@ public class SchemaManager implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaManager.class);
 
-    private static final String KEYSPACE = "$KEYSPACE$";
+    private static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
+    private static final String REPLICATION_FACTOR_PLACEHOLDER = "$REPLICATION_FACTOR$";
+
+    public static final int DEFAULT_REPLICATION_FACTOR = 1;
 
     private String m_keyspace;
     private Cluster m_cluster;
     private Session m_session;
+    private int m_replicationFactor = DEFAULT_REPLICATION_FACTOR;
 
     @Inject
     public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
@@ -73,6 +77,10 @@ public class SchemaManager implements AutoCloseable {
     }
 
     public void create(Schema schema, boolean ifNotExists) throws IOException {
+        create(schema, ifNotExists, false);
+    }
+
+    public void create(Schema schema, boolean ifNotExists, boolean printOnly) throws IOException {
 
         checkNotNull(schema, "schema argument");
         InputStream stream = checkNotNull(schema.getInputStream(), "schema input stream");
@@ -88,22 +96,27 @@ public class SchemaManager implements AutoCloseable {
 
             if (scrubbed.endsWith(";")) {
                 // Substitute the actual keyspace name for any KEYSPACE macros.
-                String queryString = statement.toString().replace(KEYSPACE, m_keyspace);
+                String queryString = statement.toString().replace(KEYSPACE_PLACEHOLDER, m_keyspace);
+                queryString = queryString.replace(REPLICATION_FACTOR_PLACEHOLDER, Integer.toString(m_replicationFactor));
 
-                try {
-                    m_session.execute(queryString);
-                }
-                catch (AlreadyExistsException e) {
-                    if (ifNotExists) {
-                        System.err.printf("%s; Nothing here to do%n", e.getLocalizedMessage());
+                if (printOnly) {
+                    System.err.println(queryString);
+                } else {
+                    try {
+                        m_session.execute(queryString);
                     }
-                    else {
+                    catch (AlreadyExistsException e) {
+                        if (ifNotExists) {
+                            System.err.printf("%s; Nothing here to do%n", e.getLocalizedMessage());
+                        }
+                        else {
+                            throw e;
+                        }
+                    }
+                    catch (SyntaxError e) {
+                        System.out.printf("ERROR: %s (query: \"%s\").%n", e.getLocalizedMessage(), queryString);
                         throw e;
                     }
-                }
-                catch (SyntaxError e) {
-                    System.out.printf("ERROR: %s (query: \"%s\").%n", e.getLocalizedMessage(), queryString);
-                    throw e;
                 }
                 statement = new StringBuilder();
             }
@@ -120,4 +133,11 @@ public class SchemaManager implements AutoCloseable {
         m_cluster.close();
     }
 
+    public int getReplicationFactor() {
+        return m_replicationFactor;
+    }
+
+    public void setReplicationFactor(int replicationFactor) {
+        m_replicationFactor = replicationFactor;
+    }
 }

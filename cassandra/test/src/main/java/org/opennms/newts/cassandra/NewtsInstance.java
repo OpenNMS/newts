@@ -38,6 +38,7 @@ public class NewtsInstance extends ExternalResource {
     private static final String CASSANDRA_PASSWORD = "cassandra";
 
     private static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
+    private static final String REPLICATION_FACTOR_PLACEHOLDER = "$REPLICATION_FACTOR$";
 
     private static ServiceLoader<Schema> schemaLoader = ServiceLoader.load(Schema.class);
 
@@ -47,7 +48,7 @@ public class NewtsInstance extends ExternalResource {
 
     @Override
     public void before() throws Throwable {
-        cassandraUnit = new MyCassandraCQLUnit(getDataSet(CASSANDRA_KEYSPACE));
+        cassandraUnit = new MyCassandraCQLUnit(getDataSet(CASSANDRA_KEYSPACE, 1));
         cassandraUnit.before();
         host = EmbeddedCassandraServerHelper.getHost();
         port = EmbeddedCassandraServerHelper.getNativeTransportPort();
@@ -64,7 +65,7 @@ public class NewtsInstance extends ExternalResource {
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
     }
 
-    public static CQLDataSet getDataSet(String keyspace) {
+    public static CQLDataSet getDataSet(String keyspace, int replicationFactor) {
         try {
             //  Concatenate the schema strings
             String schemasString = "";
@@ -74,6 +75,7 @@ public class NewtsInstance extends ExternalResource {
 
             // Replace the placeholders
             schemasString = schemasString.replace(KEYSPACE_PLACEHOLDER, keyspace);
+            schemasString = schemasString.replace(REPLICATION_FACTOR_PLACEHOLDER, Integer.toString(replicationFactor));
 
             // Split the resulting script back into lines
             String lines[] = schemasString.split("\\r?\\n");
