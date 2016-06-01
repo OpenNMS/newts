@@ -16,6 +16,7 @@
 package org.opennms.newts.cassandra.search;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -26,6 +27,10 @@ import com.google.common.collect.Lists;
  * @author jwhite
  */
 public class EscapableResourceIdSplitter implements ResourceIdSplitter {
+    private static final Pattern MATCH_COLON = Pattern.compile(":");
+    private static final Pattern MATCH_BACKSLASH = Pattern.compile("\\\\");
+    private static final Pattern MATCH_ESCAPED_COLON = Pattern.compile("\\\\:");
+    private static final Pattern MATCH_ESCAPED_BACKSLASH = Pattern.compile("\\\\\\\\");
 
     /**
      * Splits a resource id into a list of elements.
@@ -78,9 +83,9 @@ public class EscapableResourceIdSplitter implements ResourceIdSplitter {
             return;
         }
         // \: -> :
-        sanitizedElement = sanitizedElement.replaceAll("\\\\:", ":");
+        sanitizedElement = MATCH_ESCAPED_COLON.matcher(sanitizedElement).replaceAll(":");
         // \\ -> \
-        sanitizedElement = sanitizedElement.replaceAll("\\\\\\\\", "\\\\");
+        sanitizedElement = MATCH_ESCAPED_BACKSLASH.matcher(sanitizedElement).replaceAll("\\\\");
         elements.add(sanitizedElement);
     }
 
@@ -110,9 +115,9 @@ public class EscapableResourceIdSplitter implements ResourceIdSplitter {
             }
 
             // \ -> \\
-            trimmedEl = trimmedEl.replaceAll("\\\\", "\\\\\\\\");
+            trimmedEl = MATCH_BACKSLASH.matcher(trimmedEl).replaceAll("\\\\\\\\");
             // : -> \:
-            trimmedEl = trimmedEl.replaceAll(":", "\\\\:");
+            trimmedEl = MATCH_COLON.matcher(trimmedEl).replaceAll("\\\\:");
 
             if (sb.length() > 0) {
                 sb.append(SEPARATOR);
