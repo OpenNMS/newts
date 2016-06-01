@@ -26,6 +26,9 @@ import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.google.common.collect.Lists;
@@ -42,9 +45,20 @@ public class CassandraIndexerTest {
         ArgumentCaptor<Statement> statementCaptor = ArgumentCaptor.forClass(Statement.class);
         when(session.executeAsync(statementCaptor.capture())).thenReturn(mock(ResultSetFuture.class));
 
+        PreparedStatement statement = mock(PreparedStatement.class);
+        BoundStatement boundStatement = mock(BoundStatement.class);
+        when(session.prepare(any(RegularStatement.class))).thenReturn(statement);
+        when(statement.bind()).thenReturn(boundStatement);
+        when(boundStatement.setString(any(String.class), any(String.class))).thenReturn(boundStatement);
+
+        CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(true)
+                // Limit the batch size so we can accurately count the number of statements
+                .withMaxBatchSize(1).build();
+
         MetricRegistry registry = new MetricRegistry();
         GuavaResourceMetadataCache cache = new GuavaResourceMetadataCache(2048, registry);
-        CassandraIndexer indexer = new CassandraIndexer(session, 0, cache, registry, true,
+        CassandraIndexer indexer = new CassandraIndexer(session, 0, cache, registry, options,
                 new EscapableResourceIdSplitter(), new ContextConfigurations());
 
         Resource r = new Resource("snmp:1589:vmware5Cpu:2:vmware5Cpu");
@@ -64,8 +78,7 @@ public class CassandraIndexerTest {
         // Index the collection of samples
         indexer.update(samples);
 
-        // Verify that exectuteAsync was called exactly twice. The statements are executed
-        // in bounded batches, so this give us an upper limit on the number of inserts.
-        verify(session, times(2)).executeAsync(any(Statement.class));
+        // Verify the number of exectuteAsync calls
+        verify(session, times(20)).executeAsync(any(Statement.class));
     }
 }

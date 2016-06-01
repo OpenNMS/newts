@@ -31,6 +31,7 @@ import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.CassandraIndexer;
 import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
+import org.opennms.newts.cassandra.search.CassandraIndexingOptions;
 import org.opennms.newts.cassandra.search.EscapableResourceIdSplitter;
 import org.opennms.newts.cassandra.search.GuavaResourceMetadataCache;
 import org.opennms.newts.cassandra.search.ResourceIdSplitter;
@@ -81,8 +82,11 @@ class InsertDispatcher extends Dispatcher {
         if (m_config.isSearchEnabled()) {
             ResourceIdSplitter resourceIdSplitter = new EscapableResourceIdSplitter();
             GuavaResourceMetadataCache cache = new GuavaResourceMetadataCache(m_config.getNumResources(), metrics);
+            CassandraIndexingOptions indexingOptions = new CassandraIndexingOptions.Builder()
+                    .withHierarchicalIndexing(m_config.isHierarchicalIndexingEnabled())
+                    .withMaxBatchSize(m_config.getBatchSize()).build();
             CassandraIndexer cassandraIndexer = new CassandraIndexer(session, Config.CASSANDRA_TTL,
-                    cache, metrics, m_config.isHierarchicalIndexingEnabled(), resourceIdSplitter, contexts);
+                    cache, metrics, indexingOptions, resourceIdSplitter, contexts);
             CassandraIndexerSampleProcessor indexerSampleProcessor = new CassandraIndexerSampleProcessor(cassandraIndexer);
             processors.add(indexerSampleProcessor);
         }

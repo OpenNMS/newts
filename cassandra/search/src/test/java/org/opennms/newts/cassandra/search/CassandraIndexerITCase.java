@@ -81,7 +81,10 @@ public class CassandraIndexerITCase {
         MetricRegistry registry = new MetricRegistry();
         ContextConfigurations contextConfigurations = new ContextConfigurations();
 
-        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
+        CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(false).build();
+
+        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, options, new SimpleResourceIdSplitter(), contextConfigurations);
 
         indexer.update(samples);
 
@@ -143,7 +146,10 @@ public class CassandraIndexerITCase {
 
         CassandraSession session = newtsInstance.getCassandraSession();
 
-        Indexer indexer = new CassandraIndexer(session, 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
+        CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(false).build();
+
+        Indexer indexer = new CassandraIndexer(session, 86400, cache, registry, options, new SimpleResourceIdSplitter(), contextConfigurations);
         CassandraSearcher searcher = new CassandraSearcher(session, registry, contextConfigurations);
 
         Map<String, String> base = map("meat", "people", "bread", "beer");
@@ -181,7 +187,10 @@ public class CassandraIndexerITCase {
         MetricRegistry registry = new MetricRegistry();
         ContextConfigurations contextConfigurations = new ContextConfigurations();
 
-        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, true, new SimpleResourceIdSplitter(), contextConfigurations);
+        CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(true).build();
+
+        Indexer indexer = new CassandraIndexer(session, 86400, mockCache, registry, options, new SimpleResourceIdSplitter(), contextConfigurations);
 
         indexer.update(samples);
 
@@ -251,7 +260,10 @@ public class CassandraIndexerITCase {
         MetricRegistry registry = new MetricRegistry();
         ContextConfigurations contextConfigurations = new ContextConfigurations();
 
-        Indexer indexer = new CassandraIndexer(newtsInstance.getCassandraSession(), 86400, cache, registry, false, new SimpleResourceIdSplitter(), contextConfigurations);
+        CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(false).build();
+
+        Indexer indexer = new CassandraIndexer(newtsInstance.getCassandraSession(), 86400, cache, registry, options, new SimpleResourceIdSplitter(), contextConfigurations);
 
         Sample s = sampleFor(new Resource("aaa", Optional.of(map("beverage", "beer"))), "m0");
         indexer.update(Collections.singletonList(s));
