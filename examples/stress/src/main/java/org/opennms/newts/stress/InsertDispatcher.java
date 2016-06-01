@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import org.opennms.newts.api.DefaultSampleProcessorService;
 import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleProcessorService;
@@ -86,7 +87,7 @@ class InsertDispatcher extends Dispatcher {
             processors.add(indexerSampleProcessor);
         }
 
-        SampleProcessorService sampleProcessorService = new SampleProcessorService(m_config.getThreads(), processors);
+        SampleProcessorService sampleProcessorService = new DefaultSampleProcessorService(m_config.getThreads(), processors);
 
         m_repository = new CassandraSampleRepository(
                 session,

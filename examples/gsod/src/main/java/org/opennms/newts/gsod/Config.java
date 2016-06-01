@@ -19,6 +19,7 @@ package org.opennms.newts.gsod;
 import java.util.Collections;
 import java.util.Properties;
 
+import org.opennms.newts.api.DefaultSampleProcessorService;
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
@@ -53,7 +54,7 @@ public class Config extends AbstractModule {
 
     @Provides
     SampleProcessorService getSampleProcessorService() {
-        return new SampleProcessorService(1, Collections.<SampleProcessor>emptySet());
+        return new DefaultSampleProcessorService(1, Collections.<SampleProcessor>emptySet());
     }
 
 }

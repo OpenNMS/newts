@@ -15,6 +15,9 @@
  */
 package org.opennms.newts.rest;
 
+import org.opennms.newts.api.DefaultSampleProcessorService;
+import org.opennms.newts.api.SampleProcessorService;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 
@@ -29,6 +32,7 @@ public class NewtsGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(MetricRegistry.class).toInstance(new MetricRegistry());
+        bind(SampleProcessorService.class).to(DefaultSampleProcessorService.class);
     }
 
 }

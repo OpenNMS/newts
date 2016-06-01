@@ -28,14 +28,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class SampleProcessorServiceTest {
+public class DefaultSampleProcessorServiceTest {
 
     private SampleProcessor m_processor = mock(SampleProcessor.class);
     private SampleProcessorService m_service;
 
     @Before
     public void setUp() throws Exception {
-        m_service = new SampleProcessorService(1, Collections.singleton(m_processor));
+        m_service = new DefaultSampleProcessorService(1, Collections.singleton(m_processor));
     }
 
     @Test

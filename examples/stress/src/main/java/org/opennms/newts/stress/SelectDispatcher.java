@@ -19,8 +19,8 @@ package org.opennms.newts.stress;
 import java.util.concurrent.BlockingQueue;
 
 import org.opennms.newts.aggregate.IntervalGenerator;
+import org.opennms.newts.api.DefaultSampleProcessorService;
 import org.opennms.newts.api.Sample;
-import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.query.ResultDescriptor;
@@ -62,7 +62,7 @@ public class SelectDispatcher extends Dispatcher {
                 session,
                 Config.CASSANDRA_TTL,
                 new MetricRegistry(),
-                new SampleProcessorService(1),
+                new DefaultSampleProcessorService(1),
                 new ContextConfigurations());
 
         m_queryQueue = Queues.newArrayBlockingQueue(config.getThreads() * 10);
