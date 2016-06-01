@@ -16,6 +16,7 @@
 package org.cassandraunit;
 
 import org.cassandraunit.dataset.CQLDataSet;
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 
 /**
  * Used to make the after() and before() methods public.
@@ -24,7 +25,7 @@ import org.cassandraunit.dataset.CQLDataSet;
  */
 public class MyCassandraCQLUnit extends CassandraCQLUnit {
     public MyCassandraCQLUnit(CQLDataSet dataSet) {
-        super(dataSet);
+        super(dataSet, null, EmbeddedCassandraServerHelper.DEFAULT_STARTUP_TIMEOUT* 2);
     }
 
     public void before() throws Exception {
