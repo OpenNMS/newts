@@ -24,6 +24,10 @@ class InsertConfig extends Config {
 
     private int m_batchSize = 100;
 
+    private boolean m_enableSearch = false;
+
+    private boolean m_enableHierarchicalIndexing = false;
+
     @Option(name = "-B", aliases = "--batch-size", metaVar = "<size>", usage = "Number of samples per batch.")
     void setBatchSize(int batchSize) throws CmdLineException {
         checkArgument(batchSize > 0, "Batch size must be greater than zero.");
@@ -34,4 +38,21 @@ class InsertConfig extends Config {
         return m_batchSize;
     }
 
+    @Option(name = "-S", aliases = "--enable-search", usage = "Enable search indexing.")
+    void setEnableSearch(boolean enableSearch) throws CmdLineException {
+        m_enableSearch = enableSearch;
+    }
+
+    boolean isSearchEnabled() {
+        return m_enableSearch;
+    }
+
+    @Option(name = "-Z", aliases = "--enable-hierarchical-indexing", usage = "Enable hierarchical indeing.")
+    void setEnableHierarchicalIndexing(boolean enableHierarchicalIndexing) throws CmdLineException {
+        m_enableHierarchicalIndexing = enableHierarchicalIndexing;
+    }
+
+    public boolean isHierarchicalIndexingEnabled() {
+        return m_enableHierarchicalIndexing;
+    }
 }

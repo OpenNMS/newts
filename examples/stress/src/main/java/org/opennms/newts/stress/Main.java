@@ -17,6 +17,7 @@ package org.opennms.newts.stress;
 
 
 import java.io.PrintStream;
+import java.util.Date;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -97,9 +98,11 @@ public class Main {
                 throw new RuntimeException("Unknown command enum; Report as bug!!");
         }
 
+        System.out.println("Started @ " + new Date());
         dispatcher.go();
         dispatcher.printReport();
 
+        System.out.println("Finished @ " + new Date());
         System.exit(0);
 
     }

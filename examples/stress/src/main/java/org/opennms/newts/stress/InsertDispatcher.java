@@ -18,23 +18,32 @@ package org.opennms.newts.stress;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import org.opennms.newts.api.Sample;
+import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.opennms.newts.cassandra.search.CassandraIndexer;
+import org.opennms.newts.cassandra.search.CassandraIndexerSampleProcessor;
+import org.opennms.newts.cassandra.search.EscapableResourceIdSplitter;
+import org.opennms.newts.cassandra.search.GuavaResourceMetadataCache;
+import org.opennms.newts.cassandra.search.ResourceIdSplitter;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -63,12 +72,28 @@ class InsertDispatcher extends Dispatcher {
                 config.getCassandraUsername(),
                 config.getCassandraPassword(),
                 config.getCassandraSsl());
+
+        ContextConfigurations contexts = new ContextConfigurations();
+        MetricRegistry metrics = new MetricRegistry();
+        Set<SampleProcessor> processors = Sets.newHashSet();
+
+        if (m_config.isSearchEnabled()) {
+            ResourceIdSplitter resourceIdSplitter = new EscapableResourceIdSplitter();
+            GuavaResourceMetadataCache cache = new GuavaResourceMetadataCache(m_config.getNumResources(), metrics);
+            CassandraIndexer cassandraIndexer = new CassandraIndexer(session, Config.CASSANDRA_TTL,
+                    cache, metrics, m_config.isHierarchicalIndexingEnabled(), resourceIdSplitter, contexts);
+            CassandraIndexerSampleProcessor indexerSampleProcessor = new CassandraIndexerSampleProcessor(cassandraIndexer);
+            processors.add(indexerSampleProcessor);
+        }
+
+        SampleProcessorService sampleProcessorService = new SampleProcessorService(m_config.getThreads(), processors);
+
         m_repository = new CassandraSampleRepository(
                 session,
                 Config.CASSANDRA_TTL,
-                new MetricRegistry(),
-                new SampleProcessorService(1),
-                new ContextConfigurations());
+                metrics,
+                sampleProcessorService,
+                contexts);
 
         m_samplesQueue = Queues.newArrayBlockingQueue(config.getThreads() * 10);
 
@@ -86,7 +111,7 @@ class InsertDispatcher extends Dispatcher {
         for (int i = 0, pos = 0; i < m_config.getNumResources(); i++) {
             for (int j = 0; j < m_config.getNumMetrics(); j++) {
                 generators[pos++] = new SampleGenerator(
-                        "r" + i,
+                        Joiner.on(ResourceIdSplitter.SEPARATOR).join("class", "domain", "id", "type", "r" + i),
                         "m" + j,
                         m_config.getStart(),
                         m_config.getEnd(),
