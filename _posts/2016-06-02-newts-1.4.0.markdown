@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.4.0"
+date: "2016-06-02 12:32:34 -0500"
+author: j-white
+version: 1.4.0
+categories: [release]
+---
+
+Newts 1.4.0 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/1.4.0/NEWS.rst) for a list of what's changed.
+
