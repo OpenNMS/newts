@@ -31,6 +31,9 @@ import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
 
 import com.codahale.metrics.MetricRegistry;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.google.common.collect.Lists;
@@ -46,6 +49,12 @@ public class CassandraIndexerStressITCase {
         ResultSetFuture future = mock(ResultSetFuture.class);
         CassandraSession session = mock(CassandraSession.class);
         when(session.executeAsync(any(Statement.class))).thenReturn(future);
+
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        BoundStatement boundStatement = mock(BoundStatement.class);
+        when(session.prepare(any(RegularStatement.class))).thenReturn(preparedStatement);
+        when(preparedStatement.bind()).thenReturn(boundStatement);
+        when(boundStatement.setString(any(String.class), any(String.class))).thenReturn(boundStatement);
 
         ContextConfigurations contexts = new ContextConfigurations();
         MetricRegistry metrics = new MetricRegistry();
