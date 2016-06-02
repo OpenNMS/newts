@@ -1,3 +1,10 @@
+1.4.0
+~~~~~
+
+Enhanced the stress test tool to support indexing.
+
+Improved the performance of indexing by using prepared statements when possible, and only batching inserts with the same key.
+
 1.3.6
 ~~~~~
 
