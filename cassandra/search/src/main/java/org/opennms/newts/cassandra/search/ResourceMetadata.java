@@ -16,17 +16,13 @@
 package org.opennms.newts.cassandra.search;
 
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
 import com.codahale.metrics.Meter;
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 
 public class ResourceMetadata implements Serializable {
 
@@ -34,29 +30,29 @@ public class ResourceMetadata implements Serializable {
 
     private final Set<String> m_metrics = Sets.newConcurrentHashSet();
     private final Map<String, String> m_attributes = Maps.newConcurrentMap();
-    private final transient Optional<Meter> m_metricReqs;
-    private final transient Optional<Meter> m_attributeReqs;
-    private final transient Optional<Meter> m_metricMisses;
-    private final transient Optional<Meter> m_attributeMisses;
+    private final transient Meter m_metricReqs;
+    private final transient Meter m_attributeReqs;
+    private final transient Meter m_metricMisses;
+    private final transient Meter m_attributeMisses;
 
     public ResourceMetadata(Meter metricReqs, Meter attributeReqs, Meter metricMisses, Meter attributeMisses) {
-        m_metricReqs = Optional.of(checkNotNull(metricReqs, "metricsReqs argument"));
-        m_attributeReqs = Optional.of(checkNotNull(attributeReqs, "attributesReqs argument"));
-        m_metricMisses = Optional.of(checkNotNull(metricMisses, "metricsMisses argument"));
-        m_attributeMisses = Optional.of(checkNotNull(attributeMisses, "attributesMisses argument"));
+        m_metricReqs = metricReqs;
+        m_attributeReqs = attributeReqs;
+        m_metricMisses = metricMisses;
+        m_attributeMisses = attributeMisses;
     }
 
     public ResourceMetadata() {
-        m_metricReqs = Optional.absent();
-        m_attributeReqs = Optional.absent();
-        m_metricMisses = Optional.absent();
-        m_attributeMisses = Optional.absent();
+        m_metricReqs = null;
+        m_attributeReqs = null;
+        m_metricMisses = null;
+        m_attributeMisses = null;
     }
 
     public boolean containsMetric(String metric) {
-        if (m_metricReqs.isPresent()) m_metricReqs.get().mark();
+        if (m_metricReqs != null) m_metricReqs.mark();
         boolean contains = m_metrics.contains(metric);
-        if ((!contains) && m_metricMisses.isPresent()) m_metricMisses.get().mark(); 
+        if ((!contains) && m_metricMisses != null) m_metricMisses.mark();
         return contains;
     }
 
@@ -66,9 +62,9 @@ public class ResourceMetadata implements Serializable {
     }
 
     public boolean containsAttribute(String key, String value) {
-        if (m_attributeReqs.isPresent()) m_attributeReqs.get().mark();
+        if (m_attributeReqs != null) m_attributeReqs.mark();
         boolean contains = m_attributes.containsKey(key) && m_attributes.get(key).equals(value);
-        if ((!contains) && m_attributeMisses.isPresent()) m_attributeMisses.get().mark();
+        if ((!contains) && m_attributeMisses != null) m_attributeMisses.mark();
         return contains;
     }
 
@@ -117,5 +113,4 @@ public class ResourceMetadata implements Serializable {
         else if (!m_metrics.equals(other.m_metrics)) return false;
         return true;
     }
-
 }
