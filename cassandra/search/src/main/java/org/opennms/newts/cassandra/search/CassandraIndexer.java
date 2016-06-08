@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -60,7 +61,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class CassandraIndexer implements Indexer {
 
@@ -77,7 +78,8 @@ public class CassandraIndexer implements Indexer {
 
     private final CassandraIndexingOptions m_options;
 
-    private final Executor m_executor = MoreExecutors.directExecutor();
+    private final Executor m_executor = Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder().setNameFormat("CassandraIndexer-Callback-%d").build());
     private final Set<StatementGenerator> statementsInFlight = Sets.newHashSet();
 
     @Inject
