@@ -15,12 +15,9 @@
  */
 package org.opennms.newts.cassandra.search;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.List;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.opennms.newts.api.Counter;
 import org.opennms.newts.api.MetricType;
@@ -29,32 +26,22 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
+import org.opennms.newts.cassandra.NewtsInstance;
 
 import com.codahale.metrics.MetricRegistry;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.RegularStatement;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Statement;
 import com.google.common.collect.Lists;
 
 public class CassandraIndexerStressITCase {
+
+    @Rule
+    public NewtsInstance newtsInstance = new NewtsInstance();
 
     @Test
     public void canIndexManyResources() {
         final int numResources = 20000;
         final int numSamplesPerResource = 3;
 
-        // Setup the indexer
-        ResultSetFuture future = mock(ResultSetFuture.class);
-        CassandraSession session = mock(CassandraSession.class);
-        when(session.executeAsync(any(Statement.class))).thenReturn(future);
-
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        BoundStatement boundStatement = mock(BoundStatement.class);
-        when(session.prepare(any(RegularStatement.class))).thenReturn(preparedStatement);
-        when(preparedStatement.bind()).thenReturn(boundStatement);
-        when(boundStatement.setString(any(String.class), any(String.class))).thenReturn(boundStatement);
+        CassandraSession session = newtsInstance.getCassandraSession();
 
         ContextConfigurations contexts = new ContextConfigurations();
         MetricRegistry metrics = new MetricRegistry();

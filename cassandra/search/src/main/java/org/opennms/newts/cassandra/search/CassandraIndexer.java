@@ -17,10 +17,10 @@ package org.opennms.newts.cassandra.search;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,6 +49,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.RegularStatement;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
@@ -55,6 +57,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 
 public class CassandraIndexer implements Indexer {
 
@@ -71,6 +77,7 @@ public class CassandraIndexer implements Indexer {
 
     private final CassandraIndexingOptions m_options;
 
+    private final Executor m_executor = MoreExecutors.directExecutor();
     private final Set<StatementGenerator> statementsInFlight = Sets.newHashSet();
 
     @Inject
@@ -94,6 +101,14 @@ public class CassandraIndexer implements Indexer {
                 .value(Constants.Schema.C_TERMS_FIELD, bindMarker(Constants.Schema.C_TERMS_FIELD))
                 .value(Constants.Schema.C_TERMS_VALUE, bindMarker(Constants.Schema.C_TERMS_VALUE))
                 .using(ttl(ttl)));
+    }
+
+    private void mergeIt(final Map<Context, Map<Resource, ResourceMetadata>> cacheQueue) {
+        for (Context context : cacheQueue.keySet()) {
+            for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
+                m_cache.merge(context, entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override
@@ -124,25 +139,32 @@ public class CassandraIndexer implements Indexer {
                     futures.add(m_session.executeAsync(statementToExecute));
                 }
 
-                for (ResultSetFuture future : futures) {
-                    future.getUninterruptibly();
-                }
-            }
+                final ListenableFuture<List<ResultSet>> resultsFuture = Futures.allAsList(futures);
+                final Set<StatementGenerator> effectiveGenerators = generators;
+                final Map<Context, Map<Resource, ResourceMetadata>> effectiveCacheQueue = cacheQueue;
+                Futures.addCallback(resultsFuture, new FutureCallback<List<ResultSet>>() {
+                    @Override
+                    public void onSuccess(List<ResultSet> results) {
+                        mergeIt(effectiveCacheQueue);
+                        synchronized(statementsInFlight) {
+                            statementsInFlight.removeAll(effectiveGenerators);
+                        }
+                    }
 
-            // Order matters here; We want the cache updated only after a successful Cassandra write.
-            for (Context context : cacheQueue.keySet()) {
-                for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
-                    m_cache.merge(context, entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        finally {
-            synchronized(statementsInFlight) {
-                statementsInFlight.removeAll(generators);
-            }
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        synchronized(statementsInFlight) {
+                            statementsInFlight.removeAll(effectiveGenerators);
+                        }
+                    }
+                  }, m_executor);
+           } else {
+               // Immediately merge any records
+               mergeIt(cacheQueue);
+           }
+        } finally {
             ctx.stop();
         }
-
     }
 
     private List<Statement> toStatements(Set<StatementGenerator> generators) {
