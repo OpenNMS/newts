@@ -40,6 +40,8 @@ import org.opennms.newts.api.search.Indexer;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.cassandra.search.support.StatementGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -57,6 +59,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class CassandraIndexer implements Indexer {
+    private static final Logger LOG = LoggerFactory.getLogger(CassandraIndexer.class);
 
     private final CassandraSession m_session;
     private final int m_ttl;
@@ -220,6 +223,7 @@ public class CassandraIndexer implements Indexer {
 
     private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, Set<StatementGenerator> generators, Context context, Resource resource) {
         if (!m_cache.get(context, resource).isPresent()) {
+            LOG.trace("Resource '{}' in context '{}' is not present is cache.", resource, context);
             if (m_options.shouldIndexResourceTerms()) {
                 for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
                     generators.add(new TermInsert(context, resource.getId(), Constants.DEFAULT_TERM_FIELD, s));
@@ -290,6 +294,8 @@ public class CassandraIndexer implements Indexer {
 
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
             if (!(cached.isPresent() && cached.get().containsAttribute(field.getKey(), field.getValue()))) {
+                LOG.trace("Resource attribute for resource '{}' in context '{}' for entry '{}' is not present is cache. Cached meta-data is: {}",
+                        resource, context, field, cached);
                 // Search indexing
                 if (m_options.shouldIndexUsingDefaultTerm()) {
                     generators.add(new TermInsert(context, resource.getId(), Constants.DEFAULT_TERM_FIELD, field.getValue()));
@@ -338,6 +344,8 @@ public class CassandraIndexer implements Indexer {
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
 
         if (!(cached.isPresent() && cached.get().containsMetric(name))) {
+            LOG.trace("Metric resource '{}' in context '{}' with name '{}' is not present is cache. Cached meta-data is: {}",
+                    resource, context, name, cached);
             generators.add(new MetricInsert(context, resource.getId(), name));
 
             getOrCreateResourceMetadata(context, resource, cacheQueue).putMetric(name);
@@ -387,6 +395,8 @@ public class CassandraIndexer implements Indexer {
 
         @Override
         public RegularStatement toStatement() {
+            LOG.trace("Inserting metric in context: '{}' with resource id: '{}' with name: '{}'",
+                    m_context, m_resourceId, m_metric);
             return insertInto(Constants.Schema.T_METRICS)
                     .value(Constants.Schema.C_METRICS_CONTEXT, m_context.getId())
                     .value(Constants.Schema.C_METRICS_RESOURCE, m_resourceId)
@@ -470,6 +480,8 @@ public class CassandraIndexer implements Indexer {
 
         @Override
         public BoundStatement toStatement() {
+            LOG.trace("Inserting term in context: '{}' with resource id: '{}' with field: '{}' and value: '{}'",
+                    m_context, m_resourceId, m_field, m_value);
             return m_insertTermsStatement.bind()
                     .setString(Constants.Schema.C_TERMS_CONTEXT, m_context.getId())
                     .setString(Constants.Schema.C_TERMS_RESOURCE, m_resourceId)
@@ -490,6 +502,8 @@ public class CassandraIndexer implements Indexer {
 
         @Override
         public RegularStatement toStatement() {
+            LOG.trace("Inserting attribute in context: '{}' with resource id: '{}' with name: '{}' and value: '{}'",
+                    m_context, m_resourceId, m_field, m_value);
             return insertInto(Constants.Schema.T_ATTRS)
                 .value(Constants.Schema.C_ATTRS_CONTEXT, m_context.getId())
                 .value(Constants.Schema.C_ATTRS_RESOURCE, m_resourceId)
