@@ -71,6 +71,8 @@ public class CassandraIndexer implements Indexer {
 
     private final CassandraIndexingOptions m_options;
 
+    private final Set<StatementGenerator> statementsInFlight = Sets.newHashSet();
+
     @Inject
     public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry,
             CassandraIndexingOptions options, ResourceIdSplitter resourceIdSplitter, ContextConfigurations contextConfigurations) {
@@ -110,6 +112,10 @@ public class CassandraIndexer implements Indexer {
 
         try {
             if (!generators.isEmpty()) {
+                synchronized(statementsInFlight) {
+                    generators.removeAll(statementsInFlight);
+                    statementsInFlight.addAll(generators);
+                }
                 m_insertCounter.inc(generators.size());
 
                 // Asynchronously execute the statements
@@ -131,6 +137,9 @@ public class CassandraIndexer implements Indexer {
             }
         }
         finally {
+            synchronized(statementsInFlight) {
+                statementsInFlight.removeAll(generators);
+            }
             ctx.stop();
         }
 
