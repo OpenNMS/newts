@@ -131,7 +131,6 @@ public class CassandraIndexer implements Indexer {
                     generators.removeAll(statementsInFlight);
                     statementsInFlight.addAll(generators);
                 }
-                m_insertCounter.inc(generators.size());
 
                 // Asynchronously execute the statements
                 List<ResultSetFuture> futures = Lists.newArrayList();
@@ -146,6 +145,7 @@ public class CassandraIndexer implements Indexer {
                     @Override
                     public void onSuccess(List<ResultSet> results) {
                         mergeIt(effectiveCacheQueue);
+                        m_insertCounter.inc(effectiveGenerators.size());
                         synchronized(statementsInFlight) {
                             statementsInFlight.removeAll(effectiveGenerators);
                         }
