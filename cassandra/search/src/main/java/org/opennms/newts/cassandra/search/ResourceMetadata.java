@@ -90,7 +90,7 @@ public class ResourceMetadata implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s[metric=%s, attributes]", getClass().getSimpleName(), m_metrics, m_attributes);
+        return String.format("%s[metric=%s, attributes=%s]", getClass().getSimpleName(), m_metrics, m_attributes);
     }
 
     @Override
