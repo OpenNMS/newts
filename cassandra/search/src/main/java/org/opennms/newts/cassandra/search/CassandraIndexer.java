@@ -17,10 +17,10 @@ package org.opennms.newts.cassandra.search;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -43,7 +43,7 @@ import org.opennms.newts.cassandra.search.support.StatementGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.datastax.driver.core.BoundStatement;
@@ -66,7 +66,7 @@ public class CassandraIndexer implements Indexer {
     private final ResourceMetadataCache m_cache;
     private final Timer m_updateTimer;
     private final Timer m_deleteTimer;
-    private final Counter m_insertCounter;
+    private final Meter m_inserts;
     private final ResourceIdSplitter m_resourceIdSplitter;
     private final ContextConfigurations m_contextConfigurations;
 
@@ -89,7 +89,7 @@ public class CassandraIndexer implements Indexer {
 
         m_updateTimer = registry.timer(name("search", "update"));
         m_deleteTimer = registry.timer(name("search", "delete"));
-        m_insertCounter = registry.counter(name("search", "inserts"));
+        m_inserts = registry.meter(name("search", "inserts"));
 
         m_insertTermsStatement = session.prepare(insertInto(Constants.Schema.T_TERMS)
                 .value(Constants.Schema.C_TERMS_CONTEXT, bindMarker(Constants.Schema.C_TERMS_CONTEXT))
@@ -119,7 +119,7 @@ public class CassandraIndexer implements Indexer {
                     generators.removeAll(statementsInFlight);
                     statementsInFlight.addAll(generators);
                 }
-                m_insertCounter.inc(generators.size());
+                m_inserts.mark(generators.size());
 
                 // Asynchronously execute the statements
                 List<ResultSetFuture> futures = Lists.newArrayList();
