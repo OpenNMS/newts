@@ -1,3 +1,10 @@
+1.4.1
+~~~~~
+
+Added TRACE logging statements to help debug indexing. These indicate what is being indexed, and why.
+
+De-duplicate indexing statements that are already in flight.
+
 1.4.0
 ~~~~~
 
