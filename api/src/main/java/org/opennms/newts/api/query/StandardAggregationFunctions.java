@@ -27,6 +27,10 @@ public enum StandardAggregationFunctions implements AggregationFunction {
 
         @Override
         public Double apply(Collection<Double> input) {
+            if (input.isEmpty()) {
+                return Double.NaN;
+            }
+
             int count = 0;
             Double sum = 0.0d;
             for (Double item : input) {
@@ -44,6 +48,10 @@ public enum StandardAggregationFunctions implements AggregationFunction {
 
         @Override
         public Double apply(Collection<Double> input) {
+            if (input.isEmpty()) {
+                return Double.NaN;
+            }
+
             Double max = Double.MIN_VALUE;
             for (Double item : input) {
                 if (!Double.isNaN(item)) {
@@ -59,6 +67,10 @@ public enum StandardAggregationFunctions implements AggregationFunction {
 
         @Override
         public Double apply(Collection<Double> input) {
+            if (input.isEmpty()) {
+                return Double.NaN;
+            }
+
             Double min = Double.MAX_VALUE;
             for (Double item : input) {
                 if (!Double.isNaN(item)) {
