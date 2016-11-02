@@ -41,6 +41,7 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.exceptions.DriverException;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 
 
 public class CassandraSessionImpl implements CassandraSession {
@@ -66,6 +67,7 @@ public class CassandraSessionImpl implements CassandraSession {
                 .builder()
                 .withPort(port)
                 .addContactPoints(hostname.split(","))
+                .withReconnectionPolicy(new ExponentialReconnectionPolicy(1000, 2 * 60 * 1000))
                 .withCompression(Compression.valueOf(compression.toUpperCase()));
 
         if (username != null && password != null) {
