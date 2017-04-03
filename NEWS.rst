@@ -1,3 +1,19 @@
+1.4.3
+~~~~~
+
+Upgraded the Cassandra driver to 3.2.0.
+
+Added support for ignoring counter wraps, and using NaNs by setting the 'org.opennms.newts.nan_on_counter_wrap' system property to 'true'.
+
+1.4.2
+~~~~~
+
+Upgraded the Cassandra driver to 3.1.1.
+
+Reduced the maximum reconnection delay from 10 minutes to 2 minutes.
+
+Updated aggregation functions to return NaN (instead of 0) when there are no values to aggregate.
+
 1.4.1
 ~~~~~
 
