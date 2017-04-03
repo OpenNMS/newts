@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opennms.newts.aggregate.Rate;
 import org.opennms.newts.aggregate.Utils.SampleRowsBuilder;
@@ -52,6 +53,11 @@ public class RateTest {
         for (int i = 0; i < m_metrics.length; i++) {
             m_metrics[i] = String.format("bytes.%d", (i + 1));
         }
+    }
+
+    @Before
+    public void setUp() {
+        Counter.NAN_ON_COUNTER_WRAP = false;
     }
 
     @Test
@@ -165,6 +171,64 @@ public class RateTest {
                 690.915556,
                 579.413333,
                 276.480000
+        };
+
+        for (int i = 0; i < expectedRates.length; i++) {
+            double actualRate = output.next().getElement("m1").getValue().doubleValue();
+            assertEquals(expectedRates[i], actualRate, 0.0001);
+        }
+    }
+
+    @Test
+    public void testCounterWrap() {
+        Iterator<Row<Sample>> samples = new SampleRowsBuilder(new Resource("localhost"), MetricType.COUNTER)
+                .row(1).element("m1", 1)
+                .row(2).element("m1", 2)
+                .row(3).element("m1", 3)
+                .row(4).element("m1", 1)
+                .row(5).element("m1", 2)
+                .row(6).element("m1", 3)
+                .build();
+
+        Iterator<Results.Row<Sample>> output = new Rate(samples, Sets.newHashSet("m1")).iterator();
+
+        double expectedRates[] = new double[] {
+                Double.NaN,
+                1.0,
+                1.0,
+                4.294967294E9,
+                1.0,
+                1.0
+        };
+
+        for (int i = 0; i < expectedRates.length; i++) {
+            double actualRate = output.next().getElement("m1").getValue().doubleValue();
+            assertEquals(expectedRates[i], actualRate, 0.0001);
+        }
+    }
+
+    @Test
+    public void testNanOnCounterWrap() {
+        Counter.NAN_ON_COUNTER_WRAP = true;
+
+        Iterator<Row<Sample>> samples = new SampleRowsBuilder(new Resource("localhost"), MetricType.COUNTER)
+                .row(1).element("m1", 1)
+                .row(2).element("m1", 2)
+                .row(3).element("m1", 3)
+                .row(4).element("m1", 1)
+                .row(5).element("m1", 2)
+                .row(6).element("m1", 3)
+                .build();
+
+        Iterator<Results.Row<Sample>> output = new Rate(samples, Sets.newHashSet("m1")).iterator();
+
+        double expectedRates[] = new double[] {
+                Double.NaN,
+                1.0,
+                1.0,
+                Double.NaN,
+                1.0,
+                1.0
         };
 
         for (int i = 0; i < expectedRates.length; i++) {

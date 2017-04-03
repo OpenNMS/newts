@@ -27,6 +27,9 @@ public class Counter extends ValueType<UnsignedLong> {
     private static final UnsignedLong MAX32 = toUnsignedLong(0xFFFFFFFFL);
     private static final UnsignedLong MAX64 = toUnsignedLong(0xFFFFFFFFFFFFFFFFL);
 
+    public static final String NAN_ON_COUNTER_WRAP_SYS_PROP = "org.opennms.newts.nan_on_counter_wrap";
+    public static boolean NAN_ON_COUNTER_WRAP = Boolean.getBoolean(NAN_ON_COUNTER_WRAP_SYS_PROP);
+
     private final UnsignedLong m_value;
 
     public Counter(long value) {
@@ -54,6 +57,10 @@ public class Counter extends ValueType<UnsignedLong> {
 
         // If previous value is greater-than this one, we've wrapped
         if (previous.compareTo(getValue()) > 0) {
+            if (NAN_ON_COUNTER_WRAP) {
+                throw new ArithmeticException();
+            }
+
             UnsignedLong count32 = getValue().plus(MAX32).plus(UnsignedLong.ONE);
 
             // Still smaller, this is a 64-bit counter wrap
