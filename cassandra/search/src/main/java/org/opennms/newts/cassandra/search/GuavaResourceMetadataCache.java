@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
@@ -86,6 +87,11 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
 
         o.get().merge(metadata);
 
+    }
+
+    @VisibleForTesting
+    protected Cache<String, ResourceMetadata> getCache() {
+        return m_cache;
     }
 
 }

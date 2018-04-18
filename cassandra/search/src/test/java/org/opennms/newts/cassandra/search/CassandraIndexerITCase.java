@@ -276,17 +276,17 @@ public class CassandraIndexerITCase {
     }
 
     /** Creates a sample (any sample), for a given resource and metric name. */
-    private Sample sampleFor(Resource resource, String metric) {
+    protected static Sample sampleFor(Resource resource, String metric) {
         return new Sample(Timestamp.now(), resource, metric, MetricType.GAUGE, ValueType.compose(0.0d, MetricType.GAUGE));
     }
 
     /** Returns a Map from an even number of strings **/
-    private Map<String, String> map(String... attrs) {
+    protected static Map<String, String> map(String... attrs) {
         return map(Maps.<String, String> newHashMap(), attrs);
     }
 
     /** Returns a Map from an even number of strings, and a (copy of a )base map */
-    private Map<String, String> map(Map<String, String> base, String... attrs) {
+    protected static Map<String, String> map(Map<String, String> base, String... attrs) {
         checkArgument((attrs.length % 2) == 0, "odd number of attrs!");
 
         Map<String, String> map = Maps.newHashMap(base);
