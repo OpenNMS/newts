@@ -1,3 +1,12 @@
+1.5.0
+~~~~~
+
+Upgrade the Cassandra driver to 3.5.0.
+
+Fixed a bug with the GSOD example where it would fail to initialize.
+
+Added a utility class that can be used to populate an index cache from existing records.
+
 1.4.3
 ~~~~~
 
