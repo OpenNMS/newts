@@ -23,6 +23,8 @@ import org.opennms.newts.api.DefaultSampleProcessorService;
 import org.opennms.newts.api.SampleProcessor;
 import org.opennms.newts.api.SampleProcessorService;
 import org.opennms.newts.api.SampleRepository;
+import org.opennms.newts.cassandra.CassandraSession;
+import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
 import com.codahale.metrics.MetricRegistry;
@@ -39,11 +41,15 @@ public class Config extends AbstractModule {
     protected void configure() {
 
         bind(SampleRepository.class).to(CassandraSampleRepository.class);
+        bind(CassandraSession.class).to(CassandraSessionImpl.class);
 
         Properties properties = new Properties();
         properties.put("cassandra.keyspace", System.getProperty("cassandra.keyspace", "newts"));
         properties.put("cassandra.hostname", System.getProperty("cassandra.host", "localhost"));
         properties.put("cassandra.port", System.getProperty("cassandra.port", "9042"));
+        properties.put("cassandra.username", System.getProperty("cassandra.username", "admin"));
+        properties.put("cassandra.password", System.getProperty("cassandra.password", "admin"));
+        properties.put("cassandra.ssl", System.getProperty("cassandra.ssl", "false"));
         properties.put("cassandra.compression", System.getProperty("cassandra.compression", "NONE"));
         properties.put("samples.cassandra.time-to-live", System.getProperty("cassandra.time-to-live", "0"));
         Names.bindProperties(binder(), properties);
