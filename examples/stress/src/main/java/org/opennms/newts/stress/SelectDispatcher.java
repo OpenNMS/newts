@@ -30,7 +30,6 @@ import org.opennms.newts.cassandra.CassandraSessionImpl;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.opennms.newts.persistence.cassandra.CassandraSampleRepository;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Queues;
 
 
@@ -61,7 +60,7 @@ public class SelectDispatcher extends Dispatcher {
         m_repository = new CassandraSampleRepository(
                 session,
                 Config.CASSANDRA_TTL,
-                new MetricRegistry(),
+                m_metricRegistry,
                 new DefaultSampleProcessorService(1),
                 new ContextConfigurations());
 

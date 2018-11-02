@@ -18,6 +18,8 @@ package org.opennms.newts.stress;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.concurrent.TimeUnit;
+
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 
@@ -26,13 +28,27 @@ abstract class Dispatcher {
 
     protected final Worker[] m_threads;
     protected final MetricRegistry m_metricRegistry = new MetricRegistry();
+    protected final ConsoleReporter m_reporter;
 
     Dispatcher(Config config) {
         checkNotNull(config, "config argument");
         m_threads = new Worker[config.getThreads()];
+        m_reporter = ConsoleReporter.forRegistry(m_metricRegistry)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build();
+        m_reporter.start(30, TimeUnit.SECONDS);
     }
 
     abstract void go() throws InterruptedException;
+
+    void setupReport() {
+        ConsoleReporter reporter = ConsoleReporter.forRegistry(m_metricRegistry)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build();
+
+    }
 
     void shutdown() throws InterruptedException {
         // Trigger shutdown on all threads
@@ -44,10 +60,11 @@ abstract class Dispatcher {
             w.join();
         }
 
+        m_reporter.stop();
     }
 
     void printReport() {
-        ConsoleReporter.forRegistry(m_metricRegistry).build().report();
+        m_reporter.report();
     }
 
 }

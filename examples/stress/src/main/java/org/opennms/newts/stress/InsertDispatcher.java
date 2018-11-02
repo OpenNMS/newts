@@ -76,17 +76,16 @@ class InsertDispatcher extends Dispatcher {
                 config.getCassandraSsl());
 
         ContextConfigurations contexts = new ContextConfigurations();
-        MetricRegistry metrics = new MetricRegistry();
         Set<SampleProcessor> processors = Sets.newHashSet();
 
         if (m_config.isSearchEnabled()) {
             ResourceIdSplitter resourceIdSplitter = new EscapableResourceIdSplitter();
-            GuavaResourceMetadataCache cache = new GuavaResourceMetadataCache(m_config.getNumResources(), metrics);
+            GuavaResourceMetadataCache cache = new GuavaResourceMetadataCache(m_config.getNumResources(), m_metricRegistry);
             CassandraIndexingOptions indexingOptions = new CassandraIndexingOptions.Builder()
                     .withHierarchicalIndexing(m_config.isHierarchicalIndexingEnabled())
                     .withMaxBatchSize(m_config.getBatchSize()).build();
             CassandraIndexer cassandraIndexer = new CassandraIndexer(session, Config.CASSANDRA_TTL,
-                    cache, metrics, indexingOptions, resourceIdSplitter, contexts);
+                    cache, m_metricRegistry, indexingOptions, resourceIdSplitter, contexts);
             CassandraIndexerSampleProcessor indexerSampleProcessor = new CassandraIndexerSampleProcessor(cassandraIndexer);
             processors.add(indexerSampleProcessor);
         }
@@ -96,7 +95,7 @@ class InsertDispatcher extends Dispatcher {
         m_repository = new CassandraSampleRepository(
                 session,
                 Config.CASSANDRA_TTL,
-                metrics,
+                m_metricRegistry,
                 sampleProcessorService,
                 contexts);
 
