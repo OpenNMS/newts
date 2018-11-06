@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.CloseFuture;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Cluster.Builder;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolOptions.Compression;
 import com.datastax.driver.core.RegularStatement;
@@ -63,11 +65,20 @@ public class CassandraSessionImpl implements CassandraSession {
 
         LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
 
+        PoolingOptions poolingOptions = new PoolingOptions();
+        poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL,  30)
+                .setMaxConnectionsPerHost( HostDistance.LOCAL, 30)
+                .setCoreConnectionsPerHost(HostDistance.REMOTE, 30)
+                .setMaxConnectionsPerHost( HostDistance.REMOTE, 30);
+        poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, 4)
+                .setMaxRequestsPerConnection(HostDistance.REMOTE, 4);
+
         Builder builder = Cluster
                 .builder()
                 .withPort(port)
                 .addContactPoints(hostname.split(","))
                 .withReconnectionPolicy(new ExponentialReconnectionPolicy(1000, 2 * 60 * 1000))
+                .withPoolingOptions(poolingOptions)
                 .withCompression(Compression.valueOf(compression.toUpperCase()));
 
         if (username != null && password != null) {
