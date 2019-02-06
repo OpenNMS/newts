@@ -52,11 +52,21 @@ public class CassandraSessionImpl implements CassandraSession {
 
     private final Session m_session;
 
+    public CassandraSessionImpl(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
+                                @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
+                                @Named("cassandra.username") String username, @Named("cassandra.password") String password,
+                                @Named("cassandra.ssl") boolean ssl) {
+        this(keyspace, hostname, port, compression, username, password, ssl, null, null, null);
+    }
+
     @Inject
     public CassandraSessionImpl(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
             @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
             @Named("cassandra.username") String username, @Named("cassandra.password") String password,
-            @Named("cassandra.ssl") boolean ssl) {
+            @Named("cassandra.ssl") boolean ssl,
+            @Named("cassandra.pool.core-connections-per-host") Integer coreConnectionsPerHost,
+            @Named("cassandra.pool.max-connections-per-host") Integer maxConnectionsPerHost,
+            @Named("cassandra.pool.max-requests-per-connection") Integer maxRequestsPerConnection) {
 
         checkNotNull(keyspace, "keyspace argument");
         checkNotNull(hostname, "hostname argument");
@@ -65,13 +75,19 @@ public class CassandraSessionImpl implements CassandraSession {
 
         LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
 
-        PoolingOptions poolingOptions = new PoolingOptions();
-        poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL,  30)
-                .setMaxConnectionsPerHost( HostDistance.LOCAL, 30)
-                .setCoreConnectionsPerHost(HostDistance.REMOTE, 30)
-                .setMaxConnectionsPerHost( HostDistance.REMOTE, 30);
-        poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, 4)
-                .setMaxRequestsPerConnection(HostDistance.REMOTE, 4);
+        final PoolingOptions poolingOptions = new PoolingOptions();
+        if (coreConnectionsPerHost != null) {
+            poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL,  coreConnectionsPerHost)
+                    .setCoreConnectionsPerHost(HostDistance.REMOTE, coreConnectionsPerHost);
+        }
+        if (maxConnectionsPerHost != null) {
+            poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL,  maxConnectionsPerHost)
+                    .setMaxConnectionsPerHost(HostDistance.REMOTE, maxConnectionsPerHost);
+        }
+        if (maxRequestsPerConnection != null) {
+            poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL,  maxRequestsPerConnection)
+                    .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection);
+        }
 
         Builder builder = Cluster
                 .builder()

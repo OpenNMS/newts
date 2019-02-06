@@ -54,6 +54,15 @@ public class CassandraConfig {
     @JsonProperty("ssl")
     private boolean m_ssl = false;
 
+    @JsonProperty("core-connections-per-host")
+    private Integer m_coreConnectionsPerHost;
+
+    @JsonProperty("max-connections-per-host")
+    private Integer m_maxConnectionsPerHost;
+
+    @JsonProperty("max-requests-per-connection")
+    private Integer m_maxRequestsPerConnection;
+
     public String getKeyspace() {
         return m_keyspace;
     }
@@ -84,5 +93,17 @@ public class CassandraConfig {
 
     public boolean getSsl() {
         return m_ssl;
+    }
+
+    public Integer getCoreConnectionsPerHost() {
+        return m_coreConnectionsPerHost;
+    }
+
+    public Integer getMaxConnectionsPerHost() {
+        return m_maxConnectionsPerHost;
+    }
+
+    public Integer getMaxRequestsPerConnection() {
+        return m_maxRequestsPerConnection;
     }
 }

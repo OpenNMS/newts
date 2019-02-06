@@ -63,6 +63,9 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(String.class).annotatedWith(named("cassandra.username")).toInstance(m_newtsConf.getCassandraUsername());
         bind(String.class).annotatedWith(named("cassandra.password")).toInstance(m_newtsConf.getCassandraPassword());
         bind(Boolean.class).annotatedWith(named("cassandra.ssl")).toInstance(m_newtsConf.getCassandraSsl());
+        bind(Integer.class).annotatedWith(named("cassandra.pool.core-connections-per-host")).toInstance(m_newtsConf.getCoreConnectionsPerHost());
+        bind(Integer.class).annotatedWith(named("cassandra.pool.max-connections-per-host")).toInstance(m_newtsConf.getMaxConnectionsPerHost());
+        bind(Integer.class).annotatedWith(named("cassandra.pool.max-requests-per-connection")).toInstance(m_newtsConf.getMaxRequestsPerConnection());
 
         bind(Integer.class).annotatedWith(named("samples.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());
         bind(Integer.class).annotatedWith(named("search.cassandra.time-to-live")).toInstance(m_newtsConf.getCassandraColumnTTL());

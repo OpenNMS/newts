@@ -96,6 +96,18 @@ public class NewtsConfig extends Configuration {
         return m_cassandraConfig.getSsl();
     }
 
+    public Integer getCoreConnectionsPerHost() {
+        return m_cassandraConfig.getCoreConnectionsPerHost();
+    }
+
+    public Integer getMaxConnectionsPerHost() {
+        return m_cassandraConfig.getMaxConnectionsPerHost();
+    }
+
+    public Integer getMaxRequestsPerConnection() {
+        return m_cassandraConfig.getMaxRequestsPerConnection();
+    }
+
     public Map<String, ResultDescriptorDTO> getReports() {
         return m_reports;
     }
