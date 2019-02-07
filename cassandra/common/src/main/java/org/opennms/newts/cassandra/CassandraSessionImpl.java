@@ -77,15 +77,18 @@ public class CassandraSessionImpl implements CassandraSession {
 
         final PoolingOptions poolingOptions = new PoolingOptions();
         if (coreConnectionsPerHost != null) {
-            poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL,  coreConnectionsPerHost)
+            LOG.debug("Using {} core connections per host.", coreConnectionsPerHost);
+            poolingOptions.setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost)
                     .setCoreConnectionsPerHost(HostDistance.REMOTE, coreConnectionsPerHost);
         }
         if (maxConnectionsPerHost != null) {
-            poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL,  maxConnectionsPerHost)
+            LOG.debug("Using {} max connections per host.", maxConnectionsPerHost);
+            poolingOptions.setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost)
                     .setMaxConnectionsPerHost(HostDistance.REMOTE, maxConnectionsPerHost);
         }
         if (maxRequestsPerConnection != null) {
-            poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL,  maxRequestsPerConnection)
+            LOG.debug("Using {} max requests per connection.", maxRequestsPerConnection);
+            poolingOptions.setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
                     .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection);
         }
 
