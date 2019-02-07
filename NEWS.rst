@@ -1,3 +1,8 @@
+1.5.1
+~~~~~
+
+Added support for configuration the number of connections used in the pool.
+
 1.5.0
 ~~~~~
 
