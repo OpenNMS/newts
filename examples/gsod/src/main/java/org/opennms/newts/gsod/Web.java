@@ -17,16 +17,18 @@ package org.opennms.newts.gsod;
 
 
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.staticFileLocation;
 
 import java.util.Map;
 
-import spark.Request;
-import spark.Response;
-import spark.template.velocity.VelocityRoute;
-
 import com.google.common.collect.Maps;
 
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.TemplateViewRoute;
+import spark.template.velocity.VelocityTemplateEngine;
 
 public class Web {
     
@@ -55,30 +57,28 @@ public class Web {
 
         staticFileLocation("/static");
 
-        get(new VelocityRoute("/stations") {
-
+        get("/stations", new TemplateViewRoute() {
             @Override
-            public Object handle(Request request, Response response) {
+            public ModelAndView handle(Request request, Response response) {
                 Map<String, Object> model = Maps.newHashMap();
                 model.put("stationsMap", STATION_NAMES);
-                return modelAndView(model, "index.wm");
+                return new ModelAndView(model, "index.wm");
             }
-        });
+        }, new VelocityTemplateEngine());
 
-        get(new VelocityRoute("/summer88") {
-
+        get("/summer88", new TemplateViewRoute() {
             @Override
-            public Object handle(Request arg0, Response arg1) {
+            public ModelAndView handle(Request request, Response response) {
                 Map<String, Object> model = Maps.newHashMap();
                 model.put("stationIds", STATION_IDS);
-                return modelAndView(model, "summer.wm");
+                return new ModelAndView(model, "summer.wm");
             }
-        });
+        }, new VelocityTemplateEngine());
 
-        get(new VelocityRoute("/stations/:stationName") {
+        get("/stations/:stationName", new TemplateViewRoute() {
 
             @Override
-            public Object handle(Request request, Response response) {
+            public ModelAndView handle(Request request, Response response) {
 
                 String stationName = request.params(":stationName");
                 String id = STATION_IDS.get(stationName);
@@ -94,9 +94,9 @@ public class Web {
                 model.put("end", request.queryParams("end"));
                 model.put("resolution", request.queryParams("resolution"));
 
-                return modelAndView(model, "station.wm");
+                return new ModelAndView(model, "station.wm");
             }
-        });
+        }, new VelocityTemplateEngine());
 
     }
 
