@@ -1,4 +1,4 @@
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="newts-1.5.2">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="newts-1.5.3-SNAPSHOT">
 
     <feature name="netty" description="Netty IO library" version="4.0.56.Final">
       <bundle dependency="true">mvn:io.netty/netty-handler/4.0.56.Final</bundle>
@@ -22,28 +22,28 @@
       <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.5.4</bundle>
     </feature>
 
-    <feature name="newts-api" description="Newts API" version="1.5.2">
+    <feature name="newts-api" description="Newts API" version="1.5.3-SNAPSHOT">
       <feature>fastxml-jackson</feature>
       <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
       <bundle dependency="true">mvn:org.apache.commons/commons-jexl/2.1.1</bundle>
-      <bundle>mvn:org.opennms.newts/newts-api/1.5.2</bundle>
-      <bundle>mvn:org.opennms.newts/newts-aggregate/1.5.2</bundle>
+      <bundle>mvn:org.opennms.newts/newts-api/1.5.3-SNAPSHOT</bundle>
+      <bundle>mvn:org.opennms.newts/newts-aggregate/1.5.3-SNAPSHOT</bundle>
     </feature>
 
-    <feature name="newts-cassandra-common" description="Newts Cassandra Common" version="1.5.2">
+    <feature name="newts-cassandra-common" description="Newts Cassandra Common" version="1.5.3-SNAPSHOT">
       <feature>newts-api</feature>
       <feature>cassandra-driver</feature>
-      <bundle>mvn:org.opennms.newts/newts-cassandra-common/1.5.2</bundle>
+      <bundle>mvn:org.opennms.newts/newts-cassandra-common/1.5.3-SNAPSHOT</bundle>
     </feature>
 
-    <feature name="newts-cassandra" description="Newts Cassandra Repository" version="1.5.2">
+    <feature name="newts-cassandra" description="Newts Cassandra Repository" version="1.5.3-SNAPSHOT">
       <feature>newts-cassandra-common</feature>
-      <bundle>mvn:org.opennms.newts/newts-cassandra/1.5.2</bundle>
+      <bundle>mvn:org.opennms.newts/newts-cassandra/1.5.3-SNAPSHOT</bundle>
     </feature>
 
-    <feature name="newts-cassandra-search" description="Newts Cassandra Search" version="1.5.2">
+    <feature name="newts-cassandra-search" description="Newts Cassandra Search" version="1.5.3-SNAPSHOT">
       <feature>newts-cassandra-common</feature>
-      <bundle>mvn:org.opennms.newts/newts-cassandra-search/1.5.2</bundle>
+      <bundle>mvn:org.opennms.newts/newts-cassandra-search/1.5.3-SNAPSHOT</bundle>
     </feature>
 
 </features>
