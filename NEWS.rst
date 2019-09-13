@@ -1,3 +1,8 @@
+1.5.2
+~~~~~
+
+Changed the way the MetricRegistries are wired to simplify the integration in OpenNMS.
+
 1.5.1
 ~~~~~
 
