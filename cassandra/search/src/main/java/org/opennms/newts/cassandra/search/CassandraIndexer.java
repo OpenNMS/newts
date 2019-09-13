@@ -77,7 +77,7 @@ public class CassandraIndexer implements Indexer {
     private final Set<StatementGenerator> statementsInFlight = Sets.newHashSet();
 
     @Inject
-    public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, MetricRegistry registry,
+    public CassandraIndexer(CassandraSession session, @Named("search.cassandra.time-to-live") int ttl, ResourceMetadataCache cache, @Named("newtsMetricRegistry") MetricRegistry registry,
             CassandraIndexingOptions options, ResourceIdSplitter resourceIdSplitter, ContextConfigurations contextConfigurations) {
         m_session = checkNotNull(session, "session argument");
         m_ttl = ttl;

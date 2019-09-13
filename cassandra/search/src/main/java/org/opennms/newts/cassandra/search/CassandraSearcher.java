@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
@@ -68,7 +69,7 @@ public class CassandraSearcher implements Searcher {
     private final PreparedStatement m_selectMetricNamesStatement;
 
     @Inject
-    public CassandraSearcher(CassandraSession session, MetricRegistry registry, ContextConfigurations contextConfigurations) {
+    public CassandraSearcher(CassandraSession session, @Named("newtsMetricRegistry") MetricRegistry registry, ContextConfigurations contextConfigurations) {
         m_session = checkNotNull(session, "session argument");
         m_searchTimer = registry.timer(name("search", "search"));
         m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
