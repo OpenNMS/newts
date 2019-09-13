@@ -15,6 +15,8 @@
  */
 package org.opennms.newts.rest;
 
+import static com.google.inject.name.Names.named;
+
 import org.opennms.newts.api.DefaultSampleProcessorService;
 import org.opennms.newts.api.SampleProcessorService;
 
@@ -31,7 +33,7 @@ public class NewtsGuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(MetricRegistry.class).toInstance(new MetricRegistry());
+        bind(MetricRegistry.class).annotatedWith(named("newtsMetricRegistry")).toInstance(new MetricRegistry());
         bind(SampleProcessorService.class).to(DefaultSampleProcessorService.class);
     }
 

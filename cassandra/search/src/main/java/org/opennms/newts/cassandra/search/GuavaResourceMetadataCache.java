@@ -48,7 +48,8 @@ public class GuavaResourceMetadataCache implements ResourceMetadataCache {
     private final Meter m_attributeMisses;
 
     @Inject
-    public GuavaResourceMetadataCache(@Named("search.resourceMetadata.maxCacheEntries") long maxSize, MetricRegistry registry) {
+    public GuavaResourceMetadataCache(@Named("search.resourceMetadata.maxCacheEntries") long maxSize,
+                                      @Named("newtsMetricRegistry") MetricRegistry registry) {
         LOG.info("Initializing resource metadata cache ({} max entries)", maxSize);
         m_cache = CacheBuilder.newBuilder().maximumSize(maxSize).build();
 

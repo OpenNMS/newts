@@ -94,7 +94,8 @@ public class CassandraSampleRepository implements SampleRepository {
     private final ContextConfigurations m_contextConfigurations;
 
     @Inject
-    public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, MetricRegistry registry, SampleProcessorService processorService, ContextConfigurations contextConfigurations) {
+    public CassandraSampleRepository(CassandraSession session, @Named("samples.cassandra.time-to-live") int ttl, @Named("newtsMetricRegistry") MetricRegistry registry,
+                                     SampleProcessorService processorService, ContextConfigurations contextConfigurations) {
 
         m_session = checkNotNull(session, "session argument");
         checkArgument(ttl >= 0, "Negative Cassandra column TTL");
