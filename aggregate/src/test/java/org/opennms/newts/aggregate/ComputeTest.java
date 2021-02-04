@@ -22,6 +22,7 @@ import static org.opennms.newts.api.query.StandardAggregationFunctions.AVERAGE;
 
 import java.util.Iterator;
 
+import org.apache.commons.jexl3.JexlException;
 import org.junit.Test;
 import org.opennms.newts.aggregate.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.api.Measurement;
@@ -130,5 +131,25 @@ public class ComputeTest {
 
         assertRowsEqual(expected, compute);
 
+    }
+
+    @Test(expected = JexlException.class)
+    public void testBlacklist() {
+        Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost"))
+                .row(300).element("in", 20)
+                .row(600).element("in", 60)
+                .build();
+
+        ResultDescriptor rDescriptor = new ResultDescriptor()
+                .datasource("in", "ifInOctets", seconds(600), AVERAGE)
+                .expression("sum", "in + in.class.hashCode()")
+
+                .export("sum");
+
+        Compute compute = new Compute(rDescriptor, testData);
+
+        while(compute.hasNext()) {
+            compute.next().getElement("sum");
+        }
     }
 }

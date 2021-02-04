@@ -24,10 +24,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.JexlContext;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.opennms.newts.api.Duration;
 
 import com.google.common.base.Function;
@@ -38,6 +40,17 @@ import com.google.common.collect.Sets;
 
 public class ResultDescriptor implements Serializable {
     private static final long serialVersionUID = -6983442401680715547L;
+
+    private final static JexlEngine JEXL_ENGINE;
+
+    static {
+        final JexlSandbox jexlSandbox = new JexlSandbox(false);
+        jexlSandbox.white(String.class.getName());
+
+        JEXL_ENGINE = new JexlBuilder()
+                .sandbox(jexlSandbox)
+                .create();
+    }
 
     public static interface UnaryFunction extends Serializable {
         double apply(double a);
@@ -252,8 +265,7 @@ public class ResultDescriptor implements Serializable {
     }
     
     public ResultDescriptor expression(String label, String expression) {
-        final JexlEngine je = new JexlEngine();
-        final Expression expr = je.createExpression(expression);
+        final JexlExpression expr = JEXL_ENGINE.createExpression(expression);
         final String[] labels = getLabels().toArray(new String[0]);
         CalculationFunction evaluate = new CalculationFunction() {
             private static final long serialVersionUID = -3328049421398096252L;
