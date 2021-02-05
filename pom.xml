@@ -24,7 +24,8 @@
 
   <scm>
     <url>https://github.com/OpenNMS/newts</url>
-    <connection>https://github.com/OpenNMS/newts.git</connection>
+    <connection>scm:git:https://github.com/OpenNMS/newts.git</connection>
+    <developerConnection>scm:git:git@github.com:OpenNMS/newts</developerConnection>
   </scm>
 
   <developers>
