@@ -25,7 +25,7 @@
     <feature name="newts-api" description="Newts API" version="1.5.3-SNAPSHOT">
       <feature>fastxml-jackson</feature>
       <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
-      <bundle dependency="true">mvn:org.apache.commons/commons-jexl/2.1.1</bundle>
+      <bundle dependency="true">mvn:org.apache.commons/commons-jexl3/3.1</bundle>
       <bundle>mvn:org.opennms.newts/newts-api/1.5.3-SNAPSHOT</bundle>
       <bundle>mvn:org.opennms.newts/newts-aggregate/1.5.3-SNAPSHOT</bundle>
     </feature>
