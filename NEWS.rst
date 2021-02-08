@@ -1,3 +1,8 @@
+1.5.3
+~~~~~
+
+Sandbox JEXL expressions.
+
 1.5.2
 ~~~~~
 
