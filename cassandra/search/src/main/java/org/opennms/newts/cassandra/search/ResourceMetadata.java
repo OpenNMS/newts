@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.codahale.metrics.Meter;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
 public class ResourceMetadata implements Serializable {
@@ -34,6 +35,12 @@ public class ResourceMetadata implements Serializable {
     private final transient Meter m_attributeReqs;
     private final transient Meter m_metricMisses;
     private final transient Meter m_attributeMisses;
+
+    /**
+     * The timestamp (as milliseconds since EPOCH) when the stored representation of this resource metadata expires.
+     * {@code null} represents that there is no inforation availale and the entry is considered expired.
+     */
+    private Long m_expires = null;
 
     public ResourceMetadata(Meter metricReqs, Meter attributeReqs, Meter metricMisses, Meter attributeMisses) {
         m_metricReqs = metricReqs;
@@ -73,6 +80,19 @@ public class ResourceMetadata implements Serializable {
         return this;
     }
 
+    public long getExpires() {
+        return this.m_expires;
+    }
+
+    public ResourceMetadata setExpires(final Long expires) {
+        this.m_expires = expires;
+        return this;
+    }
+
+    public boolean expired(final long currentTimeMillis) {
+        return this.m_expires == null || this.m_expires <= currentTimeMillis;
+    }
+
     /**
      * Merges the metrics and attributes from the given instance, to the current instance.
      *
@@ -85,6 +105,12 @@ public class ResourceMetadata implements Serializable {
             modified = !m_attributes.equals(other.m_attributes);
         }
         m_attributes.putAll(other.m_attributes);
+
+        // Get the earliest expiring time while always overwriting null values
+        this.m_expires = Ordering.natural()
+                                 .nullsLast()
+                                 .min(this.m_expires, other.m_expires);
+
         return modified;
     }
 

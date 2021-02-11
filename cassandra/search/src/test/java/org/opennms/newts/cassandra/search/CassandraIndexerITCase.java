@@ -275,6 +275,45 @@ public class CassandraIndexerITCase {
 
     }
 
+    @Test
+    public void testCacheExpiring() throws Exception {
+        final MetricRegistry registry = new MetricRegistry();
+
+        final ResourceMetadataCache cache = new GuavaResourceMetadataCache(100, registry);
+        final ContextConfigurations contextConfigurations = new ContextConfigurations();
+
+        final CassandraSession session = newtsInstance.getCassandraSession();
+
+        final CassandraIndexingOptions options = new CassandraIndexingOptions.Builder()
+                .withHierarchicalIndexing(false).build();
+        final Indexer indexer = new CassandraIndexer(session, 10, cache, registry, options, new SimpleResourceIdSplitter(), contextConfigurations);
+
+        final Resource resource = new Resource("aaa", Optional.of(map("beverage", "beer")));
+        indexer.update(Collections.singletonList(sampleFor(resource, "m0")));
+
+        assertThat(session.execute("SELECT count(*) as count FROM terms").one().getLong("count"), is(3L));
+
+        // Let the TTL expire
+        Thread.sleep(15_000);
+        assertThat(session.execute("SELECT count(*) as count FROM terms").one().getLong("count"), is(0L));
+
+        // Reindex
+        indexer.update(Collections.singletonList(sampleFor(resource, "m0")));
+        assertThat(session.execute("SELECT count(*) as count FROM terms").one().getLong("count"), is(3L));
+
+        // Reindex before TTL * 3 / 4
+        Thread.sleep(8_000);
+        indexer.update(Collections.singletonList(sampleFor(resource, "m0")));
+
+        // Let initial TTL pass - 12s after reindex
+        Thread.sleep(4_000);
+        assertThat(session.execute("SELECT count(*) as count FROM terms").one().getLong("count"), is(3L));
+
+        // Let remaining TTL pass - 20s after reindex, 12s after last update
+        Thread.sleep(8_000);
+        assertThat(session.execute("SELECT count(*) as count FROM terms").one().getLong("count"), is(0L));
+    }
+
     /** Creates a sample (any sample), for a given resource and metric name. */
     protected static Sample sampleFor(Resource resource, String metric) {
         return new Sample(Timestamp.now(), resource, metric, MetricType.GAUGE, ValueType.compose(0.0d, MetricType.GAUGE));

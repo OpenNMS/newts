@@ -49,16 +49,19 @@ public class CassandraCachePrimer {
     @Inject
     public CassandraCachePrimer(CassandraSession session) {
         m_session = checkNotNull(session);
-        Select select = QueryBuilder.select(Constants.Schema.C_METRICS_CONTEXT,
-                Constants.Schema.C_METRICS_RESOURCE,
-                Constants.Schema.C_METRICS_NAME)
+        Select select = QueryBuilder.select()
+                .column(Constants.Schema.C_METRICS_CONTEXT)
+                .column(Constants.Schema.C_METRICS_RESOURCE)
+                .column(Constants.Schema.C_METRICS_NAME)
                 .from(Constants.Schema.T_METRICS);
         m_selectAllMetricsStatement = session.prepare(select.toString());
 
-        select = QueryBuilder.select(Constants.Schema.C_ATTRS_CONTEXT,
-                Constants.Schema.C_ATTRS_RESOURCE,
-                Constants.Schema.C_ATTRS_ATTR,
-                Constants.Schema.C_ATTRS_VALUE)
+        select = QueryBuilder.select()
+                .column(Constants.Schema.C_ATTRS_CONTEXT)
+                .column(Constants.Schema.C_ATTRS_RESOURCE)
+                .column(Constants.Schema.C_ATTRS_ATTR)
+                .column(Constants.Schema.C_ATTRS_VALUE)
+                .ttl(Constants.Schema.C_ATTRS_VALUE).as("ttl")
                 .from(Constants.Schema.T_ATTRS);
         m_selectAllAttributesStatement = session.prepare(select.toString());
     }
@@ -86,6 +89,13 @@ public class CassandraCachePrimer {
 
             final Resource resource = new Resource(row.getString(Constants.Schema.C_METRICS_RESOURCE));
             final ResourceMetadata resourceMetadata = new ResourceMetadata();
+
+            // As cassandra is unable to provide remaining TTL values for tables with partition/primary keys only, we
+            // hope that the cached metadata is merged with one from the `resource_attributes` table on which the TTL
+            // can be determined. As a fallback, we let the cache expire immediately avoiding objects in the cache with
+            // are in fact already timed out.
+            resourceMetadata.setExpires(null);
+
             resourceMetadata.putMetric(row.getString(Constants.Schema.C_METRICS_NAME));
             cache.merge(rowContext, resource, resourceMetadata);
         }
@@ -107,6 +117,13 @@ public class CassandraCachePrimer {
 
             final Resource resource = new Resource(row.getString(Constants.Schema.C_ATTRS_RESOURCE));
             final ResourceMetadata resourceMetadata = new ResourceMetadata();
+
+            // Let the caches expire before the real TTL to avoid corner-cases and add some margin
+            // Cassandra supports fetching of TTL values only on rows where not all columns are primary keys. Therefore
+            // we assume that the TTL of entries in this table is similar to entries of other metadata tables. Setting
+            // the expiration time only once will will merge the value to all other cached entries for the same resource
+            resourceMetadata.setExpires(System.currentTimeMillis() + row.getInt("ttl") * 1000L * 3L / 4L);
+
             resourceMetadata.putAttribute(row.getString(Constants.Schema.C_ATTRS_ATTR),
                     row.getString(Constants.Schema.C_ATTRS_VALUE));
             cache.merge(rowContext, resource, resourceMetadata);
