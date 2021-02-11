@@ -1,3 +1,8 @@
+1.5.4
+~~~~~
+
+Respect remaining TTL while caching resource metadata.
+
 1.5.3
 ~~~~~
 

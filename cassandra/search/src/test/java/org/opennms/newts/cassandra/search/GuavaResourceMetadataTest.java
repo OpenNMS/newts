@@ -39,25 +39,27 @@ public class GuavaResourceMetadataTest {
 
         assertThat(cache.get(c, r).isPresent(), not(true));
 
-        cache.merge(c, r, new ResourceMetadata());
+        cache.merge(c, r, new ResourceMetadata().setExpires(200L));
 
         assertThat(cache.get(c, r).isPresent(), is(true));
         assertThat(cache.get(c, r).get().containsMetric("m0"), not(true));
         assertThat(cache.get(c, r).get().containsMetric("m1"), not(true));
+        assertThat(cache.get(c, r).get().getExpires(), is(200L));
 
-        cache.merge(c, r, new ResourceMetadata().putMetric("m0").putMetric("m1"));
+        cache.merge(c, r, new ResourceMetadata().setExpires(100L).putMetric("m0").putMetric("m1"));
 
         assertThat(cache.get(c, r).get().containsMetric("m0"), is(true));
         assertThat(cache.get(c, r).get().containsMetric("m1"), is(true));
         assertThat(cache.get(c, r).get().containsAttribute("meat", "beef"), not(true));
         assertThat(cache.get(c, r).get().containsAttribute("pudding", "bread"), not(true));
+        assertThat(cache.get(c, r).get().getExpires(), is(100L));
 
-        cache.merge(c, r, new ResourceMetadata().putAttribute("meat", "beef"));
-        cache.merge(c, r, new ResourceMetadata().putAttribute("pudding", "bread"));
+        cache.merge(c, r, new ResourceMetadata().setExpires(500L).putAttribute("meat", "beef"));
+        cache.merge(c, r, new ResourceMetadata().setExpires(400L).putAttribute("pudding", "bread"));
 
         assertThat(cache.get(c, r).get().containsAttribute("meat", "beef"), is(true));
         assertThat(cache.get(c, r).get().containsAttribute("pudding", "bread"), is(true));
-
+        assertThat(cache.get(c, r).get().getExpires(), is(100L));
     }
 
 }

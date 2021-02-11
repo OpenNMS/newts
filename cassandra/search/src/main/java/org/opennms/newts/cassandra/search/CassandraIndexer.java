@@ -222,7 +222,9 @@ public class CassandraIndexer implements Indexer {
     }
 
     private void maybeIndexResource(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, Set<StatementGenerator> generators, Context context, Resource resource) {
-        if (!m_cache.get(context, resource).isPresent()) {
+        Optional<ResourceMetadata> cached = m_cache.get(context, resource);
+
+        if (!(cached.isPresent() && !cached.get().expired(System.currentTimeMillis()))) {
             LOG.trace("Resource '{}' in context '{}' is not present is cache.", resource, context);
             if (m_options.shouldIndexResourceTerms()) {
                 for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
@@ -293,7 +295,7 @@ public class CassandraIndexer implements Indexer {
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
 
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
-            if (!(cached.isPresent() && cached.get().containsAttribute(field.getKey(), field.getValue()))) {
+            if (!(cached.isPresent() && !cached.get().expired(System.currentTimeMillis()) && cached.get().containsAttribute(field.getKey(), field.getValue()))) {
                 LOG.trace("Resource attribute for resource '{}' in context '{}' for entry '{}' is not present is cache. Cached meta-data is: {}",
                         resource, context, field, cached);
                 // Search indexing
@@ -343,7 +345,7 @@ public class CassandraIndexer implements Indexer {
     private void maybeAddMetricName(Map<Context, Map<Resource, ResourceMetadata>> cacheQueue, Set<StatementGenerator> generators, Context context, Resource resource, String name) {
         Optional<ResourceMetadata> cached = m_cache.get(context, resource);
 
-        if (!(cached.isPresent() && cached.get().containsMetric(name))) {
+        if (!(cached.isPresent() && !cached.get().expired(System.currentTimeMillis()) && cached.get().containsMetric(name))) {
             LOG.trace("Metric resource '{}' in context '{}' with name '{}' is not present is cache. Cached meta-data is: {}",
                     resource, context, name, cached);
             generators.add(new MetricInsert(context, resource.getId(), name));
@@ -360,7 +362,7 @@ public class CassandraIndexer implements Indexer {
         statement.add(delete);
     }
 
-    private static ResourceMetadata getOrCreateResourceMetadata(Context context, Resource resource, Map<Context, Map<Resource, ResourceMetadata>> map) {
+    private ResourceMetadata getOrCreateResourceMetadata(Context context, Resource resource, Map<Context, Map<Resource, ResourceMetadata>> map) {
 
         Map<Resource, ResourceMetadata> inner = map.get(context);
         if (inner == null) {
@@ -370,7 +372,10 @@ public class CassandraIndexer implements Indexer {
 
         ResourceMetadata rMeta = inner.get(resource);
         if (rMeta == null) {
-            rMeta = new ResourceMetadata();
+            // Let the caches expire before the real TTL to avoid corner-cases and add some margin
+            final long expires = System.currentTimeMillis() + this.m_ttl * 1000L * 3L / 4L;
+
+            rMeta = new ResourceMetadata().setExpires(expires);
             inner.put(resource, rMeta);
         }
 
