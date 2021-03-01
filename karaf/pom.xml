@@ -12,9 +12,15 @@
 
   <name>New Timeseries Datastore :: Karaf Features</name>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/filtered-resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -29,7 +35,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>features.xml</file>
+                  <file>target/classes/features.xml</file>
                   <classifier>features</classifier>
                   <type>xml</type>
                 </artifact>

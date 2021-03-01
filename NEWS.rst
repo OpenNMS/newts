@@ -1,3 +1,8 @@
+1.5.5
+~~~~~
+
+Fix a version issue in the published Karaf features.xml.
+
 1.5.4
 ~~~~~
 
