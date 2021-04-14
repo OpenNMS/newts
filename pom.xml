@@ -50,7 +50,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cassandraDriverVersion>3.5.0</cassandraDriverVersion>
+    <cassandraDriverVersion>3.8.0</cassandraDriverVersion>
     <guavaVersion>18.0</guavaVersion>
     <guiceVersion>4.0</guiceVersion>
     <jacksonVersion>2.5.4</jacksonVersion>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The OpenNMS Group
+ * Copyright 2016-2021, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -39,6 +39,8 @@ public class NewtsInstance extends ExternalResource {
 
     private static final String KEYSPACE_PLACEHOLDER = "$KEYSPACE$";
     private static final String REPLICATION_FACTOR_PLACEHOLDER = "$REPLICATION_FACTOR$";
+    
+    private static final String CASSANDRA_CLOUD_CONNECT_BUNDLE = null;
 
     private static ServiceLoader<Schema> schemaLoader = ServiceLoader.load(Schema.class);
 
@@ -61,7 +63,7 @@ public class NewtsInstance extends ExternalResource {
 
     public CassandraSession getCassandraSession() {
         return new CassandraSessionImpl(CASSANDRA_KEYSPACE, host,
-                port, CASSANDRA_COMPRESSION,
+                port, CASSANDRA_CLOUD_CONNECT_BUNDLE, CASSANDRA_COMPRESSION,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
     }
 

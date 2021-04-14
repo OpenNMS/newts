@@ -8,12 +8,12 @@
       <bundle dependency="true">mvn:io.netty/netty-codec/4.0.56.Final</bundle>
     </feature>
 
-    <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="3.5.0">
+    <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="3.8.0">
       <feature>netty</feature>
       <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/3.2.6</bundle>
       <bundle dependency="true">mvn:org.codehaus.jackson/jackson-core-asl/1.9.13</bundle>
       <bundle dependency="true">mvn:org.codehaus.jackson/jackson-mapper-asl/1.9.13</bundle>
-      <bundle dependency="true">mvn:com.datastax.cassandra/cassandra-driver-core/3.5.0</bundle>
+      <bundle dependency="true">mvn:com.datastax.cassandra/cassandra-driver-core/3.8.0</bundle>
     </feature>
 
     <feature name="fastxml-jackson" description="Jackson JSON library" version="2.5.4">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The OpenNMS Group
+ * Copyright 2016-2021, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -45,7 +45,8 @@ import com.google.inject.multibindings.Multibinder;
  * 
  * @author eevans
  */
-public class CassandraGuiceModule extends AbstractModule {
+public class 
+ extends AbstractModule {
 
     private final NewtsConfig m_newtsConf;
 
@@ -59,6 +60,7 @@ public class CassandraGuiceModule extends AbstractModule {
         bind(String.class).annotatedWith(named("cassandra.keyspace")).toInstance(m_newtsConf.getCassandraKeyspace());
         bind(String.class).annotatedWith(named("cassandra.hostname")).toInstance(m_newtsConf.getCassandraHost());
         bind(Integer.class).annotatedWith(named("cassandra.port")).toInstance(m_newtsConf.getCassandraPort());
+        bind(String.class).annotatedWith(named("cassandra.cloud-connect-bundle")).toInstance(m_newtsConf.getCassandraCloudConnectBundle());
         bind(String.class).annotatedWith(named("cassandra.compression")).toInstance(m_newtsConf.getCassandraCompression());
         bind(String.class).annotatedWith(named("cassandra.username")).toInstance(m_newtsConf.getCassandraUsername());
         bind(String.class).annotatedWith(named("cassandra.password")).toInstance(m_newtsConf.getCassandraPassword());
