@@ -45,8 +45,7 @@ import com.google.inject.multibindings.Multibinder;
  * 
  * @author eevans
  */
-public class 
- extends AbstractModule {
+public class CassandraGuiceModule extends AbstractModule {
 
     private final NewtsConfig m_newtsConf;
 
