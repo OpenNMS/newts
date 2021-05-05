@@ -29,6 +29,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
 
 import org.kohsuke.args4j.Argument;
@@ -47,7 +48,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
@@ -244,7 +244,7 @@ public class MergeSort {
         
             @Override
             public Iterable<String> apply(Path input) {
-                return FileIterable.unzipLines(input, Charsets.US_ASCII).filter(excludes(excludePattern));
+                return FileIterable.unzipLines(input, Charsets.US_ASCII).filter(excludes(excludePattern)::test);
             }
         
         };
@@ -254,10 +254,10 @@ public class MergeSort {
         return new Predicate<String>() {
 
             @Override
-            public boolean apply(String input) {
+            public boolean test(String input) {
                 return !input.contains(excludePattern);
             }
-            
+
         };
     }
     
