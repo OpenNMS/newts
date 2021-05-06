@@ -3,11 +3,12 @@ version: 2
 jobs:
   build:
     machine: true
+    resource_class: xlarge
 
     working_directory: /home/circleci/newts
 
     environment:
-      MAVEN_OPTS: -Xmx1024m
+      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC
 
     steps:
       # Restore source cache
@@ -43,6 +44,7 @@ jobs:
 
       - run:
           name: Run the tests
+          no_output_timeout: 20m
           command: mvn -DskipITs=false verify
 
       - run:
