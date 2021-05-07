@@ -42,7 +42,7 @@ public class CassandraIndexerStressITCase {
 
     @Test
     public void canIndexManyResources() {
-        final int numResources = 2000;
+        final int numResources = 20000;
         final int numSamplesPerResource = 3;
 
         // Setup the indexer
