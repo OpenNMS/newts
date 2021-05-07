@@ -1,3 +1,9 @@
+2.0.0
+~~~~~
+
+BREAKING: Newts now has a dependency on Guava 23, rather than 18.
+It has also been updated to build for Java 1.8 and higher.
+
 1.5.6
 ~~~~~
 
