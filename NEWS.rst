@@ -1,3 +1,8 @@
+1.5.6
+~~~~~
+
+Rerelease of 1.5.5 to test deployment.
+
 1.5.5
 ~~~~~
 
