@@ -5,7 +5,7 @@
 
   <groupId>org.opennms.newts</groupId>
   <artifactId>newts-parent</artifactId>
-  <version>1.5.6-SNAPSHOT</version>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>http://newts.io</url>
   <name>Newts</name>
@@ -50,8 +50,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cassandraDriverVersion>3.8.0</cassandraDriverVersion>
-    <guavaVersion>18.0</guavaVersion>
+    <cassandraDriverVersion>3.11.0</cassandraDriverVersion>
+    <guavaVersion>23.0</guavaVersion>
     <guiceVersion>4.0</guiceVersion>
     <jacksonVersion>2.5.4</jacksonVersion>
     <junitVersion>4.13.1</junitVersion>
@@ -149,8 +149,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
