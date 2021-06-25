@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2021, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -19,6 +19,7 @@ package org.opennms.newts.cassandra;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -54,14 +55,16 @@ public class CassandraSessionImpl implements CassandraSession {
 
     public CassandraSessionImpl(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
                                 @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
+                                @Named("cassandra.cloud-connect-bundle") String cloudConnectBundle,
                                 @Named("cassandra.username") String username, @Named("cassandra.password") String password,
                                 @Named("cassandra.ssl") boolean ssl) {
-        this(keyspace, hostname, port, compression, username, password, ssl, null, null, null);
+        this(keyspace, hostname, port, compression, cloudConnectBundle, username, password, ssl, null, null, null);
     }
 
     @Inject
     public CassandraSessionImpl(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
             @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
+            @Named("cassandra.cloud-connect-bundle") String cloudConnectBundle,
             @Named("cassandra.username") String username, @Named("cassandra.password") String password,
             @Named("cassandra.ssl") boolean ssl,
             @Named("cassandra.pool.core-connections-per-host") Integer coreConnectionsPerHost,
@@ -69,11 +72,19 @@ public class CassandraSessionImpl implements CassandraSession {
             @Named("cassandra.pool.max-requests-per-connection") Integer maxRequestsPerConnection) {
 
         checkNotNull(keyspace, "keyspace argument");
-        checkNotNull(hostname, "hostname argument");
-        checkArgument(port > 0 && port < 65535, "not a valid port number: %d", port);
         checkNotNull(compression, "compression argument");
 
-        LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
+        checkArgument(hostname != null || cloudConnectBundle != null);
+        
+        if (hostname != null) {
+            checkArgument(port > 0 && port < 65535, "not a valid port number: %d", port);
+            LOG.info("Setting up session with {}:{} using compression {}", hostname, port, compression.toUpperCase());
+        } else if (cloudConnectBundle != null) {
+            checkArgument(new File(cloudConnectBundle).canRead(), "cloud-connect-bundle must be readable: %s", cloudConnectBundle);
+            checkNotNull(username, "username (client ID for cloud-connect)");
+            checkNotNull(password, "password (client secret for cloud-connect)");
+            LOG.info("Setting up cloud session with bundle {} and client ID {}", cloudConnectBundle, username);
+        }
 
         final PoolingOptions poolingOptions = new PoolingOptions();
         if (coreConnectionsPerHost != null) {
@@ -94,14 +105,19 @@ public class CassandraSessionImpl implements CassandraSession {
 
         Builder builder = Cluster
                 .builder()
-                .withPort(port)
-                .addContactPoints(hostname.split(","))
                 .withReconnectionPolicy(new ExponentialReconnectionPolicy(1000, 2 * 60 * 1000))
                 .withPoolingOptions(poolingOptions)
                 .withCompression(Compression.valueOf(compression.toUpperCase()));
 
+        if (hostname != null) {
+            builder.withPort(port);
+            builder.addContactPoints(hostname.split(","));
+        } else if (cloudConnectBundle != null) {
+            builder.withCloudSecureConnectBundle(new File(cloudConnectBundle));
+        }
+        
         if (username != null && password != null) {
-            LOG.info("Using username: {} and password: XXXXXXXX", username);
+            LOG.info("Using username / client ID: {} and password / client secret: XXXXXXXX", username);
             builder.withCredentials(username, password);
         }
 

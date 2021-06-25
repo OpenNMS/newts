@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2021, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -70,6 +70,7 @@ class InsertDispatcher extends Dispatcher {
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),
+                null,
                 config.getCassandraCompression(),
                 config.getCassandraUsername(),
                 config.getCassandraPassword(),
