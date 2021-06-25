@@ -20,7 +20,7 @@
   </modules>
 
   <properties>
-    <cassandraUnitVersion>4.3.1.0</cassandraUnitVersion>
+    <cassandraUnitVersion>3.11.2.0</cassandraUnitVersion>
   </properties>
 
   <dependencyManagement>

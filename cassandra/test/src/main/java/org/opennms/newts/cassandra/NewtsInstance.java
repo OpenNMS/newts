@@ -63,7 +63,7 @@ public class NewtsInstance extends ExternalResource {
 
     public CassandraSession getCassandraSession() {
         return new CassandraSessionImpl(CASSANDRA_KEYSPACE, host,
-                port, CASSANDRA_CLOUD_CONNECT_BUNDLE, CASSANDRA_COMPRESSION,
+                port, CASSANDRA_COMPRESSION, CASSANDRA_CLOUD_CONNECT_BUNDLE,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
     }
 
