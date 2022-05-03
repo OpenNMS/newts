@@ -122,12 +122,14 @@ jobs:
 
       - persist_to_workspace:
           root: .
+          paths:
+            - ./
 
   deploy:
     executor: build-executor
 
     steps:
-      - attach_workspace
+      - attach_workspace:
           at: .
 
       - fetch_maven_cache
