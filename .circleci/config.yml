@@ -121,16 +121,14 @@ jobs:
           path: assembly/target/newts*
 
       - persist_to_workspace:
-          root: /home/circleci
-          paths:
-            - newts
+          root: .
 
   deploy:
     executor: build-executor
 
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - attach_workspace
+          at: .
 
       - fetch_maven_cache
 
