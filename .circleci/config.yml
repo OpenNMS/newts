@@ -31,13 +31,17 @@ commands:
           key: source-<< pipeline.parameters.cache_version >>-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".git"
-  fetch_maven_cache:
-    description: Download and Cache Maven Dependencies
+
+  generate_megapom:
     steps:
       - run:
           name: create checksum file
-          command: |
-            find * -name pom.xml | sort -u | xargs cat > /tmp/megapom.xml
+          command: find * -name pom.xml | sort -u | xargs cat > /tmp/megapom.xml
+
+  fetch_maven_cache:
+    description: Download Update Maven Dependencies
+    steps:
+      - generate_megapom
 
       - restore_cache:
           keys:
@@ -46,20 +50,33 @@ commands:
           - maven-<< pipeline.parameters.cache_version >>-dependencies-
 
       - run:
+          name: Clean Old Maven Repository Entries
+          command: |
+            if [ -d ~/.m2/repository ]; then
+              # clean out anything older than 14 days
+              find ~/.m2/repository -type f -ctime +14 -exec rm -rf {} \; 2>/dev/null || :
+              find ~/.m2/repository -depth -type d -print | while read -r DIR; do
+                rmdir "$DIR" 2>/dev/null || :
+              done
+            fi
+
+      - run:
           name: Collect Maven Dependencies
           command: |
              mvn dependency:resolve || true
              mvn dependency:resolve-plugins || true
              mvn dependency:go-offline || true
 
+  store_maven_cache:
+    description: Save Maven Dependencies
+    steps:
+      - generate_megapom
+
       - run:
-          name: Clean Old Maven Repository Entries
+          name: Remove Build Artifacts from Maven Cache
           command: |
             if [ -d ~/.m2/repository ]; then
-              find ~/.m2/repository -type f -ctime +14 -exec rm -rf {} \; 2>/dev/null || :
-              find ~/.m2/repository -depth -type d -print | while read -r DIR; do
-                rmdir "$DIR" 2>/dev/null || :
-              done
+              rm -rf ~/.m2/repository/org/opennms/newts
             fi
 
       - save_cache:
@@ -78,11 +95,11 @@ jobs:
     steps:
       - cached_checkout
       - fetch_maven_cache
-
       - run:
           name: Run the build
           no_output_timeout: 20m
           command: mvn -DskipTests=true install
+      - store_maven_cache
 
       - run:
           name: Run the tests
@@ -115,12 +132,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+      - fetch_maven_cache
 
       - run:
           name: Deploy the artifacts
