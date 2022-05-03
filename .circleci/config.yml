@@ -9,7 +9,7 @@ parameters:
   cache_version:
     description: the current version of the cache
     type: string
-    default: v3
+    default: v4
 
 orbs:
   branch-management: opennms/branch-management@2.3.0
@@ -67,8 +67,8 @@ commands:
 
 jobs:
   build:
-    machine: true
-    resource_class: large
+    executor: build-executor
+    resource_class: xlarge
 
     environment:
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC
@@ -76,6 +76,11 @@ jobs:
     steps:
       - cached_checkout
       - fetch_maven_cache
+
+      - run:
+          name: Run the build
+          no_output_timeout: 20m
+          command: mvn -DskipTests=true install
 
       - run:
           name: Run the tests
@@ -102,7 +107,7 @@ jobs:
             - newts
 
   deploy:
-    machine: true
+    executor: build-executor
 
     steps:
       - attach_workspace:
