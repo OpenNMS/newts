@@ -1,46 +1,81 @@
-version: 2
+version: 2.1
 
-jobs:
-  build:
-    machine: true
-    resource_class: xlarge
+executors:
+  build-executor:
+    docker:
+      - image: cimg/openjdk:8.0-browsers
 
-    working_directory: /home/circleci/newts
+parameters:
+  cache_version:
+    description: the current version of the cache
+    type: string
+    default: v3
 
-    environment:
-      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC
+orbs:
+  branch-management: opennms/branch-management@2.3.0
 
+commands:
+  cached_checkout:
+    description: Restore and Update Source Cache
     steps:
-      # Restore source cache
       - restore_cache:
           keys:
-            - source-v1-{{ .Branch }}-{{ .Revision }}
-            - source-v1-{{ .Branch }}-
-            - source-v1-
+            - source-<< pipeline.parameters.cache_version >>-{{ .Branch }}-{{ .Revision }}
+            - source-<< pipeline.parameters.cache_version >>-{{ .Branch }}-
+            - source-<< pipeline.parameters.cache_version >>-
 
       - checkout
 
       # Save source cache
       - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          key: source-<< pipeline.parameters.cache_version >>-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".git"
+  fetch_maven_cache:
+    description: Download and Cache Maven Dependencies
+    steps:
+      - run:
+          name: create checksum file
+          command: |
+            find * -name pom.xml | sort -u | xargs cat > /tmp/megapom.xml
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
+          - maven-<< pipeline.parameters.cache_version >>-dependencies-{{ checksum "/tmp/megapom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          - maven-<< pipeline.parameters.cache_version >>-dependencies-
 
-      - run: |
-           mvn dependency:resolve-plugins
-           mvn dependency:go-offline || true
+      - run:
+          name: Collect Maven Dependencies
+          command: |
+             mvn dependency:resolve dependency:resolve-plugins dependency:go-offline || true
+
+      - run:
+          name: Clean Old Maven Repository Entries
+          command: |
+            if [ -d ~/.m2/repository ]; then
+              find ~/.m2/repository -type f -ctime +14 -exec rm -rf {} \; 2>/dev/null || :
+              find ~/.m2/repository -depth -type d -print | while read -r DIR; do
+                rmdir "$DIR" 2>/dev/null || :
+              done
+            fi
 
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+          key: << pipeline.parameters.cache_version >>-dependencies-{{ checksum "/tmp/megapom.xml" }}
+
+jobs:
+  build:
+    machine: true
+    resource_class: large
+
+    environment:
+      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC
+
+    steps:
+      - cached_checkout
+      - fetch_maven_cache
 
       - run:
           name: Run the tests
@@ -69,8 +104,6 @@ jobs:
   deploy:
     machine: true
 
-    working_directory: /home/circleci/newts
-
     steps:
       - attach_workspace:
           at: /home/circleci
@@ -88,14 +121,17 @@ jobs:
             mvn -s .circleci.settings.xml -DskipTests deploy
 
 workflows:
-  version: 2
   build-deploy:
     jobs:
       - build
+          filters:
+            branches:
+              only: /.*/
       - deploy:
           requires:
             - build
           filters:
             branches:
               only:
+               - /^release-.*/
                - master
