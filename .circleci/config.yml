@@ -48,7 +48,9 @@ commands:
       - run:
           name: Collect Maven Dependencies
           command: |
-             mvn dependency:resolve dependency:resolve-plugins dependency:go-offline || true
+             mvn dependency:resolve || true
+             mvn dependency:resolve-plugins || true
+             mvn dependency:go-offline || true
 
       - run:
           name: Clean Old Maven Repository Entries
