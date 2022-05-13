@@ -23,6 +23,8 @@ import org.opennms.newts.api.Timestamp;
 
 import io.dropwizard.jersey.params.AbstractParam;
 
+import javax.annotation.Nullable;
+
 
 /**
  * JAX-RS parameter that encapsulates creation of {@link Timestamp} instances from ISO 8601
@@ -32,16 +34,18 @@ import io.dropwizard.jersey.params.AbstractParam;
  * @author eevans
  */
 public class TimestampParam extends AbstractParam<Timestamp> {
+    private final String input;
 
     private static final DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
 
-    public TimestampParam(String input) {
+    public TimestampParam(@Nullable final String input) {
         super(input);
+        this.input = input;
     }
 
     @Override
-    protected String errorMessage(String input, Exception e) {
-        return String.format("Unable to parse '%s' as date-time", input);
+    protected String errorMessage(Exception e) {
+        return String.format("Unable to parse '%s' as date-time", input == null? "null" : input);
     }
 
     @Override

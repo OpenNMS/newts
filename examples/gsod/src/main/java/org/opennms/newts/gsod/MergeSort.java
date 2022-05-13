@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.AnnotatedElement;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
@@ -50,7 +51,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-import com.google.common.io.Files;
 
 
 public class MergeSort {
@@ -122,7 +122,7 @@ public class MergeSort {
         Path root = m_source.toPath();
         
         if (m_targetDir == null) {
-            m_targetDir = Files.createTempDir();
+            m_targetDir = Files.createTempDirectory("newts-mergesort-").toFile().getAbsoluteFile();
             System.err.println("Working Directory: " + m_targetDir);
         }
         

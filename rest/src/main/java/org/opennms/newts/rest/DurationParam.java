@@ -19,6 +19,8 @@ import org.opennms.newts.api.Duration;
 
 import io.dropwizard.jersey.params.AbstractParam;
 
+import javax.annotation.Nullable;
+
 
 /**
  * JAX-RS parameter that encapsulates creation of {@link Duration} instances from a string
@@ -27,14 +29,16 @@ import io.dropwizard.jersey.params.AbstractParam;
  * @author eevans
  */
 public class DurationParam extends AbstractParam<Duration> {
+    private final String input;
 
-    public DurationParam(String input) {
+    public DurationParam(@Nullable final String input) {
         super(input);
+        this.input = input;
     }
 
     @Override
-    protected String errorMessage(String input, Exception e) {
-        return String.format("Unable to parse '%s' as resolution", input);
+    protected String errorMessage(Exception e) {
+        return String.format("Unable to parse '%s' as resolution", input == null? "null" : input);
     }
 
     @Override

@@ -50,18 +50,21 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cassandraDriverVersion>3.5.0</cassandraDriverVersion>
+    <cassandraDriverVersion>3.11.2</cassandraDriverVersion>
     <guavaVersion>23.0</guavaVersion>
     <maxGuavaVersion>26</maxGuavaVersion>
-    <guiceVersion>4.0</guiceVersion>
-    <jacksonVersion>2.5.4</jacksonVersion>
-    <junitVersion>4.13.1</junitVersion>
-    <logbackVersion>1.1.3</logbackVersion>
-    <metricsVersion>3.1.1</metricsVersion>
+    <guiceVersion>4.2.3</guiceVersion>
+    <jackson1Version>1.9.14-atlassian-6</jackson1Version>
+    <jackson2Version>2.13.3</jackson2Version>
+    <jnaVersion>5.11.0</jnaVersion>
+    <junitVersion>4.13.2</junitVersion>
+    <logbackVersion>1.2.11</logbackVersion>
+    <metricsVersion>3.2.6</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
-    <slf4jVersion>1.7.12</slf4jVersion>
-    <jexlVersion>3.1</jexlVersion>
-    <args4jVersion>2.32</args4jVersion>
+    <nettyVersion>4.1.75.Final</nettyVersion>
+    <slf4jVersion>1.7.36</slf4jVersion>
+    <jexlVersion>3.2.1</jexlVersion>
+    <args4jVersion>2.33</args4jVersion>
   </properties>
 
   <dependencyManagement>
@@ -92,14 +95,99 @@
         <version>${metricsVersion}</version>
       </dependency>
       <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>${jackson1Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-jaxrs</artifactId>
+        <version>${jackson1Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>${jackson1Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-xc</artifactId>
+        <version>${jackson1Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jacksonVersion}</version>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-guava</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-joda</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-json-provider</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-base</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-afterburner</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-jaxb-annotations</artifactId>
+        <version>${jackson2Version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-parameter-names</artifactId>
+        <version>${jackson2Version}</version>
       </dependency>
       <dependency>
         <groupId>com.datastax.cassandra</groupId>
         <artifactId>cassandra-driver-core</artifactId>
         <version>${cassandraDriverVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.java.dev.jna</groupId>
+        <artifactId>jna</artifactId>
+        <version>${jnaVersion}</version>
       </dependency>
 
       <dependency>
@@ -281,5 +369,16 @@
       </build>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <id>atlassian-public</id>
+      <name>Atlassian public repo</name>
+      <url>https://maven.opennms.org/content/repositories/atlassian-public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   
 </project>
