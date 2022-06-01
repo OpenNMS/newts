@@ -10,22 +10,22 @@
   <fileSets>
     <fileSet>
       <directory>${basedir}/src/main/resources</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${basedir}/bin</directory>
-      <outputDirectory>/bin</outputDirectory>
+      <outputDirectory>bin</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/bin</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
     </fileSet>
   </fileSets>
 
   <files>
     <file>
       <source>${basedir}/../rest/example-config.yaml</source>
-      <outputDirectory>/etc</outputDirectory>
+      <outputDirectory>etc</outputDirectory>
       <destName>config.yaml</destName>
     </file>
   </files>

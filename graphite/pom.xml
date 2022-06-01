@@ -25,7 +25,7 @@
               org.opennms.newts.graphite*
             </Export-Package>
             <Import-Package>
-	            <![CDATA[javax.inject*;resolution:=optional,*]]>
+	            <![CDATA[javax.inject*;resolution:=optional,com.google.common.*;version="[${guavaVersion},${maxGuavaVersion})",*]]>
             </Import-Package>
             <Bundle-DocURL>https://newts.io</Bundle-DocURL>
           </instructions>

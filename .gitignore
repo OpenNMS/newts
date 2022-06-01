@@ -5,11 +5,12 @@ target/
 .project
 .settings/
 
-# Idea project files
-/.idea
+# editor droppings
+.idea/
 *.iml
 *.iws
 *.ipr
+.*.swp
 
 # Jekyll
 Gemfile.lock

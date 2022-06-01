@@ -52,6 +52,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <cassandraDriverVersion>3.5.0</cassandraDriverVersion>
     <guavaVersion>23.0</guavaVersion>
+    <maxGuavaVersion>26</maxGuavaVersion>
     <guiceVersion>4.0</guiceVersion>
     <jacksonVersion>2.5.4</jacksonVersion>
     <junitVersion>4.13.1</junitVersion>
