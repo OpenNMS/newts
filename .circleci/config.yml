@@ -90,7 +90,7 @@ jobs:
     resource_class: xlarge
 
     environment:
-      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC
+      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
       - cached_checkout

@@ -25,7 +25,7 @@
 	      org.opennms.newts.aggregate* 
 	    </Export-Package>
 	    <Import-Package>
-	      *
+	      <![CDATA[com.google.common.*;version="[${guavaVersion},${maxGuavaVersion})",*]]>
 	    </Import-Package>
 	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
 	  </instructions>
