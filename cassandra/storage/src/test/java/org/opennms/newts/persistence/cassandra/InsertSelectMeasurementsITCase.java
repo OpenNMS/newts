@@ -38,7 +38,7 @@ import org.opennms.newts.api.query.ResultDescriptor;
 import org.opennms.newts.persistence.cassandra.Utils.MeasurementRowsBuilder;
 import org.opennms.newts.persistence.cassandra.Utils.SampleRowsBuilder;
 
-import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 

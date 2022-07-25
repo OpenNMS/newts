@@ -40,13 +40,7 @@ public class TimestampParam extends AbstractParam<Timestamp> {
     }
 
     @Override
-    protected String errorMessage(String input, Exception e) {
-        return String.format("Unable to parse '%s' as date-time", input);
-    }
-
-    @Override
-    protected Timestamp parse(String input) throws Exception {
-
+    protected Timestamp parse(String input) {
         if (input.matches("^[\\d]+$")) {
             return Timestamp.fromEpochSeconds(Integer.valueOf(input));
         }

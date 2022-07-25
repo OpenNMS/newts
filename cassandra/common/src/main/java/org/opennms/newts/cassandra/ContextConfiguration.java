@@ -3,7 +3,7 @@ package org.opennms.newts.cassandra;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 
-import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -16,11 +16,10 @@
 package org.opennms.newts.cassandra.search;
 
 import static com.codahale.metrics.MetricRegistry.name;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.insertInto;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
+import static com.datastax.oss.driver.api.querybuilder.select.Selector.ttl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -29,6 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,13 +48,17 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.RegularStatement;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.BatchStatement;
+import com.datastax.oss.driver.api.core.cql.BatchStatementBuilder;
+import com.datastax.oss.driver.api.core.cql.BatchableStatement;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.DefaultBatchType;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.cql.Statement;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -96,12 +102,11 @@ public class CassandraIndexer implements Indexer {
                 .value(Constants.Schema.C_TERMS_RESOURCE, bindMarker(Constants.Schema.C_TERMS_RESOURCE))
                 .value(Constants.Schema.C_TERMS_FIELD, bindMarker(Constants.Schema.C_TERMS_FIELD))
                 .value(Constants.Schema.C_TERMS_VALUE, bindMarker(Constants.Schema.C_TERMS_VALUE))
-                .using(ttl(ttl)));
+                .usingTtl(ttl).build());
     }
 
     @Override
     public void update(Collection<Sample> samples) {
-
         Timer.Context ctx = m_updateTimer.time();
 
         Set<StatementGenerator> generators = Sets.newHashSet();
@@ -122,13 +127,17 @@ public class CassandraIndexer implements Indexer {
                 m_inserts.mark(generators.size());
 
                 // Asynchronously execute the statements
-                List<ResultSetFuture> futures = Lists.newArrayList();
-                for (Statement statementToExecute : toStatements(generators)) {
+                List<CompletionStage<AsyncResultSet>> futures = Lists.newArrayList();
+                for (Statement<?> statementToExecute : toStatements(generators)) {
                     futures.add(m_session.executeAsync(statementToExecute));
                 }
 
-                for (ResultSetFuture future : futures) {
-                    future.getUninterruptibly();
+                for (CompletionStage<AsyncResultSet> future : futures) {
+                    try {
+                        future.toCompletableFuture().get();
+                    } catch (InterruptedException|ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
 
@@ -138,22 +147,20 @@ public class CassandraIndexer implements Indexer {
                     m_cache.merge(context, entry.getKey(), entry.getValue());
                 }
             }
-        }
-        finally {
+        } finally {
             synchronized(statementsInFlight) {
                 statementsInFlight.removeAll(generators);
             }
             ctx.stop();
         }
-
     }
 
     private List<Statement> toStatements(Set<StatementGenerator> generators) {
         List<Statement> statementsToExecute = Lists.newArrayList();
 
-        Map<String, List<Statement>> statementsByKey = Maps.newHashMap();
+        Map<String, List<BatchableStatement>> statementsByKey = Maps.newHashMap();
         for (StatementGenerator generator : generators) {
-            Statement statement = generator.toStatement()
+            BatchableStatement statement = generator.toStatement()
                     .setConsistencyLevel(m_contextConfigurations.getWriteConsistency(generator.getContext()));
             String key = generator.getKey();
             if (key == null) {
@@ -163,7 +170,7 @@ public class CassandraIndexer implements Indexer {
             }
 
             // Group these by key
-            List<Statement> statementsForKey = statementsByKey.get(key);
+            List<BatchableStatement> statementsForKey = statementsByKey.get(key);
             if (statementsForKey == null) {
                 statementsForKey = Lists.newArrayList();
                 statementsByKey.put(key, statementsForKey);
@@ -172,9 +179,13 @@ public class CassandraIndexer implements Indexer {
         }
 
         // Consolidate the grouped statements into batches
-        for (List<Statement> statementsForKey: statementsByKey.values()) {
-            for (List<Statement> partition : Lists.partition(statementsForKey, m_options.getMaxBatchSize())) {
-                statementsToExecute.add(unloggedBatch(partition.toArray(new RegularStatement[partition.size()])));
+        for (List<BatchableStatement> statementsForKey: statementsByKey.values()) {
+            for (List<BatchableStatement> partition : Lists.partition(statementsForKey, m_options.getMaxBatchSize())) {
+                BatchStatementBuilder builder = BatchStatement.builder(DefaultBatchType.UNLOGGED);
+                for (BatchableStatement statement : partition) {
+                    builder.addStatement(statement);
+                }
+                statementsToExecute.add(builder.build());
             }
         }
 
@@ -187,14 +198,18 @@ public class CassandraIndexer implements Indexer {
 
         final ConsistencyLevel writeConsistency = m_contextConfigurations.getWriteConsistency(context);
 
-        final List<RegularStatement> statements = Lists.newArrayList();
+        final List<SimpleStatement> statements = Lists.newArrayList();
         definitelyUnindexResource(statements, context, resource, writeConsistency);
         definitelyUnindexResourceAttributes(statements, context, resource, writeConsistency);
         definitelyRemoveMetricName(statements, context, resource, writeConsistency);
 
         try {
             if (!statements.isEmpty()) {
-                m_session.execute(batch(statements.toArray(new RegularStatement[statements.size()])));
+                BatchStatementBuilder builder = BatchStatement.builder(DefaultBatchType.LOGGED);
+                for (SimpleStatement statement : statements) {
+                    builder.addStatement(statement);
+                }
+                m_session.execute(builder.build());
             }
 
             m_cache.delete(context, resource);
@@ -239,31 +254,31 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private void recursivelyUnindexResourceElements(List<RegularStatement> statement, Context context, String resourceId, ConsistencyLevel writeConsistencyLevel) {
+    private void recursivelyUnindexResourceElements(List<SimpleStatement> statement, Context context, String resourceId, ConsistencyLevel writeConsistencyLevel) {
         List<String> elements = m_resourceIdSplitter.splitIdIntoElements(resourceId);
         int numElements = elements.size();
         if (numElements == 1) {
             // Tag the top level elements with _parent:_root
-            RegularStatement delete = QueryBuilder.delete()
-                    .from(Constants.Schema.T_TERMS)
-                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, Constants.TOP_LEVEL_PARENT_TERM_VALUE))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resourceId));
-            delete.setConsistencyLevel(writeConsistencyLevel);
+            SimpleStatement delete = QueryBuilder.deleteFrom(Constants.Schema.T_TERMS)
+                    .whereColumn(Constants.Schema.C_TERMS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_TERMS_FIELD).isEqualTo(literal(Constants.PARENT_TERM_FIELD))
+                    .whereColumn(Constants.Schema.C_TERMS_VALUE).isEqualTo(literal(Constants.TOP_LEVEL_PARENT_TERM_VALUE))
+                    .whereColumn(Constants.Schema.C_TERMS_RESOURCE).isEqualTo(literal(resourceId))
+                    .build()
+                    .setConsistencyLevel(writeConsistencyLevel);
             statement.add(delete);
         } else {
             // Construct the parent's resource id
             String parentResourceId = m_resourceIdSplitter.joinElementsToId(elements.subList(0, numElements-1));
 
             // Tag the resource with its parent's id
-            RegularStatement delete = QueryBuilder.delete()
-                    .from(Constants.Schema.T_TERMS)
-                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.PARENT_TERM_FIELD))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, parentResourceId))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resourceId));
-            delete.setConsistencyLevel(writeConsistencyLevel);
+            SimpleStatement delete = QueryBuilder.deleteFrom(Constants.Schema.T_TERMS)
+                    .whereColumn(Constants.Schema.C_TERMS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_TERMS_FIELD).isEqualTo(literal(Constants.PARENT_TERM_FIELD))
+                    .whereColumn(Constants.Schema.C_TERMS_VALUE).isEqualTo(literal(parentResourceId))
+                    .whereColumn(Constants.Schema.C_TERMS_RESOURCE).isEqualTo(literal(resourceId))
+                    .build()
+                    .setConsistencyLevel(writeConsistencyLevel);
             statement.add(delete);
 
             // Recurse
@@ -271,15 +286,15 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private void definitelyUnindexResource(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistencyLevel) {
+    private void definitelyUnindexResource(List<SimpleStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistencyLevel) {
         for (String s : m_resourceIdSplitter.splitIdIntoElements(resource.getId())) {
-            RegularStatement delete = QueryBuilder.delete()
-                .from(Constants.Schema.T_TERMS)
-                .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
-                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD))
-                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, s))
-                .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
-            delete.setConsistencyLevel(writeConsistencyLevel);
+            SimpleStatement delete = QueryBuilder.deleteFrom(Constants.Schema.T_TERMS)
+                    .whereColumn(Constants.Schema.C_TERMS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_TERMS_FIELD).isEqualTo(literal(Constants.DEFAULT_TERM_FIELD))
+                    .whereColumn(Constants.Schema.C_TERMS_VALUE).isEqualTo(literal(s))
+                    .whereColumn(Constants.Schema.C_TERMS_RESOURCE).isEqualTo(literal(resource.getId()))
+                    .build()
+                    .setConsistencyLevel(writeConsistencyLevel);
             statement.add(delete);
         }
         if (m_options.isHierarchicalIndexingEnabled()) {
@@ -311,33 +326,36 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private void definitelyUnindexResourceAttributes(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
+    private void definitelyUnindexResourceAttributes(List<SimpleStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
         if (!resource.getAttributes().isPresent()) {
             return;
         }
 
         for (Entry<String, String> field : resource.getAttributes().get().entrySet()) {
             // Search unindexing
-            RegularStatement delete = QueryBuilder.delete().from(Constants.Schema.T_TERMS)
-                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, Constants.DEFAULT_TERM_FIELD))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, field.getValue()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
-            delete.setConsistencyLevel(writeConsistency);
+            SimpleStatement delete = QueryBuilder.deleteFrom(Constants.Schema.T_TERMS)
+                    .whereColumn(Constants.Schema.C_TERMS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_TERMS_FIELD).isEqualTo(literal(Constants.DEFAULT_TERM_FIELD))
+                    .whereColumn(Constants.Schema.C_TERMS_VALUE).isEqualTo(literal(field.getValue()))
+                    .whereColumn(Constants.Schema.C_TERMS_RESOURCE).isEqualTo(literal(resource.getId()))
+                    .build()
+                    .setConsistencyLevel(writeConsistency);
             statement.add(delete);
-            delete = QueryBuilder.delete().from(Constants.Schema.T_TERMS)
-                    .where(QueryBuilder.eq(Constants.Schema.C_TERMS_CONTEXT, context.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_FIELD, field.getKey()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_VALUE, field.getValue()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_TERMS_RESOURCE, resource.getId()));
-            delete.setConsistencyLevel(writeConsistency);
+            delete = QueryBuilder.deleteFrom(Constants.Schema.T_TERMS)
+                    .whereColumn(Constants.Schema.C_TERMS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_TERMS_FIELD).isEqualTo(literal(field.getKey()))
+                    .whereColumn(Constants.Schema.C_TERMS_VALUE).isEqualTo(literal(field.getValue()))
+                    .whereColumn(Constants.Schema.C_TERMS_RESOURCE).isEqualTo(literal(resource.getId()))
+                    .build()
+                    .setConsistencyLevel(writeConsistency);
             statement.add(delete);
             // Storage
-            delete = QueryBuilder.delete().from(Constants.Schema.T_ATTRS)
-                    .where(QueryBuilder.eq(Constants.Schema.C_ATTRS_CONTEXT, context.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_ATTRS_RESOURCE, resource.getId()))
-                    .and(QueryBuilder.eq(Constants.Schema.C_ATTRS_ATTR, field.getKey()));
-            delete.setConsistencyLevel(writeConsistency);
+            delete = QueryBuilder.deleteFrom(Constants.Schema.T_ATTRS)
+                    .whereColumn(Constants.Schema.C_ATTRS_CONTEXT).isEqualTo(literal(context.getId()))
+                    .whereColumn(Constants.Schema.C_ATTRS_RESOURCE).isEqualTo(literal(resource.getId()))
+                    .whereColumn(Constants.Schema.C_ATTRS_ATTR).isEqualTo(literal(field.getKey()))
+                    .build()
+                    .setConsistencyLevel(writeConsistency);
             statement.add(delete);
         }
     }
@@ -354,11 +372,12 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private void definitelyRemoveMetricName(List<RegularStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
-        RegularStatement delete = QueryBuilder.delete().from(Constants.Schema.T_METRICS)
-                .where(QueryBuilder.eq(Constants.Schema.C_METRICS_CONTEXT, context.getId()))
-                .and(QueryBuilder.eq(Constants.Schema.C_METRICS_RESOURCE, resource.getId()));
-        delete.setConsistencyLevel(writeConsistency);
+    private void definitelyRemoveMetricName(List<SimpleStatement> statement, Context context, Resource resource, ConsistencyLevel writeConsistency) {
+        SimpleStatement delete = QueryBuilder.deleteFrom(Constants.Schema.T_METRICS)
+                .whereColumn(Constants.Schema.C_METRICS_CONTEXT).isEqualTo(literal(context.getId()))
+                .whereColumn(Constants.Schema.C_METRICS_RESOURCE).isEqualTo(literal(resource.getId()))
+                .build()
+                .setConsistencyLevel(writeConsistency);
         statement.add(delete);
     }
 
@@ -399,14 +418,15 @@ public class CassandraIndexer implements Indexer {
         }
 
         @Override
-        public RegularStatement toStatement() {
+        public SimpleStatement toStatement() {
             LOG.trace("Inserting metric in context: '{}' with resource id: '{}' with name: '{}'",
                     m_context, m_resourceId, m_metric);
             return insertInto(Constants.Schema.T_METRICS)
-                    .value(Constants.Schema.C_METRICS_CONTEXT, m_context.getId())
-                    .value(Constants.Schema.C_METRICS_RESOURCE, m_resourceId)
-                    .value(Constants.Schema.C_METRICS_NAME, m_metric)
-                    .using(ttl(m_ttl));
+                    .value(Constants.Schema.C_METRICS_CONTEXT, literal(m_context.getId()))
+                    .value(Constants.Schema.C_METRICS_RESOURCE, literal(m_resourceId))
+                    .value(Constants.Schema.C_METRICS_NAME, literal(m_metric))
+                    .usingTtl(m_ttl)
+                    .build();
         }
 
         @Override
@@ -487,11 +507,12 @@ public class CassandraIndexer implements Indexer {
         public BoundStatement toStatement() {
             LOG.trace("Inserting term in context: '{}' with resource id: '{}' with field: '{}' and value: '{}'",
                     m_context, m_resourceId, m_field, m_value);
-            return m_insertTermsStatement.bind()
+            return m_insertTermsStatement.boundStatementBuilder()
                     .setString(Constants.Schema.C_TERMS_CONTEXT, m_context.getId())
                     .setString(Constants.Schema.C_TERMS_RESOURCE, m_resourceId)
                     .setString(Constants.Schema.C_TERMS_FIELD, m_field)
-                    .setString(Constants.Schema.C_TERMS_VALUE, m_value);
+                    .setString(Constants.Schema.C_TERMS_VALUE, m_value)
+                    .build();
         }
     }
 
@@ -506,15 +527,16 @@ public class CassandraIndexer implements Indexer {
         }
 
         @Override
-        public RegularStatement toStatement() {
+        public SimpleStatement toStatement() {
             LOG.trace("Inserting attribute in context: '{}' with resource id: '{}' with name: '{}' and value: '{}'",
                     m_context, m_resourceId, m_field, m_value);
             return insertInto(Constants.Schema.T_ATTRS)
-                .value(Constants.Schema.C_ATTRS_CONTEXT, m_context.getId())
-                .value(Constants.Schema.C_ATTRS_RESOURCE, m_resourceId)
-                .value(Constants.Schema.C_ATTRS_ATTR, m_field)
-                .value(Constants.Schema.C_ATTRS_VALUE, m_value)
-                .using(ttl(m_ttl));
+                .value(Constants.Schema.C_ATTRS_CONTEXT, literal(m_context.getId()))
+                .value(Constants.Schema.C_ATTRS_RESOURCE, literal(m_resourceId))
+                .value(Constants.Schema.C_ATTRS_ATTR, literal(m_field))
+                .value(Constants.Schema.C_ATTRS_VALUE, literal(m_value))
+                .usingTtl(m_ttl)
+                .build();
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, The OpenNMS Group
+ * Copyright 2023, The OpenNMS Group
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -23,12 +23,12 @@ import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.cassandra.CassandraSession;
 
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 
 /**
  * NOTE: Due to the current schema, we cannot perform server side filtering
@@ -49,20 +49,18 @@ public class CassandraCachePrimer {
     @Inject
     public CassandraCachePrimer(CassandraSession session) {
         m_session = checkNotNull(session);
-        Select select = QueryBuilder.select()
+        Select select = QueryBuilder.selectFrom(Constants.Schema.T_METRICS)
                 .column(Constants.Schema.C_METRICS_CONTEXT)
                 .column(Constants.Schema.C_METRICS_RESOURCE)
-                .column(Constants.Schema.C_METRICS_NAME)
-                .from(Constants.Schema.T_METRICS);
+                .column(Constants.Schema.C_METRICS_NAME);
         m_selectAllMetricsStatement = session.prepare(select.toString());
 
-        select = QueryBuilder.select()
+        select = QueryBuilder.selectFrom(Constants.Schema.T_ATTRS)
                 .column(Constants.Schema.C_ATTRS_CONTEXT)
                 .column(Constants.Schema.C_ATTRS_RESOURCE)
                 .column(Constants.Schema.C_ATTRS_ATTR)
                 .column(Constants.Schema.C_ATTRS_VALUE)
-                .ttl(Constants.Schema.C_ATTRS_VALUE).as("ttl")
-                .from(Constants.Schema.T_ATTRS);
+                .ttl(Constants.Schema.C_ATTRS_VALUE).as("ttl");
         m_selectAllAttributesStatement = session.prepare(select.toString());
     }
 
@@ -71,16 +69,10 @@ public class CassandraCachePrimer {
     }
 
     public void prime(ResourceMetadataCache cache, Context context) {
-        BoundStatement bindStatement = m_selectAllMetricsStatement.bind();
-        bindStatement.setFetchSize(m_fetchSize);
+        BoundStatement bindStatement = m_selectAllMetricsStatement.bind()
+                .setPageSize(m_fetchSize);
         ResultSet rs = m_session.execute(bindStatement);
         for (Row row : rs) {
-            // If we're nearing the end of the current page, trigger another fetch now instead
-            // of waiting until all rows have been processed
-            if (rs.getAvailableWithoutFetching() == m_fetchMoreThreshold && !rs.isFullyFetched()) {
-                rs.fetchMoreResults(); // this is asynchronous
-            }
-
             final Context rowContext = new Context(row.getString(Constants.Schema.C_METRICS_CONTEXT));
             if (context != null && !context.equals(rowContext)) {
                 // Skip this entry, it's not in the context we're interested in
@@ -100,15 +92,9 @@ public class CassandraCachePrimer {
             cache.merge(rowContext, resource, resourceMetadata);
         }
 
-        bindStatement = m_selectAllAttributesStatement.bind();
-        bindStatement.setFetchSize(m_fetchSize);
+        bindStatement = m_selectAllAttributesStatement.bind()
+                .setPageSize(m_fetchSize);
         for (Row row : m_session.execute(bindStatement)) {
-            // If we're nearing the end of the current page, trigger another fetch now instead
-            // of waiting until all rows have been processed
-            if (rs.getAvailableWithoutFetching() == m_fetchMoreThreshold && !rs.isFullyFetched()) {
-                rs.fetchMoreResults(); // this is asynchronous
-            }
-
             final Context rowContext = new Context(row.getString(Constants.Schema.C_ATTRS_CONTEXT));
             if (context != null && !context.equals(rowContext)) {
                 // Skip this entry, it's not in the context we're interested in
@@ -121,7 +107,7 @@ public class CassandraCachePrimer {
             // Let the caches expire before the real TTL to avoid corner-cases and add some margin
             // Cassandra supports fetching of TTL values only on rows where not all columns are primary keys. Therefore
             // we assume that the TTL of entries in this table is similar to entries of other metadata tables. Setting
-            // the expiration time only once will will merge the value to all other cached entries for the same resource
+            // the expiration time only once will merge the value to all other cached entries for the same resource
             resourceMetadata.setExpires(System.currentTimeMillis() + row.getInt("ttl") * 1000L * 3L / 4L);
 
             resourceMetadata.putAttribute(row.getString(Constants.Schema.C_ATTRS_ATTR),

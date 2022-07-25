@@ -33,11 +33,6 @@ public class DurationParam extends AbstractParam<Duration> {
     }
 
     @Override
-    protected String errorMessage(String input, Exception e) {
-        return String.format("Unable to parse '%s' as resolution", input);
-    }
-
-    @Override
     protected Duration parse(String input) throws Exception {
         if (input.matches("^[\\d]+$")) {
             return Duration.seconds(Integer.valueOf(input));

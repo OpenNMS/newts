@@ -1,47 +1,54 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="newts-${project.version}">
 
-    <feature name="netty" description="Netty IO library" version="4.0.56.Final">
-      <bundle dependency="true">mvn:io.netty/netty-handler/4.0.56.Final</bundle>
-      <bundle dependency="true">mvn:io.netty/netty-common/4.0.56.Final</bundle>
-      <bundle dependency="true">mvn:io.netty/netty-buffer/4.0.56.Final</bundle>
-      <bundle dependency="true">mvn:io.netty/netty-transport/4.0.56.Final</bundle>
-      <bundle dependency="true">mvn:io.netty/netty-codec/4.0.56.Final</bundle>
+    <feature name="netty" description="Netty IO library" version="4.1.77.Final">
+      <bundle dependency="true">mvn:io.netty/netty-handler/4.1.77.Final</bundle>
+      <bundle dependency="true">mvn:io.netty/netty-common/4.1.77.Final</bundle>
+      <bundle dependency="true">mvn:io.netty/netty-resolver/4.1.77.Final</bundle>
+      <bundle dependency="true">mvn:io.netty/netty-buffer/4.1.77.Final</bundle>
+      <bundle dependency="true">mvn:io.netty/netty-transport/4.1.77.Final</bundle>
+      <bundle dependency="true">mvn:io.netty/netty-codec/4.1.77.Final</bundle>
     </feature>
 
-    <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="3.5.0">
+    <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="4.15.0">
       <feature>netty</feature>
-      <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/3.2.6</bundle>
-      <bundle dependency="true">mvn:org.codehaus.jackson/jackson-core-asl/1.9.13</bundle>
-      <bundle dependency="true">mvn:org.codehaus.jackson/jackson-mapper-asl/1.9.13</bundle>
-      <bundle dependency="true">mvn:com.datastax.cassandra/cassandra-driver-core/3.5.0</bundle>
+      <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/4.2.10</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.13.3</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.13.3</bundle>
+      <bundle dependency="true">mvn:com.datastax.oss/java-driver-core/4.15.0</bundle>
+      <bundle dependency="true">mvn:com.datastax.oss/native-protocol/1.5.1</bundle>
+      <bundle dependency="true">mvn:com.datastax.oss/java-driver-shaded-guava/25.1-jre-graal-sub-1</bundle>
+      <bundle dependency="true">mvn:com.datastax.oss/java-driver-query-builder/4.15.0</bundle>
+      <bundle dependency="true">mvn:com.typesafe/config/1.4.1</bundle>
+      <bundle dependency="true">mvn:org.hdrhistogram/HdrHistogram/2.1.12</bundle>
     </feature>
 
-    <feature name="fastxml-jackson" description="Jackson JSON library" version="2.5.4">
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.5.4</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.5.4</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.5.4</bundle>
+    <feature name="fastxml-jackson" description="Jackson JSON library" version="2.13.3">
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.13.3</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.13.3</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.13.3</bundle>
     </feature>
 
-    <feature name="newts-api" description="Newts API" version="${project.version}">
+    <feature name="newts-api" description="Newts API" version="${osgi.version}">
       <feature>fastxml-jackson</feature>
-      <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
-      <bundle dependency="true">mvn:org.apache.commons/commons-jexl3/3.1</bundle>
+      <bundle dependency="true">mvn:com.google.guava/guava/31.1-jre</bundle>
+      <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+      <bundle dependency="true">mvn:org.apache.commons/commons-jexl3/3.2.1</bundle>
       <bundle>mvn:org.opennms.newts/newts-api/${project.version}</bundle>
       <bundle>mvn:org.opennms.newts/newts-aggregate/${project.version}</bundle>
     </feature>
 
-    <feature name="newts-cassandra-common" description="Newts Cassandra Common" version="${project.version}">
+    <feature name="newts-cassandra-common" description="Newts Cassandra Common" version="${osgi.version}">
       <feature>newts-api</feature>
       <feature>cassandra-driver</feature>
       <bundle>mvn:org.opennms.newts/newts-cassandra-common/${project.version}</bundle>
     </feature>
 
-    <feature name="newts-cassandra" description="Newts Cassandra Repository" version="${project.version}">
+    <feature name="newts-cassandra" description="Newts Cassandra Repository" version="${osgi.version}">
       <feature>newts-cassandra-common</feature>
       <bundle>mvn:org.opennms.newts/newts-cassandra/${project.version}</bundle>
     </feature>
 
-    <feature name="newts-cassandra-search" description="Newts Cassandra Search" version="${project.version}">
+    <feature name="newts-cassandra-search" description="Newts Cassandra Search" version="${osgi.version}">
       <feature>newts-cassandra-common</feature>
       <bundle>mvn:org.opennms.newts/newts-cassandra-search/${project.version}</bundle>
     </feature>

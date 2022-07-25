@@ -17,7 +17,7 @@ package org.opennms.newts.cassandra.search.support;
 
 import org.opennms.newts.api.Context;
 
-import com.datastax.driver.core.Statement;
+import com.datastax.oss.driver.api.core.cql.BatchableStatement;
 
 /**
  * Used to group and de-duplicate statements before they are generated and executed.
@@ -46,5 +46,5 @@ public interface StatementGenerator {
      *
      * @return statement
      */
-    Statement toStatement();
+    BatchableStatement<?> toStatement();
 }

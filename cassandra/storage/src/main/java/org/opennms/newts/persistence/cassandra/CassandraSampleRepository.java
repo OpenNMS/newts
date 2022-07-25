@@ -19,17 +19,21 @@ package org.opennms.newts.persistence.cassandra;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.querybuilder.Batch;
-import com.datastax.driver.core.querybuilder.Delete;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.BatchStatement;
+import com.datastax.oss.driver.api.core.cql.BatchStatementBuilder;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.DefaultBatchType;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.querybuilder.delete.Delete;
+import com.datastax.oss.driver.api.querybuilder.insert.Insert;
+import com.datastax.oss.driver.api.querybuilder.insert.RegularInsert;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+
 import org.opennms.newts.aggregate.IntervalGenerator;
 import org.opennms.newts.aggregate.ResultProcessor;
 import org.opennms.newts.api.Context;
@@ -45,6 +49,7 @@ import org.opennms.newts.api.SampleSelectCallback;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 import org.opennms.newts.api.query.ResultDescriptor;
+import org.opennms.newts.api.search.QueryBuilder;
 import org.opennms.newts.cassandra.CassandraSession;
 import org.opennms.newts.cassandra.ContextConfigurations;
 import org.slf4j.Logger;
@@ -55,18 +60,17 @@ import javax.inject.Named;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.codahale.metrics.MetricRegistry.name;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gte;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.insertInto;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lte;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.ttl;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.deleteFrom;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.insertInto;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.selectFrom;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -107,21 +111,18 @@ public class CassandraSampleRepository implements SampleRepository {
 
         m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
-        Select select = QueryBuilder.select().from(SchemaConstants.T_SAMPLES);
-        select.where(eq(SchemaConstants.F_CONTEXT, bindMarker(SchemaConstants.F_CONTEXT)));
-        select.where(eq(SchemaConstants.F_PARTITION, bindMarker(SchemaConstants.F_PARTITION)));
-        select.where(eq(SchemaConstants.F_RESOURCE, bindMarker(SchemaConstants.F_RESOURCE)));
-
-        select.where(gte(SchemaConstants.F_COLLECTED, bindMarker("start")));
-        select.where(lte(SchemaConstants.F_COLLECTED, bindMarker("end")));
-
+        Select select = selectFrom(SchemaConstants.T_SAMPLES).columns(SchemaConstants.F_VALUE, SchemaConstants.F_METRIC_NAME, SchemaConstants.F_COLLECTED, SchemaConstants.F_RESOURCE, SchemaConstants.F_ATTRIBUTES)
+                .whereColumn(SchemaConstants.F_CONTEXT).isEqualTo(bindMarker(SchemaConstants.F_CONTEXT))
+                .whereColumn(SchemaConstants.F_PARTITION).isEqualTo(bindMarker(SchemaConstants.F_PARTITION))
+                .whereColumn(SchemaConstants.F_RESOURCE).isEqualTo(bindMarker(SchemaConstants.F_RESOURCE))
+                .whereColumn(SchemaConstants.F_COLLECTED).isGreaterThanOrEqualTo(bindMarker("start"))
+                .whereColumn(SchemaConstants.F_COLLECTED).isLessThanOrEqualTo(bindMarker("end"));
         m_selectStatement = m_session.prepare(select.toString());
 
-        Delete delete = QueryBuilder.delete().from(SchemaConstants.T_SAMPLES);
-        delete.where(eq(SchemaConstants.F_CONTEXT, bindMarker(SchemaConstants.F_CONTEXT)));
-        delete.where(eq(SchemaConstants.F_PARTITION, bindMarker(SchemaConstants.F_PARTITION)));
-        delete.where(eq(SchemaConstants.F_RESOURCE, bindMarker(SchemaConstants.F_RESOURCE)));
-
+        Delete delete = deleteFrom(SchemaConstants.T_SAMPLES)
+                .whereColumn(SchemaConstants.F_CONTEXT).isEqualTo(bindMarker(SchemaConstants.F_CONTEXT))
+                .whereColumn(SchemaConstants.F_PARTITION).isEqualTo(bindMarker(SchemaConstants.F_PARTITION))
+                .whereColumn(SchemaConstants.F_RESOURCE).isEqualTo(bindMarker(SchemaConstants.F_RESOURCE));
         m_deleteStatement = m_session.prepare(delete.toString());
 
         m_sampleSelectTimer = registry.timer(metricName("sample-select-timer"));
@@ -238,7 +239,7 @@ public class CassandraSampleRepository implements SampleRepository {
         Timer.Context timer = m_insertTimer.time();
         Timestamp now = Timestamp.now();
 
-        Batch batch = unloggedBatch();
+        BatchStatementBuilder batchBuilder = BatchStatement.builder(DefaultBatchType.UNLOGGED);
 
         for (Sample m : samples) {
             int ttl = m_ttl;
@@ -252,28 +253,27 @@ public class CassandraSampleRepository implements SampleRepository {
 
             Duration resourceShard = m_contextConfigurations.getResourceShard(m.getContext());
 
-            Insert insert = insertInto(SchemaConstants.T_SAMPLES)
-                    .value(SchemaConstants.F_CONTEXT, m.getContext().getId())
-                    .value(SchemaConstants.F_PARTITION, m.getTimestamp().stepFloor(resourceShard).asSeconds())
-                    .value(SchemaConstants.F_RESOURCE, m.getResource().getId())
-                    .value(SchemaConstants.F_COLLECTED, m.getTimestamp().asMillis())
-                    .value(SchemaConstants.F_METRIC_NAME, m.getName())
-                    .value(SchemaConstants.F_VALUE, ValueType.decompose(m.getValue()));
+            RegularInsert insert = insertInto(SchemaConstants.T_SAMPLES)
+                    .value(SchemaConstants.F_CONTEXT, literal(m.getContext().getId()))
+                    .value(SchemaConstants.F_PARTITION, literal(m.getTimestamp().stepFloor(resourceShard).asSeconds()))
+                    .value(SchemaConstants.F_RESOURCE, literal(m.getResource().getId()))
+                    .value(SchemaConstants.F_COLLECTED, literal(m.getTimestamp().asMillis()))
+                    .value(SchemaConstants.F_METRIC_NAME, literal(m.getName()))
+                    .value(SchemaConstants.F_VALUE, literal(ValueType.decompose(m.getValue())));
 
             // Inserting a column with a null value inserts a tombstone (a deletion marker); Skip the attributes
             // for any sample that has not specified them.
             if (m.getAttributes() != null) {
-                insert.value(SchemaConstants.F_ATTRIBUTES, m.getAttributes());
+                insert = insert.value(SchemaConstants.F_ATTRIBUTES, literal(m.getAttributes()));
             }
 
             // Use the context specific consistency level
-            insert.setConsistencyLevel(m_contextConfigurations.getWriteConsistency(m.getContext()));
-
-            batch.add(insert.using(ttl(ttl)));
+            batchBuilder.addStatement(insert.usingTtl(ttl).build()
+                    .setConsistencyLevel(m_contextConfigurations.getWriteConsistency(m.getContext())));
         }
 
         try {
-            m_session.execute(batch);
+            m_session.execute(batchBuilder.build());
 
             if (m_processorService != null) {
                 m_processorService.submit(samples);
@@ -299,7 +299,7 @@ public class CassandraSampleRepository implements SampleRepository {
 
             final Duration resourceShard = m_contextConfigurations.getResourceShard(context);
 
-            final List<Future<ResultSet>> futures = Lists.newArrayList();
+            final List<CompletionStage<AsyncResultSet>> futures = Lists.newArrayList();
             for (Timestamp partition : new IntervalGenerator(start.stepFloor(resourceShard),
                     end.stepFloor(resourceShard),
                     resourceShard)) {
@@ -311,9 +311,9 @@ public class CassandraSampleRepository implements SampleRepository {
                 futures.add(m_session.executeAsync(bindStatement));
             }
 
-            for (final Future<ResultSet> future : futures) {
+            for (final CompletionStage<AsyncResultSet> future : futures) {
                 try {
-                    future.get();
+                    future.toCompletableFuture().get();
                 } catch (final InterruptedException | ExecutionException e) {
                     throw Throwables.propagate(e);
                 }
@@ -328,7 +328,7 @@ public class CassandraSampleRepository implements SampleRepository {
                 // Now delete the samples...
                 final Duration resourceShard = m_contextConfigurations.getResourceShard(context);
 
-                final List<Future<ResultSet>> futures = Lists.newArrayList();
+                final List<CompletionStage<AsyncResultSet>> futures = Lists.newArrayList();
                 for (Timestamp partition : new IntervalGenerator(start.stepFloor(resourceShard),
                         end.stepFloor(resourceShard),
                         resourceShard)) {
@@ -340,9 +340,9 @@ public class CassandraSampleRepository implements SampleRepository {
                     futures.add(m_session.executeAsync(bindStatement));
                 }
 
-                for (final Future<ResultSet> future : futures) {
+                for (final CompletionStage<AsyncResultSet> future : futures) {
                     try {
-                        future.get();
+                        future.toCompletableFuture().get();
                     } catch (final InterruptedException | ExecutionException e) {
                         throw Throwables.propagate(e);
                     }
@@ -357,25 +357,23 @@ public class CassandraSampleRepository implements SampleRepository {
         }
     }
 
-    private Iterator<com.datastax.driver.core.Row> cassandraSelect(Context context, Resource resource,
-                                                                   Timestamp start, Timestamp end) {
+    private Iterator<com.datastax.oss.driver.api.core.cql.Row> cassandraSelect(Context context, Resource resource,
+                                                                               Timestamp start, Timestamp end) {
 
-        List<Future<ResultSet>> futures = Lists.newArrayList();
+        List<CompletionStage<AsyncResultSet>> futures = Lists.newArrayList();
 
         Duration resourceShard = m_contextConfigurations.getResourceShard(context);
         Timestamp lower = start.stepFloor(resourceShard);
         Timestamp upper = end.stepFloor(resourceShard);
 
         for (Timestamp partition : new IntervalGenerator(lower, upper, resourceShard)) {
-            BoundStatement bindStatement = m_selectStatement.bind();
-            bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
-            bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
-            bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
-            bindStatement.setTimestamp("start", start.asDate());
-            bindStatement.setTimestamp("end", end.asDate());
-            // Use the context specific consistency level
-            bindStatement.setConsistencyLevel(m_contextConfigurations.getReadConsistency(context));
-
+            BoundStatement bindStatement = m_selectStatement.bind()
+                    .setString(SchemaConstants.F_CONTEXT, context.getId())
+                    .setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds())
+                    .setString(SchemaConstants.F_RESOURCE, resource.getId())
+                    .setInstant("start", start.asDate().toInstant())
+                    .setInstant("end", end.asDate().toInstant())
+                    .setConsistencyLevel(m_contextConfigurations.getReadConsistency(context));
             futures.add(m_session.executeAsync(bindStatement));
         }
 

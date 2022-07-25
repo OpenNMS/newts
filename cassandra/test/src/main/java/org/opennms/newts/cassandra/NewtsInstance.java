@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The OpenNMS Group
+ * Copyright 2023, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -15,21 +15,16 @@
  */
 package org.opennms.newts.cassandra;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ServiceLoader;
 
-import org.cassandraunit.MyCassandraCQLUnit;
-import org.cassandraunit.dataset.CQLDataSet;
-import org.cassandraunit.dataset.cql.FileCQLDataSet;
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.junit.rules.ExternalResource;
+import org.testcontainers.containers.CassandraContainer;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Throwables;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import com.google.common.io.CharStreams;
-import com.google.common.io.Files;
 
 public class NewtsInstance extends ExternalResource {
     private static final String CASSANDRA_COMPRESSION = "NONE";
@@ -42,30 +37,32 @@ public class NewtsInstance extends ExternalResource {
 
     private static ServiceLoader<Schema> schemaLoader = ServiceLoader.load(Schema.class);
 
-    private MyCassandraCQLUnit cassandraUnit;
+    public CassandraContainer<?> cassandra = new CassandraContainer<>("cassandra:3.11.13");
+
     private String host;
     private int port;
 
     @Override
-    public void before() throws Throwable {
-        cassandraUnit = new MyCassandraCQLUnit(getDataSet(CASSANDRA_KEYSPACE, 1));
-        cassandraUnit.before();
-        host = EmbeddedCassandraServerHelper.getHost();
-        port = EmbeddedCassandraServerHelper.getNativeTransportPort();
+    public void before() {
+        cassandra.start();
+        installSchema(cassandra, CASSANDRA_KEYSPACE, 1);
+        host = cassandra.getHost();
+        port = cassandra.getMappedPort(CassandraContainer.CQL_PORT);
     }
 
     @Override
     public void after() {
-        cassandraUnit.after();
+        cassandra.stop();
     }
 
     public CassandraSession getCassandraSession() {
-        return new CassandraSessionImpl(CASSANDRA_KEYSPACE, host,
+        return new CassandraSessionImpl(cassandra.getLocalDatacenter(),
+                CASSANDRA_KEYSPACE, host,
                 port, CASSANDRA_COMPRESSION,
                 CASSANDRA_USERNAME, CASSANDRA_PASSWORD, false);
     }
 
-    public static CQLDataSet getDataSet(String keyspace, int replicationFactor) {
+    public static void installSchema(CassandraContainer<?> cassandra, String keyspace, int replicationFactor) {
         try {
             //  Concatenate the schema strings
             String schemasString = "";
@@ -101,13 +98,17 @@ public class NewtsInstance extends ExternalResource {
                 }
             }
 
-            // Write the results to disk
-            File schemaFile = File.createTempFile("schema-", ".cql", new File("target"));
-            schemaFile.deleteOnExit();
-            Files.write(sb.toString(), schemaFile, Charsets.UTF_8);
-            return new FileCQLDataSet(schemaFile.getAbsolutePath(), false, true, keyspace);
+            Cluster cluster = cassandra.getCluster();
+            try(Session session = cluster.connect()) {
+                for (String statement : sb.toString().split(";")) {
+                    if (statement.trim().isEmpty()) {
+                        continue;
+                    }
+                    session.execute(statement);
+                }
+            }
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

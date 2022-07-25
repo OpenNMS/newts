@@ -26,6 +26,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CassandraConfig {
 
+    @JsonProperty("datacenter")
+    private String m_datacenter = "datacenter1";
+
     @JsonProperty("keyspace")
     private String m_keyspace = "newts";
 
@@ -62,6 +65,14 @@ public class CassandraConfig {
 
     @JsonProperty("max-requests-per-connection")
     private Integer m_maxRequestsPerConnection;
+
+    public String getDatacenter() {
+        return m_datacenter;
+    }
+
+    public void setDatacenter(String m_datacenter) {
+        m_datacenter = m_datacenter;
+    }
 
     public String getKeyspace() {
         return m_keyspace;

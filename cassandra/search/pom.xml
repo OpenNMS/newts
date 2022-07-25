@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.opennms.newts</groupId>
     <artifactId>newts-cassandra-parent</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -78,7 +78,7 @@
 	      org.opennms.newts.cassandra.search*
 	    </Export-Package>
 	    <Import-Package>
-	      <![CDATA[javax.inject*;resolution:=optional,com.google.common.*;version="[${guavaVersion},${maxGuavaVersion})",*]]>
+	      <![CDATA[javax.inject*;resolution:=optional,*]]>
 	    </Import-Package>
 	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
 	  </instructions>

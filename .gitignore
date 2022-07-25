@@ -4,6 +4,7 @@ target/
 .classpath
 .project
 .settings/
+pom.xml.versionsBackup
 
 # editor droppings
 .idea/

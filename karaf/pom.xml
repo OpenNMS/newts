@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opennms.newts</groupId>
     <artifactId>newts-parent</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -13,6 +13,10 @@
   <name>New Timeseries Datastore :: Karaf Features</name>
 
   <packaging>jar</packaging>
+
+  <properties>
+    <karafVersion>4.3.6</karafVersion>
+  </properties>
 
   <build>
     <resources>
@@ -42,9 +46,70 @@
               </artifacts>
             </configuration>
           </execution>
+          <execution>
+            <goals>
+                <goal>regex-property</goal>
+            </goals>
+            <configuration>
+                <name>osgi.version</name>
+                <value>${project.version}</value>
+                <regex>-SNAPSHOT</regex>
+                <replacement>.SNAPSHOT</replacement>
+                <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+        <version>${karafVersion}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <skip>${skipTests}</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>verify</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>mvn:org.apache.karaf.features/framework/${karafVersion}/xml/features</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/standard/${karafVersion}/xml/features</descriptor>
+                <descriptor>mvn:org.apache.karaf.features/enterprise/${karafVersion}/xml/features</descriptor>
+                <descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
+              </descriptors>
+              <distribution>org.apache.karaf.features:framework</distribution>
+              <javase>1.8</javase>
+              <framework>
+                <feature>aries-blueprint</feature>
+                <feature>framework</feature>
+                <feature>shell</feature>
+              </framework>
+              <features>
+                <feature>netty</feature>
+                <feature>cassandra-driver</feature>
+                <feature>fastxml-jackson</feature>
+                <feature>newts*</feature>
+              </features>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>framework</artifactId>
+      <type>kar</type>
+      <scope>provided</scope>
+      <version>${karafVersion}</version>
+    </dependency>
+  </dependencies>
 
 </project>

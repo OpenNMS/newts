@@ -97,7 +97,7 @@ public class GraphiteHandler extends SimpleChannelInboundHandler<String> {
 
     }
 
-    private static final Splitter s_lineTokenizer = Splitter.on(CharMatcher.WHITESPACE).limit(3).trimResults();
+    private static final Splitter s_lineTokenizer = Splitter.on(CharMatcher.whitespace()).limit(3).trimResults();
     private static final Splitter s_pathTokenizer = Splitter.on('.').trimResults();
     private static final Joiner s_pathJoiner = Joiner.on(':');
 

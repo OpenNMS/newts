@@ -31,9 +31,6 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Timestamp;
 import org.opennms.newts.api.ValueType;
 
-import com.datastax.driver.core.ResultSet;
-
-
 /**
  * Map database results to Newts {@link Sample}s.
  *
@@ -41,12 +38,12 @@ import com.datastax.driver.core.ResultSet;
  */
 class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.Row<Sample>> {
 
-    private final Iterator<com.datastax.driver.core.Row> m_results;
+    private final Iterator<com.datastax.oss.driver.api.core.cql.Row> m_results;
     private final Set<String> m_metrics;
     private Results.Row<Sample> m_next = null;
     private int m_count = 0;
 
-    DriverAdapter(Iterator<com.datastax.driver.core.Row> input) {
+    DriverAdapter(Iterator<com.datastax.oss.driver.api.core.cql.Row> input) {
         this(input, Collections.<String> emptySet());
     }
 
@@ -59,7 +56,7 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
      *            the set of result metrics to include; an empty set indicates that all metrics
      *            should be included
      */
-    DriverAdapter(Iterator<com.datastax.driver.core.Row> input, Set<String> metrics) {
+    DriverAdapter(Iterator<com.datastax.oss.driver.api.core.cql.Row> input, Set<String> metrics) {
         m_results = checkNotNull(input, "input argument");
         m_metrics = checkNotNull(metrics, "metrics argument");
 
@@ -128,28 +125,28 @@ class DriverAdapter implements Iterable<Results.Row<Sample>>, Iterator<Results.R
         return getSample(m_results.next());
     }
 
-    private static Sample getSample(com.datastax.driver.core.Row row) {
+    private static Sample getSample(com.datastax.oss.driver.api.core.cql.Row row) {
         ValueType<?> value = getValue(row);
         return new Sample(getTimestamp(row), getResource(row), getMetricName(row), value.getType(), value, getAttributes(row));
     }
 
-    private static ValueType<?> getValue(com.datastax.driver.core.Row row) {
-        return ValueType.compose(row.getBytes(SchemaConstants.F_VALUE));
+    private static ValueType<?> getValue(com.datastax.oss.driver.api.core.cql.Row row) {
+        return ValueType.compose(row.getByteBuffer(SchemaConstants.F_VALUE));
     }
 
-    private static String getMetricName(com.datastax.driver.core.Row row) {
+    private static String getMetricName(com.datastax.oss.driver.api.core.cql.Row row) {
         return row.getString(SchemaConstants.F_METRIC_NAME);
     }
 
-    private static Timestamp getTimestamp(com.datastax.driver.core.Row row) {
-        return Timestamp.fromEpochMillis(row.getTimestamp(SchemaConstants.F_COLLECTED).getTime());
+    private static Timestamp getTimestamp(com.datastax.oss.driver.api.core.cql.Row row) {
+        return Timestamp.fromEpochMillis(row.getInstant(SchemaConstants.F_COLLECTED).toEpochMilli());
     }
 
-    private static Resource getResource(com.datastax.driver.core.Row row) {
+    private static Resource getResource(com.datastax.oss.driver.api.core.cql.Row row) {
         return new Resource(row.getString(SchemaConstants.F_RESOURCE));
     }
 
-    private static Map<String, String> getAttributes(com.datastax.driver.core.Row row) {
+    private static Map<String, String> getAttributes(com.datastax.oss.driver.api.core.cql.Row row) {
         return row.getMap(SchemaConstants.F_ATTRIBUTES, String.class, String.class);
     }
 

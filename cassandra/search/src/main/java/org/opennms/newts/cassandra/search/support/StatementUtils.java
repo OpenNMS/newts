@@ -1,27 +1,28 @@
 package org.opennms.newts.cassandra.search.support;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.unloggedBatch;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.opennms.newts.cassandra.ContextConfigurations;
 
-import com.datastax.driver.core.RegularStatement;
-import com.datastax.driver.core.Statement;
+import com.datastax.oss.driver.api.core.cql.BatchStatement;
+import com.datastax.oss.driver.api.core.cql.BatchStatementBuilder;
+import com.datastax.oss.driver.api.core.cql.BatchableStatement;
+import com.datastax.oss.driver.api.core.cql.DefaultBatchType;
+import com.datastax.oss.driver.api.core.cql.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class StatementUtils {
 
     public static List<Statement> getStatements(ContextConfigurations contextConfigurations, int maxBatchSize,
-            Set<StatementGenerator> generators) {
+                                                Set<StatementGenerator> generators) {
         List<Statement> statementsToExecute = Lists.newArrayList();
 
-        Map<String, List<Statement>> statementsByKey = Maps.newHashMap();
+        Map<String, List<BatchableStatement>> statementsByKey = Maps.newHashMap();
         for (StatementGenerator generator : generators) {
-            Statement statement = generator.toStatement()
+            BatchableStatement statement = generator.toStatement()
                     .setConsistencyLevel(contextConfigurations.getWriteConsistency(generator.getContext()));
             String key = generator.getKey();
             if (key == null) {
@@ -31,7 +32,7 @@ public class StatementUtils {
             }
 
             // Group these by key
-            List<Statement> statementsForKey = statementsByKey.get(key);
+            List<BatchableStatement> statementsForKey = statementsByKey.get(key);
             if (statementsForKey == null) {
                 statementsForKey = Lists.newArrayList();
                 statementsByKey.put(key, statementsForKey);
@@ -40,9 +41,13 @@ public class StatementUtils {
         }
 
         // Consolidate the grouped statements into batches
-        for (List<Statement> statementsForKey: statementsByKey.values()) {
-            for (List<Statement> partition : Lists.partition(statementsForKey, maxBatchSize)) {
-                statementsToExecute.add(unloggedBatch(partition.toArray(new RegularStatement[partition.size()])));
+        for (List<BatchableStatement> statementsForKey: statementsByKey.values()) {
+            for (List<BatchableStatement> partition : Lists.partition(statementsForKey, maxBatchSize)) {
+                BatchStatementBuilder builder = BatchStatement.builder(DefaultBatchType.UNLOGGED);
+                for (BatchableStatement statement : partition) {
+                    builder.addStatement(statement);
+                }
+                statementsToExecute.add(builder.build());
             }
         }
 
