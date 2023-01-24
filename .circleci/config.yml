@@ -147,6 +147,8 @@ workflows:
             branches:
               only: /.*/
       - deploy:
+          context: 
+            - "OSSRH Principal"
           requires:
             - build
           filters:
