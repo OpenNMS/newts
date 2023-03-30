@@ -12,8 +12,8 @@
     <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="4.15.0">
       <feature>netty</feature>
       <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/4.2.10</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.13.3</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.13.3</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jacksonVersion}</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jacksonVersion}</bundle>
       <bundle dependency="true">mvn:com.datastax.oss/java-driver-core/4.15.0</bundle>
       <bundle dependency="true">mvn:com.datastax.oss/native-protocol/1.5.1</bundle>
       <bundle dependency="true">mvn:com.datastax.oss/java-driver-shaded-guava/25.1-jre-graal-sub-1</bundle>
@@ -22,14 +22,14 @@
       <bundle dependency="true">mvn:org.hdrhistogram/HdrHistogram/2.1.12</bundle>
     </feature>
 
-    <feature name="fastxml-jackson" description="Jackson JSON library" version="2.13.3">
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.13.3</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.13.3</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.13.3</bundle>
+    <feature name="fastxml-jackson" description="Jackson JSON library" version="${jacksonVersion}">
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jacksonVersion}</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jacksonVersion}</bundle>
+      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jacksonVersion}</bundle>
     </feature>
 
     <feature name="newts-api" description="Newts API" version="${osgi.version}">
-      <feature>fastxml-jackson</feature>
+      <feature version="${jacksonVersion}">fastxml-jackson</feature>
       <bundle dependency="true">mvn:com.google.guava/guava/31.1-jre</bundle>
       <bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
       <bundle dependency="true">mvn:org.apache.commons/commons-jexl3/3.2.1</bundle>
