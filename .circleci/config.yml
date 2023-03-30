@@ -155,4 +155,4 @@ workflows:
             branches:
               only:
                - /^release-.*/
-               - master
+               - main
