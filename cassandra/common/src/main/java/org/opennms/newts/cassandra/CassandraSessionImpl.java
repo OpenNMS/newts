@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,7 @@ public class CassandraSessionImpl implements CassandraSession {
             @Named("cassandra.pool.max-requests-per-connection") Integer maxRequestsPerConnection,
             @Named("cassandra.driver-settings-file") String driverSettingsFile) {
 
-        if (driverSettingsFile != null) {
+        if (!Strings.isNullOrEmpty(driverSettingsFile)) {
             File settingsFile = new File(driverSettingsFile);
             LOG.info("Setting up session with settings file: {}", settingsFile);
             m_session = CqlSession.builder()
