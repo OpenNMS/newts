@@ -16,27 +16,27 @@
 package org.opennms.newts.cassandra;
 
 
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletionStage;
 
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.RegularStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Statement;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.cql.Statement;
 
 
 public interface CassandraSession {
 
     PreparedStatement prepare(String statement);
 
-    PreparedStatement prepare(RegularStatement statement);
+    PreparedStatement prepare(SimpleStatement statement);
 
-    ResultSetFuture executeAsync(Statement statement);
+    CompletionStage<AsyncResultSet> executeAsync(Statement statement);
 
     ResultSet execute(Statement statement);
 
     ResultSet execute(String statement);
 
-    Future<Void> shutdown();
+    CompletionStage<Void> shutdown();
 
 }

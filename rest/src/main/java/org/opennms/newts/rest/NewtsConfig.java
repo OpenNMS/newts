@@ -64,6 +64,10 @@ public class NewtsConfig extends Configuration {
         return m_searchConfig;
     }
 
+    public String getCassandraDatacenter() {
+        return m_cassandraConfig.getDatacenter();
+    }
+
     public String getCassandraKeyspace() {
         return m_cassandraConfig.getKeyspace();
     }

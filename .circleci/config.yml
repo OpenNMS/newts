@@ -2,8 +2,8 @@ version: 2.1
 
 executors:
   build-executor:
-    docker:
-      - image: cimg/openjdk:8.0-browsers
+    machine:
+      image: ubuntu-2004:2022.04.2
 
 parameters:
   cache_version:

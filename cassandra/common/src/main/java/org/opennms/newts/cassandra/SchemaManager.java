@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The OpenNMS Group
+ * Copyright 2023, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -17,8 +17,10 @@ package org.opennms.newts.cassandra;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opennms.newts.cassandra.CassandraSessionImpl.toContactPoints;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,14 +29,16 @@ import java.nio.charset.StandardCharsets;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Cluster.Builder;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.AlreadyExistsException;
-import com.datastax.driver.core.exceptions.SyntaxError;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
+import com.datastax.oss.driver.api.core.servererrors.AlreadyExistsException;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 
 
 public class SchemaManager implements AutoCloseable {
@@ -47,29 +51,44 @@ public class SchemaManager implements AutoCloseable {
     public static final int DEFAULT_REPLICATION_FACTOR = 1;
 
     private String m_keyspace;
-    private Cluster m_cluster;
-    private Session m_session;
+    private final CqlSession m_session;
     private int m_replicationFactor = DEFAULT_REPLICATION_FACTOR;
 
     @Inject
-    public SchemaManager(@Named("cassandra.keyspace") String keyspace, @Named("cassandra.host") String host, @Named("cassandra.port") int port,
-            @Named("cassandra.username") String username, @Named("cassandra.password") String password, @Named("cassandra.ssl") boolean ssl) {
+    public SchemaManager(@Named("cassandra.localdatacenter") String localDatacenter,
+                         @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname, @Named("cassandra.port") int port,
+                         @Named("cassandra.username") String username, @Named("cassandra.password") String password, @Named("cassandra.ssl") boolean ssl,
+                         @Named("cassandra.driver-settings-file") String driverSettingsFile) {
         m_keyspace = keyspace;
 
-        Builder builder = Cluster.builder()
-                .withPort(port)
-                .addContactPoints(host.split(","));
+        if (driverSettingsFile != null) {
+            File settingsFile = new File(driverSettingsFile);
+            LOG.info("Setting up session with settings file: {}", settingsFile);
+            m_session = CqlSession.builder()
+                    .withConfigLoader(DefaultDriverConfigLoader.fromFile(settingsFile))
+                    .build();
+            return;
+        }
+
+        ProgrammaticDriverConfigLoaderBuilder configBuilder = DriverConfigLoader.programmaticBuilder()
+                .startProfile("default");
+        configBuilder.withString(DefaultDriverOption.SESSION_KEYSPACE, keyspace);
+        configBuilder.withStringList(DefaultDriverOption.CONTACT_POINTS, toContactPoints(hostname, port));
+
         if (username != null && password != null) {
             LOG.info("Using username: {} and password: XXXXXXXX", username);
-            builder.withCredentials(username, password);
+            configBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, username);
+            configBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, password);
         }
 
         if (ssl) {
-            LOG.info("Using SSL.");
-            builder.withSSL();
+            throw new IllegalArgumentException("Driver must be configured with \"cassandra.driver-settings-file\" to enable SSL support.");
         }
-        m_cluster= builder.build();
-        m_session = m_cluster.connect();
+
+        m_session = CqlSession.builder()
+                .withConfigLoader(configBuilder.build())
+                .withLocalDatacenter(localDatacenter)
+                .build();
     }
 
     public void create(Schema schema) throws IOException {
@@ -130,7 +149,7 @@ public class SchemaManager implements AutoCloseable {
 
     @Override
     public void close() {
-        m_cluster.close();
+        m_session.close();
     }
 
     public int getReplicationFactor() {

@@ -17,8 +17,8 @@ package org.opennms.newts.cassandra.search;
 
 
 import static com.codahale.metrics.MetricRegistry.name;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.bindMarker;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker;
+import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.selectFrom;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -45,13 +46,12 @@ import org.opennms.newts.cassandra.search.Constants.Schema;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -74,20 +74,20 @@ public class CassandraSearcher implements Searcher {
         m_searchTimer = registry.timer(name("search", "search"));
         m_contextConfigurations = checkNotNull(contextConfigurations, "contextConfigurations argument");
 
-        Select select = QueryBuilder.select(Schema.C_TERMS_RESOURCE).from(Schema.T_TERMS);
-        select.where(eq(Schema.C_TERMS_CONTEXT, bindMarker(Schema.C_TERMS_CONTEXT)))
-              .and(  eq(Schema.C_TERMS_FIELD, bindMarker(Schema.C_TERMS_FIELD)))
-              .and(  eq(Schema.C_TERMS_VALUE, bindMarker(Schema.C_TERMS_VALUE)));
+        Select select = selectFrom(Schema.T_TERMS).column(Schema.C_TERMS_RESOURCE)
+                .whereColumn(Schema.C_TERMS_CONTEXT).isEqualTo(bindMarker(Schema.C_TERMS_CONTEXT))
+               .whereColumn(Schema.C_TERMS_FIELD).isEqualTo(bindMarker(Schema.C_TERMS_FIELD))
+               .whereColumn(Schema.C_TERMS_VALUE).isEqualTo(bindMarker(Schema.C_TERMS_VALUE));
         m_searchStatement = m_session.prepare(select.toString());
 
-        select = QueryBuilder.select(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE).from(Schema.T_ATTRS);
-        select.where(eq(Schema.C_ATTRS_CONTEXT, bindMarker(Schema.C_ATTRS_CONTEXT)))
-              .and(  eq(Schema.C_ATTRS_RESOURCE, bindMarker(Schema.C_ATTRS_RESOURCE)));
+        select = selectFrom(Schema.T_ATTRS).columns(Schema.C_ATTRS_ATTR, Schema.C_ATTRS_VALUE)
+                .whereColumn(Schema.C_ATTRS_CONTEXT).isEqualTo(bindMarker(Schema.C_ATTRS_CONTEXT))
+                .whereColumn(Schema.C_ATTRS_RESOURCE).isEqualTo(bindMarker(Schema.C_ATTRS_RESOURCE));
         m_selectAttributesStatement = m_session.prepare(select.toString());
 
-        select = QueryBuilder.select(Schema.C_METRICS_NAME).from(Schema.T_METRICS);
-        select.where(eq(Schema.C_METRICS_CONTEXT, bindMarker(Schema.C_METRICS_CONTEXT)))
-              .and(  eq(Schema.C_METRICS_RESOURCE, bindMarker(Schema.C_METRICS_RESOURCE)));
+        select = selectFrom(Schema.T_METRICS).column(Schema.C_METRICS_NAME)
+                .whereColumn(Schema.C_METRICS_CONTEXT).isEqualTo(bindMarker(Schema.C_METRICS_CONTEXT))
+                .whereColumn(Schema.C_METRICS_RESOURCE).isEqualTo(bindMarker(Schema.C_METRICS_RESOURCE));
         m_selectMetricNamesStatement = m_session.prepare(select.toString());
     }
 
@@ -124,8 +124,8 @@ public class CassandraSearcher implements Searcher {
                     searchResults.addResult(resource, emptyList);
                 } else {
                     // Fetch the metric names and attributes concurrently
-                    ResultSetFuture attrsFuture = fetchResourceAttributes(context, id, readConsistency);
-                    ResultSetFuture metricsFuture = fetchMetricNames(context, id, readConsistency);
+                    CompletionStage<AsyncResultSet> attrsFuture = fetchResourceAttributes(context, id, readConsistency);
+                    CompletionStage<AsyncResultSet> metricsFuture = fetchMetricNames(context, id, readConsistency);
 
                     try {
                         Map<String, String> attrs = getResourceAttributesFromResults(attrsFuture);
@@ -170,11 +170,11 @@ public class CassandraSearcher implements Searcher {
     private Set<String> searchForIds(Context context, TermQuery query, ConsistencyLevel readConsistency) {
         Set<String> ids = Sets.newTreeSet();
 
-        BoundStatement bindStatement = m_searchStatement.bind();
-        bindStatement.setString(Schema.C_TERMS_CONTEXT, context.getId());
-        bindStatement.setString(Schema.C_TERMS_FIELD, query.getTerm().getField(Constants.DEFAULT_TERM_FIELD));
-        bindStatement.setString(Schema.C_TERMS_VALUE, query.getTerm().getValue());
-        bindStatement.setConsistencyLevel(readConsistency);
+        BoundStatement bindStatement = m_searchStatement.bind()
+                .setString(Schema.C_TERMS_CONTEXT, context.getId())
+                .setString(Schema.C_TERMS_FIELD, query.getTerm().getField(Constants.DEFAULT_TERM_FIELD))
+                .setString(Schema.C_TERMS_VALUE, query.getTerm().getValue())
+                .setConsistencyLevel(readConsistency);
 
         for (Row row : m_session.execute(bindStatement)) {
             ids.add(row.getString(Constants.Schema.C_TERMS_RESOURCE));
@@ -220,39 +220,58 @@ public class CassandraSearcher implements Searcher {
         return ids;
     }
 
-    private ResultSetFuture fetchResourceAttributes(Context context, String resourceId, ConsistencyLevel readConsistency) {
-        BoundStatement bindStatement = m_selectAttributesStatement.bind();
-        bindStatement.setString(Schema.C_ATTRS_CONTEXT, context.getId());
-        bindStatement.setString(Schema.C_ATTRS_RESOURCE, resourceId);
-        bindStatement.setConsistencyLevel(readConsistency);
+    private CompletionStage<AsyncResultSet> fetchResourceAttributes(Context context, String resourceId, ConsistencyLevel readConsistency) {
+        BoundStatement bindStatement = m_selectAttributesStatement.bind()
+                .setString(Schema.C_ATTRS_CONTEXT, context.getId())
+                .setString(Schema.C_ATTRS_RESOURCE, resourceId)
+                .setConsistencyLevel(readConsistency);
 
         return m_session.executeAsync(bindStatement);
     }
 
-    private Map<String, String> getResourceAttributesFromResults(ResultSetFuture results) throws InterruptedException, ExecutionException {
+    private Map<String, String> getResourceAttributesFromResults(CompletionStage<AsyncResultSet> results) throws InterruptedException, ExecutionException {
         Map<String, String> attributes = Maps.newHashMap();
 
-        for (Row row : results.get()) {
-            attributes.put(row.getString(Schema.C_ATTRS_ATTR), row.getString(Schema.C_ATTRS_VALUE));
+        // blocking
+        AsyncResultSet asyncResultSet = results.toCompletableFuture().get();
+        while (true) {
+            for (Row row : asyncResultSet.currentPage()) {
+                attributes.put(row.getString(Schema.C_ATTRS_ATTR), row.getString(Schema.C_ATTRS_VALUE));
+            }
+            if (asyncResultSet.hasMorePages()) {
+                // blocking
+                asyncResultSet = asyncResultSet.fetchNextPage().toCompletableFuture().get();
+            } else {
+                break;
+            }
         }
 
         return attributes;
     }
 
-    private ResultSetFuture fetchMetricNames(Context context, String resourceId, ConsistencyLevel readConsistency) {
-        BoundStatement bindStatement = m_selectMetricNamesStatement.bind();
-        bindStatement.setString(Schema.C_METRICS_CONTEXT, context.getId());
-        bindStatement.setString(Schema.C_METRICS_RESOURCE, resourceId);
-        bindStatement.setConsistencyLevel(readConsistency);
-
+    private CompletionStage<AsyncResultSet> fetchMetricNames(Context context, String resourceId, ConsistencyLevel readConsistency) {
+        BoundStatement bindStatement = m_selectMetricNamesStatement.bind()
+                .setString(Schema.C_METRICS_CONTEXT, context.getId())
+                .setString(Schema.C_METRICS_RESOURCE, resourceId)
+                .setConsistencyLevel(readConsistency);
         return m_session.executeAsync(bindStatement);
     }
 
-    private Collection<String> getMetricNamesFromResults(ResultSetFuture results) throws InterruptedException, ExecutionException {
+    private Collection<String> getMetricNamesFromResults(CompletionStage<AsyncResultSet> results) throws InterruptedException, ExecutionException {
         List<String> metricNames = Lists.newArrayList();
 
-        for (Row row : results.get()) {
-            metricNames.add(row.getString(Schema.C_METRICS_NAME));
+        // blocking
+        AsyncResultSet asyncResultSet = results.toCompletableFuture().get();
+        while (true) {
+            for (Row row : asyncResultSet.currentPage()) {
+                metricNames.add(row.getString(Schema.C_METRICS_NAME));
+            }
+            if (asyncResultSet.hasMorePages()) {
+                // blocking
+                asyncResultSet = asyncResultSet.fetchNextPage().toCompletableFuture().get();
+            } else {
+                break;
+            }
         }
 
         return metricNames;

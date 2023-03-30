@@ -3,7 +3,8 @@ package org.opennms.newts.rest;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Duration;
 
-import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ContextConfig {
@@ -29,10 +30,10 @@ public class ContextConfig {
     }
 
     public ConsistencyLevel getReadConsistency() {
-        return ConsistencyLevel.valueOf(m_readConsistency);
+        return DefaultConsistencyLevel.valueOf(m_readConsistency);
     }
 
     public ConsistencyLevel getWriteConsistency() {
-        return ConsistencyLevel.valueOf(m_writeConsistency);
+        return DefaultConsistencyLevel.valueOf(m_writeConsistency);
     }
 }

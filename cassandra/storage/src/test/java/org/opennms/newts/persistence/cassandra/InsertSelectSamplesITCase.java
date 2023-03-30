@@ -33,7 +33,7 @@ import org.opennms.newts.api.Sample;
 import org.opennms.newts.api.Results.Row;
 import org.opennms.newts.api.Timestamp;
 
-import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 

@@ -61,12 +61,13 @@ class InsertDispatcher extends Dispatcher {
     private final SampleRepository m_repository;
     private final BlockingQueue<Collection<Sample>> m_samplesQueue;
 
-    InsertDispatcher(InsertConfig config) throws InterruptedException {
+    InsertDispatcher(InsertConfig config) {
         super(config);
 
         m_config = config;
 
         CassandraSession session = new CassandraSessionImpl(
+                config.getCassandraLocalDatacenter(),
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),
