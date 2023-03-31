@@ -40,7 +40,7 @@ class Config {
 
     private boolean m_needHelp = false;
     private int m_threads = 4;
-    private String m_cassandraLocalDatacenter = "datacenter1";
+    private String m_cassandraDatacenter = "datacenter1";
     private String m_cassandraHost = "localhost";
     private int m_cassandraPort = 9042;
     private String m_cassandraKeyspace = "newts";
@@ -82,9 +82,9 @@ class Config {
         checkArgument(threads > 0, "-n/--num-threads must be at least 1");
         m_threads = threads;
     }
-    @Option(name = "-l", aliases = "--cassandra-local-datacenter", metaVar = "<dc>", usage = "Cassandra local datacenter.")
-    void setCassandraLocalDatacenter(String localDatacenter) {
-        m_cassandraLocalDatacenter = localDatacenter;
+    @Option(name = "-d", aliases = "--cassandra-datacenter", metaVar = "<dc>", usage = "Cassandra local datacenter.")
+    void setCassandraDatacenter(String datacenter) {
+        m_cassandraDatacenter = datacenter;
     }
 
     @Option(name = "-H", aliases = "--cassandra-host", metaVar = "<hostname>", usage = "Cassandra hostname.")
@@ -140,8 +140,8 @@ class Config {
         m_numMetrics = numMetrics;
     }
 
-    String getCassandraLocalDatacenter() {
-        return m_cassandraLocalDatacenter;
+    String getCassandraDatacenter() {
+        return m_cassandraDatacenter;
     }
 
     String getCassandraHost() {

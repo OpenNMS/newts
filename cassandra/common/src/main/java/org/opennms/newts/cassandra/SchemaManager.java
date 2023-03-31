@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
+import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class SchemaManager implements AutoCloseable {
     private int m_replicationFactor = DEFAULT_REPLICATION_FACTOR;
 
     @Inject
-    public SchemaManager(@Named("cassandra.localdatacenter") String localDatacenter,
+    public SchemaManager(@Named("cassandra.datacenter") String datacenter,
                          @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname, @Named("cassandra.port") int port,
                          @Named("cassandra.username") String username, @Named("cassandra.password") String password, @Named("cassandra.ssl") boolean ssl,
                          @Named("cassandra.driver-settings-file") String driverSettingsFile) {
@@ -83,12 +84,12 @@ public class SchemaManager implements AutoCloseable {
         }
 
         if (ssl) {
-            throw new IllegalArgumentException("Driver must be configured with \"cassandra.driver-settings-file\" to enable SSL support.");
+            configBuilder.withString(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class.getCanonicalName());
         }
 
         m_session = CqlSession.builder()
                 .withConfigLoader(configBuilder.build())
-                .withLocalDatacenter(localDatacenter)
+                .withLocalDatacenter(datacenter)
                 .build();
     }
 

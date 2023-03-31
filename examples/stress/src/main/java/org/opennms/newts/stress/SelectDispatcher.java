@@ -50,7 +50,7 @@ public class SelectDispatcher extends Dispatcher {
         m_config = config;
 
         CassandraSession session = new CassandraSessionImpl(
-                config.getCassandraLocalDatacenter(),
+                config.getCassandraDatacenter(),
                 config.getCassandraKeyspace(),
                 config.getCassandraHost(),
                 config.getCassandraPort(),

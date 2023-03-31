@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader;
+import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,23 +53,21 @@ public class CassandraSessionImpl implements CassandraSession {
 
     private final CqlSession m_session;
 
-    public CassandraSessionImpl(@Named("cassandra.localdatacenter") String localDatacenter,
+    public CassandraSessionImpl(@Named("cassandra.datacenter") String datacenter,
                                 @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
                                 @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
                                 @Named("cassandra.username") String username, @Named("cassandra.password") String password,
                                 @Named("cassandra.ssl") boolean ssl) {
-        this(localDatacenter, keyspace, hostname, port, compression, username, password, ssl, null, null, null, null);
+        this(datacenter, keyspace, hostname, port, compression, username, password, ssl, null, null, null);
     }
 
     @Inject
-    public CassandraSessionImpl(@Named("cassandra.localdatacenter") String localDatacenter,
+    public CassandraSessionImpl(@Named("cassandra.datacenter") String datacenter,
             @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
             @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
             @Named("cassandra.username") String username, @Named("cassandra.password") String password,
             @Named("cassandra.ssl") boolean ssl,
-            @Deprecated
-            @Named("cassandra.pool.core-connections-per-host") Integer coreConnectionsPerHost,
-            @Named("cassandra.pool.max-connections-per-host") Integer maxConnectionsPerHost,
+            @Named("cassandra.pool.connections-per-host") Integer connectionsPerHost,
             @Named("cassandra.pool.max-requests-per-connection") Integer maxRequestsPerConnection,
             @Named("cassandra.driver-settings-file") String driverSettingsFile) {
 
@@ -81,29 +80,24 @@ public class CassandraSessionImpl implements CassandraSession {
             return;
         }
 
-        checkNotNull(localDatacenter, "localDatacenter argument");
+        checkNotNull(datacenter, "datacenter argument");
         checkNotNull(keyspace, "keyspace argument");
         checkNotNull(hostname, "hostname argument");
         checkArgument(port > 0 && port < 65535, "not a valid port number: %d", port);
         checkNotNull(compression, "compression argument");
 
         LOG.info("Setting up session with to {}:{} using compression {} and local datacenter: {}", hostname, port,
-                compression.toUpperCase(), localDatacenter);
+                compression.toUpperCase(), datacenter);
 
         ProgrammaticDriverConfigLoaderBuilder configBuilder = DriverConfigLoader.programmaticBuilder()
                 .startProfile("default");
         configBuilder.withString(DefaultDriverOption.SESSION_KEYSPACE, keyspace);
         configBuilder.withStringList(DefaultDriverOption.CONTACT_POINTS, toContactPoints(hostname, port));
 
-        if (coreConnectionsPerHost != null) {
-            LOG.warn("Ignoring core connections per host value of: {}. " +
-                    "Use 'max-connections-per-host' only instead.", coreConnectionsPerHost);
-
-        }
-        if (maxConnectionsPerHost != null) {
-            LOG.debug("Using {} max connections per host.", maxConnectionsPerHost);
-            configBuilder.withInt(DefaultDriverOption.CONNECTION_POOL_LOCAL_SIZE, maxConnectionsPerHost);
-            configBuilder.withInt(DefaultDriverOption.CONNECTION_POOL_REMOTE_SIZE, maxConnectionsPerHost);
+        if (connectionsPerHost != null) {
+            LOG.debug("Using {} connections per host.", connectionsPerHost);
+            configBuilder.withInt(DefaultDriverOption.CONNECTION_POOL_LOCAL_SIZE, connectionsPerHost);
+            configBuilder.withInt(DefaultDriverOption.CONNECTION_POOL_REMOTE_SIZE, connectionsPerHost);
         }
         if (maxRequestsPerConnection != null) {
             LOG.debug("Using {} max requests per connection.", maxRequestsPerConnection);
@@ -121,12 +115,12 @@ public class CassandraSessionImpl implements CassandraSession {
         }
 
         if (ssl) {
-            throw new IllegalArgumentException("Driver must be configured with \"cassandra.driver-settings-file\" to enable SSL support.");
+            configBuilder.withString(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class.getCanonicalName());
         }
 
         m_session = CqlSession.builder()
                 .withConfigLoader(configBuilder.build())
-                .withLocalDatacenter(localDatacenter)
+                .withLocalDatacenter(datacenter)
                 .build();
     }
 
