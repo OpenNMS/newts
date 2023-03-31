@@ -1,3 +1,10 @@
+3.0.0
+~~~~~
+BREAKING: Major dependency upgrades
+
+Upgraded Cassandra driver to 4.15.0
+Upgraded Guava to 31.1-jre
+
 2.0.0
 ~~~~~
 
