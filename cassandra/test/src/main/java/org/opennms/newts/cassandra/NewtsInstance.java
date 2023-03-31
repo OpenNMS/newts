@@ -112,6 +112,10 @@ public class NewtsInstance extends ExternalResource {
         }
     }
 
+    public String getDatacenter() {
+        return cassandra.getLocalDatacenter();
+    }
+
     public String getHost() {
         return host;
     }
