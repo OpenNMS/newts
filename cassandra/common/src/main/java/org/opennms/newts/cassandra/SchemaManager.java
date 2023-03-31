@@ -74,7 +74,8 @@ public class SchemaManager implements AutoCloseable {
 
         ProgrammaticDriverConfigLoaderBuilder configBuilder = DriverConfigLoader.programmaticBuilder()
                 .startProfile("default");
-        configBuilder.withString(DefaultDriverOption.SESSION_KEYSPACE, keyspace);
+        // Don't set the keyspace, since we expect to create it
+        // configBuilder.withString(DefaultDriverOption.SESSION_KEYSPACE, keyspace);
         configBuilder.withStringList(DefaultDriverOption.CONTACT_POINTS, toContactPoints(hostname, port));
 
         if (username != null && password != null) {
