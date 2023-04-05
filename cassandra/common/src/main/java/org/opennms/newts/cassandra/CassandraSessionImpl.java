@@ -61,6 +61,15 @@ public class CassandraSessionImpl implements CassandraSession {
         this(datacenter, keyspace, hostname, port, compression, username, password, ssl, null, null, null);
     }
 
+    public CassandraSessionImpl(@Named("cassandra.datacenter") String datacenter,
+                                @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
+                                @Named("cassandra.port") int port, @Named("cassandra.compression") String compression,
+                                @Named("cassandra.username") String username, @Named("cassandra.password") String password,
+                                @Named("cassandra.ssl") boolean ssl,
+                                @Named("cassandra.driver-settings-file") String driverSettingsFile) {
+        this(datacenter, keyspace, hostname, port, compression, username, password, ssl, null, null, driverSettingsFile);
+    }
+
     @Inject
     public CassandraSessionImpl(@Named("cassandra.datacenter") String datacenter,
             @Named("cassandra.keyspace") String keyspace, @Named("cassandra.hostname") String hostname,
