@@ -85,6 +85,7 @@ public class CassandraSessionImpl implements CassandraSession {
             LOG.info("Setting up session with settings file: {}", settingsFile);
             m_session = CqlSession.builder()
                     .withConfigLoader(DefaultDriverConfigLoader.fromFile(settingsFile))
+                    .withKeyspace(keyspace)
                     .build();
             return;
         }
