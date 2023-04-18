@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 2.0.0"
+date: "2021-05-07 14:28:00 -0500"
+author: RangerRick
+version: 2.0.0
+categories: [release]
+---
+
+Newts 2.0.0 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/2.0.0/NEWS.rst) for a list of what's changed.
+

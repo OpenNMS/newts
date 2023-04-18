@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.5.1"
+date: "2019-02-07 04:40:00 -0500"
+author: j-white
+version: 1.5.1
+categories: [release]
+---
+
+Newts 1.5.1 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/1.5.1/NEWS.rst) for a list of what's changed.
+

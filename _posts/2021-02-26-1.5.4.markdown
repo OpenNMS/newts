@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.5.4"
+date: "2021-02-26 12:19:00 -0500"
+author: RangerRick
+version: 1.5.4
+categories: [release]
+---
+
+Newts 1.5.4 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/1.5.4/NEWS.rst) for a list of what's changed.
+

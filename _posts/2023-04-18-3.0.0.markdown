@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 3.0.0"
+date: "2023-04-18 10:41:00 -0500"
+author: RangerRick
+version: 3.0.0
+categories: [release]
+---
+
+Newts 3.0.0 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/3.0.0/NEWS.rst) for a list of what's changed.
+

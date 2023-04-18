@@ -1,0 +1,11 @@
+---
+layout: news_item
+title: "Newts 1.5.5"
+date: "2021-03-01 14:29:00 -0500"
+author: RangerRick
+version: 1.5.5
+categories: [release]
+---
+
+Newts 1.5.5 is now available! Check out the [release notes](https://github.com/OpenNMS/newts/blob/1.5.5/NEWS.rst) for a list of what's changed.
+
