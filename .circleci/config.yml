@@ -155,5 +155,4 @@ workflows:
             branches:
               only:
                - /^release-.*/
-               - main-*
                - main
