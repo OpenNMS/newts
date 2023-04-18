@@ -5,7 +5,7 @@
 
   <groupId>org.opennms.newts</groupId>
   <artifactId>newts-parent</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>http://newts.io</url>
   <name>Newts</name>
@@ -22,7 +22,7 @@
     <url>https://github.com/OpenNMS/newts</url>
     <connection>scm:git:https://github.com/OpenNMS/newts.git</connection>
     <developerConnection>scm:git:git@github.com:OpenNMS/newts</developerConnection>
-    <tag>3.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
