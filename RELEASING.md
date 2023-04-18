@@ -1,3 +1,3 @@
-mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="opennms@opennms.org" -Dgpg.keyname="opennms@opennms.org" -Prelease release:clean release:prepare
-mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="opennms@opennms.org" -Dgpg.keyname="opennms@opennms.org" -Prelease release:perform
-mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="opennms@opennms.org" -Dgpg.keyname="opennms@opennms.org" -Prelease nexus-staging:release -DstagingRepositoryId=xxxx
+mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Prelease release:clean release:prepare
+mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Prelease release:perform
+mvn -DautoVersionSubmodules=true -Darguments=-Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Dgpg.keyname="701E145FE26283F8C073BAAE697677243260D071" -Prelease nexus-staging:release -DstagingRepositoryId=xxxx
