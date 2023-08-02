@@ -24,9 +24,11 @@
             <Export-Package>
               org.opennms.newts.graphite*
             </Export-Package>
-            <Import-Package>
-	            <![CDATA[javax.inject*;resolution:=optional,*]]>
-            </Import-Package>
+	    <Import-Package>
+              javax.inject*;resolution:=optional,
+              com.google.common.*;version="${guavaOsgiVersion}",
+              *
+	    </Import-Package>
             <Bundle-DocURL>https://newts.io</Bundle-DocURL>
           </instructions>
         </configuration>

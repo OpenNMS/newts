@@ -24,6 +24,11 @@
             <Export-Package>
               org.opennms.newts.api.search.query* 
             </Export-Package>
+	    <Import-Package>
+              javax.inject*;resolution:=optional,
+              com.google.common.*;version="${guavaOsgiVersion}",
+              *
+	    </Import-Package>
             <Bundle-DocURL>https://newts.io</Bundle-DocURL>
           </instructions>
         </configuration>
