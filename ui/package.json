@@ -6,7 +6,7 @@
     "repository": "https://github.com/OpenNMS/newts-ui",
     "license": "APL2",
     "devDependencies": {
-        "karma": "~0.10",
+        "karma": "~6.4",
         "protractor": "^1.1.1",
         "http-server": "^0.6.1",
         "bower": "^1.3.1",
