@@ -3,7 +3,7 @@ updates:
 
   - package-ecosystem: "maven"
     directory: "/"
-    target-branch: "master"
+    target-branch: "release-3.x"
     reviewers:
       - "rangerrick"
     labels:
