@@ -1,0 +1,4 @@
+---
+".circleci/**/*":
+  - RangerRick
+  - mershad-manesh
