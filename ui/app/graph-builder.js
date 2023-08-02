@@ -164,7 +164,7 @@
         }
 
         function getSelectedFunction(metric) {
-            return vm.configForm[metric].function
+            return vm.configForm[metric].function;
         }
         
         function drawGraph() {
