@@ -14,7 +14,7 @@
   <name>New Timeseries Datastore :: REST</name>
 
   <properties>
-    <dropwizardVersion>2.1.1</dropwizardVersion>
+    <dropwizardVersion>2.1.7</dropwizardVersion>
   </properties>
 
   <dependencies>
@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
-      <version>1.1.1.7</version>
+      <version>${snappyJavaVersion}</version>
     </dependency>
     <dependency>
       <groupId>net.jpountz.lz4</groupId>
