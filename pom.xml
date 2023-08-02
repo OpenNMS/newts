@@ -51,14 +51,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <cassandraDriverVersion>4.15.0</cassandraDriverVersion>
-    <guavaVersion>31.1-jre</guavaVersion>
+    <guavaVersion>32.1.2-jre</guavaVersion>
+    <guavaOsgiVersion>32.1</guavaOsgiVersion>
     <guiceVersion>4.0</guiceVersion>
     <jacksonVersion>2.13.5</jacksonVersion>
     <junitVersion>4.13.2</junitVersion>
     <logbackVersion>1.2.11</logbackVersion>
     <metricsVersion>4.2.10</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
+    <nettyVersion>4.1.96.Final</nettyVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
+    <snappyJavaVersion>1.1.10.3</snappyJavaVersion>
     <testcontainersVersion>1.17.6</testcontainersVersion>
     <jexlVersion>3.2.1</jexlVersion>
     <args4jVersion>2.33</args4jVersion>
@@ -152,7 +155,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.10.1</version>
+        <version>3.11.0</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -187,7 +190,7 @@
       <plugin>
          <groupId>org.codehaus.mojo</groupId>
          <artifactId>build-helper-maven-plugin</artifactId>
-         <version>3.3.0</version>
+         <version>3.4.0</version>
       </plugin>
       <plugin>
         <groupId>com.helger.maven</groupId>

@@ -83,7 +83,9 @@
 	      org.opennms.newts.persistence.cassandra*
 	    </Export-Package>
 	    <Import-Package>
-	      <![CDATA[javax.inject*;resolution:=optional,*]]>
+              javax.inject*;resolution:=optional,
+              com.google.common.*;version="${guavaOsgiVersion}",
+              *
 	    </Import-Package>
 	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
 	  </instructions>
