@@ -24,6 +24,10 @@
 	    <Export-Package>
 	      org.opennms.newts.aggregate* 
 	    </Export-Package>
+	    <Import-Package>
+              com.google.common.*;version="${guavaOsgiVersion}",
+              *
+	    </Import-Package>
 	    <Bundle-DocURL>https://newts.io</Bundle-DocURL>
 	  </instructions>
 	</configuration>
