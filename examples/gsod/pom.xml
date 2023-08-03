@@ -14,7 +14,7 @@
   <name>New Timeseries Datastore :: Examples :: GSOD</name>
 
   <properties>
-    <rxjavaVersion>0.17.6</rxjavaVersion>
+    <rxjavaVersion>0.20.7</rxjavaVersion>
   </properties>
 
   <dependencies>
