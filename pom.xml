@@ -50,11 +50,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <asmVersion>9.5</asmVersion>
     <cassandraDriverVersion>4.17.0</cassandraDriverVersion>
     <guavaVersion>32.1.2-jre</guavaVersion>
     <guavaOsgiVersion>32.1</guavaOsgiVersion>
     <guiceVersion>4.2.3</guiceVersion>
     <jacksonVersion>2.13.5</jacksonVersion>
+    <jnrVersion>3.1.17</jnrVersion>
     <junitVersion>4.13.2</junitVersion>
     <logbackVersion>1.2.11</logbackVersion>
     <metricsVersion>4.2.10</metricsVersion>

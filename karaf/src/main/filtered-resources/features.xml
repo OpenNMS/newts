@@ -12,21 +12,40 @@
 
     <feature name="cassandra-driver" description="Datastax Cassandra Driver" version="${cassandraDriverVersion}">
       <feature>netty</feature>
+      <feature>fastxml-jackson</feature>
+      <feature>jnr</feature>
       <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metricsVersion}</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jacksonVersion}</bundle>
-      <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jacksonVersion}</bundle>
-      <bundle dependency="true">mvn:com.datastax.oss/java-driver-core/${cassandraDriverVersion}</bundle>
-      <bundle dependency="true">mvn:com.datastax.oss/native-protocol/1.5.1</bundle>
-      <bundle dependency="true">mvn:com.datastax.oss/java-driver-shaded-guava/25.1-jre-graal-sub-1</bundle>
-      <bundle dependency="true">mvn:com.datastax.oss/java-driver-query-builder/${cassandraDriverVersion}</bundle>
-      <bundle dependency="true">mvn:com.typesafe/config/1.4.1</bundle>
-      <bundle dependency="true">mvn:org.hdrhistogram/HdrHistogram/2.1.12</bundle>
+      <bundle>mvn:com.datastax.oss/java-driver-core/${cassandraDriverVersion}</bundle>
+      <bundle>mvn:com.datastax.oss/native-protocol/1.5.1</bundle>
+      <bundle>mvn:com.datastax.oss/java-driver-shaded-guava/25.1-jre-graal-sub-1</bundle>
+      <bundle>mvn:com.datastax.oss/java-driver-query-builder/${cassandraDriverVersion}</bundle>
+      <bundle>mvn:com.typesafe/config/1.4.2</bundle>
+      <bundle>mvn:org.hdrhistogram/HdrHistogram/2.1.12</bundle>
     </feature>
 
     <feature name="fastxml-jackson" description="Jackson JSON library" version="${jacksonVersion}">
       <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jacksonVersion}</bundle>
       <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jacksonVersion}</bundle>
       <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jacksonVersion}</bundle>
+    </feature>
+
+    <feature name="asm" version="${asmVersion}" description="ASM Java Bytecode Manipulation Framework">
+      <bundle>mvn:org.ow2.asm/asm/${asmVersion}</bundle>
+      <bundle>mvn:org.ow2.asm/asm-analysis/${asmVersion}</bundle>
+      <bundle>mvn:org.ow2.asm/asm-commons/${asmVersion}</bundle>
+      <bundle>mvn:org.ow2.asm/asm-tree/${asmVersion}</bundle>
+      <bundle>mvn:org.ow2.asm/asm-util/${asmVersion}</bundle>
+    </feature>
+
+    <feature name="jnr" version="${jnrVersion}" description="Java Native Runtime">
+      <feature>asm</feature>
+      <bundle>mvn:com.github.jnr/jnr-constants/0.10.4</bundle>
+      <bundle>mvn:com.github.jnr/jnr-ffi/2.2.14</bundle>
+      <bundle>mvn:com.github.jnr/jnr-posix/${jnrVersion}</bundle>
+      <bundle>wrap:mvn:com.github.jnr/jffi/1.3.11$Bundle-SymbolicName=com.github.jnr.jffi&amp;Bundle-Version=1.3.11&amp;Export-Package=com.kenai.jffi;version="1.3.11"</bundle>
+      <bundle>wrap:mvn:com.github.jnr/jffi/1.3.11/jar/native$Bundle-SymbolicName=com.github.jnr.jffi.native&amp;Bundle-Version=1.3.11&amp;Export-Package=jni*;version="1.3.11"</bundle>
+      <bundle>wrap:mvn:com.github.jnr/jnr-a64asm/1.0.0$Bundle-SymbolicName=jnr-a64asm&amp;Bundle-Version=1.0.0</bundle>
+      <bundle>wrap:mvn:com.github.jnr/jnr-x86asm/1.0.2$Bundle-SymbolicName=jnr-x86asm&amp;Bundle-Version=1.0.2</bundle>
     </feature>
 
     <feature name="newts-api" description="Newts API" version="${osgi.version}">
