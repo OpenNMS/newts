@@ -63,7 +63,7 @@
     <slf4jVersion>1.7.36</slf4jVersion>
     <snappyJavaVersion>1.1.10.3</snappyJavaVersion>
     <testcontainersVersion>1.17.6</testcontainersVersion>
-    <jexlVersion>3.2.1</jexlVersion>
+    <jexlVersion>3.3</jexlVersion>
     <args4jVersion>2.33</args4jVersion>
   </properties>
 
