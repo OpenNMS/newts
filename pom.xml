@@ -55,7 +55,7 @@
     <guavaVersion>32.1.2-jre</guavaVersion>
     <guavaOsgiVersion>32.1</guavaOsgiVersion>
     <guiceVersion>4.2.3</guiceVersion>
-    <jacksonVersion>2.13.5</jacksonVersion>
+    <jacksonVersion>2.15.2</jacksonVersion>
     <jnrVersion>3.1.17</jnrVersion>
     <junitVersion>4.13.2</junitVersion>
     <logbackVersion>1.2.12</logbackVersion>
