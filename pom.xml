@@ -63,7 +63,7 @@
     <mockitoVersion>1.10.19</mockitoVersion>
     <nettyVersion>4.1.97.Final</nettyVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
-    <snappyJavaVersion>1.1.10.3</snappyJavaVersion>
+    <snappyJavaVersion>1.1.10.5</snappyJavaVersion>
     <testcontainersVersion>1.19.0</testcontainersVersion>
     <jexlVersion>3.3</jexlVersion>
     <args4jVersion>2.33</args4jVersion>
