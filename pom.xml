@@ -59,7 +59,7 @@
     <jnrVersion>3.1.17</jnrVersion>
     <junitVersion>4.13.2</junitVersion>
     <logbackVersion>1.2.12</logbackVersion>
-    <metricsVersion>4.2.20</metricsVersion>
+    <metricsVersion>4.2.21</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
     <nettyVersion>4.1.100.Final</nettyVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
