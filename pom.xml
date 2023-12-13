@@ -61,7 +61,7 @@
     <logbackVersion>1.2.13</logbackVersion>
     <metricsVersion>4.2.23</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
-    <nettyVersion>4.1.101.Final</nettyVersion>
+    <nettyVersion>4.1.102.Final</nettyVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
     <snappyJavaVersion>1.1.10.5</snappyJavaVersion>
     <testcontainersVersion>1.19.3</testcontainersVersion>
