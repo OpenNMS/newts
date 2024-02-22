@@ -90,6 +90,7 @@ jobs:
     resource_class: xlarge
 
     environment:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
@@ -127,6 +128,9 @@ jobs:
 
   deploy:
     executor: build-executor
+
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
 
     steps:
       - attach_workspace:
