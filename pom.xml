@@ -52,19 +52,19 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <asmVersion>9.5</asmVersion>
     <cassandraDriverVersion>4.17.0</cassandraDriverVersion>
-    <guavaVersion>32.1.2-jre</guavaVersion>
+    <guavaVersion>33.0.0-jre</guavaVersion>
     <guavaOsgiVersion>32.1</guavaOsgiVersion>
     <guiceVersion>4.2.3</guiceVersion>
-    <jacksonVersion>2.15.2</jacksonVersion>
+    <jacksonVersion>2.16.1</jacksonVersion>
     <jnrVersion>3.1.17</jnrVersion>
     <junitVersion>4.13.2</junitVersion>
-    <logbackVersion>1.2.12</logbackVersion>
-    <metricsVersion>4.2.19</metricsVersion>
+    <logbackVersion>1.2.13</logbackVersion>
+    <metricsVersion>4.2.25</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
-    <nettyVersion>4.1.97.Final</nettyVersion>
+    <nettyVersion>4.1.107.Final</nettyVersion>
     <slf4jVersion>1.7.36</slf4jVersion>
-    <snappyJavaVersion>1.1.10.3</snappyJavaVersion>
-    <testcontainersVersion>1.19.0</testcontainersVersion>
+    <snappyJavaVersion>1.1.10.5</snappyJavaVersion>
+    <testcontainersVersion>1.19.6</testcontainersVersion>
     <jexlVersion>3.3</jexlVersion>
     <args4jVersion>2.33</args4jVersion>
   </properties>
@@ -207,7 +207,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.12.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -232,7 +232,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -242,7 +242,7 @@
       <plugin>
          <groupId>org.codehaus.mojo</groupId>
          <artifactId>build-helper-maven-plugin</artifactId>
-         <version>3.4.0</version>
+         <version>3.5.0</version>
       </plugin>
       <plugin>
         <groupId>com.helger.maven</groupId>
@@ -252,12 +252,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.2</version>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>0.8.11</version>
         <executions>
           <execution>
             <goals>
@@ -276,7 +276,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.5</version>
         <configuration>
           <argLine>-Xmx1G</argLine>
         </configuration>
@@ -326,7 +326,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.3</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
