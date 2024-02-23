@@ -46,7 +46,7 @@ commands:
     steps:
       - run:
           name: create checksum file
-          command: find * -name pom.xml | sort -u | xargs cat > /tmp/megapom.xml
+          command: git ls-files | grep -E '/pom.xml$' | sort -u | xargs cat > /tmp/megapom.xml
 
   fetch_maven_cache:
     description: Download Update Maven Dependencies
