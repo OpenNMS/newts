@@ -15,24 +15,6 @@ orbs:
   branch-management: opennms/branch-management@2.3.0
 
 commands:
-  shallow-clone:
-      description: "Quick shallow checkout (if possible)"
-      steps:
-        - run:
-            name: git clone
-            command: |
-              install -d -m 700 ~/.ssh
-              ssh-keyscan github.com >> ~/.ssh/known_hosts
-              ssh-keyscan -p 443 ssh.github.com >> ~/.ssh/known_hosts
-              chmod 600 ~/.ssh/known_hosts
-              git clone --no-checkout --filter=tree:0 "${CIRCLE_REPOSITORY_URL}" .
-              if [ -n "${CIRCLE_TAG}" ]; then
-                git checkout --force "${CIRCLE_TAG}"
-                git reset --hard "${CIRCLE_SHA1}"
-              else
-                git checkout --force -B "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
-              fi
-
   cached_checkout:
     description: Restore and Update Source Cache
     steps:
@@ -156,18 +138,25 @@ jobs:
     environment:
       JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
+      GIT_MERGE_AUTOEDIT: no
 
     steps:
-      - shallow-clone
-      - run:
-          name: "Fetch main"
-          command: git fetch origin main
+      - attach_workspace:
+          at: .
 
-      - branch-management/merge-branch:
-          committer_email: "cicd-system@opennms.com"
-          committer_name: "CI/CD System"
-          from: release-3.x
-          to: main
+      - run:
+          name: "Configure Git Merging"
+          command: |
+            git config merge.renameLimit 999999
+            git config user.email "cicd-system@opennms.com"
+            git config user.name "CI/CD System"
+
+      - run:
+          name: "Check Out and Merge"
+          command: |
+            git checkout main
+            git pull
+            git merge origin/release-3.x
 
       # make sure the build passes after merge
       - build
