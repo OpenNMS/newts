@@ -32,11 +32,20 @@ commands:
           paths:
             - ".git"
 
+  build:
+    description: Check Out and Build Code
+    steps:
+      - fetch_maven_cache
+      - run:
+          name: Run the build
+          no_output_timeout: 20m
+          command: mvn -DskipTests=true install
+
   generate_megapom:
     steps:
       - run:
           name: create checksum file
-          command: find * -name pom.xml | sort -u | xargs cat > /tmp/megapom.xml
+          command: git ls-files | grep -E '/pom.xml$' | sort -u | xargs cat > /tmp/megapom.xml
 
   fetch_maven_cache:
     description: Download Update Maven Dependencies
@@ -95,11 +104,7 @@ jobs:
 
     steps:
       - cached_checkout
-      - fetch_maven_cache
-      - run:
-          name: Run the build
-          no_output_timeout: 20m
-          command: mvn -DskipTests=true install
+      - build
       - store_maven_cache
 
       - run:
@@ -127,6 +132,39 @@ jobs:
           paths:
             - ./
 
+  merge:
+    executor: build-executor
+
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
+      GIT_MERGE_AUTOEDIT: no
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: "Configure Git Merging"
+          command: |
+            git config merge.renameLimit 999999
+            git config user.email "cicd-system@opennms.com"
+            git config user.name "CI/CD System"
+
+      - run:
+          name: "Check Out and Merge"
+          command: |
+            git checkout main
+            git pull
+            git merge origin/release-3.x
+
+      # make sure the build passes after merge
+      - build
+
+      - run:
+          name: "Push to Main"
+          command: git push --no-verify origin main:main
+
   deploy:
     executor: build-executor
 
@@ -151,6 +189,12 @@ workflows:
           filters:
             branches:
               only: /.*/
+      - merge:
+          requires:
+            - build
+          filters:
+            branches:
+              only: /^release-.*/
       - deploy:
           context: 
             - "OSSRH Principal"

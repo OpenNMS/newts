@@ -1,6 +1,27 @@
 version: 2
 updates:
 
+  - package-ecosystem: "npm"
+    directory: "/"
+    target-branch: "release-3.x"
+    reviewers:
+      - "rangerrick"
+      - "synqotik"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    schedule:
+      interval: "daily"
+    groups:
+      karma:
+        patterns:
+          - "*karma*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "maven"
     directory: "/"
     target-branch: "release-3.x"
