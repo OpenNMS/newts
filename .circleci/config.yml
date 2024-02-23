@@ -35,7 +35,6 @@ commands:
   build:
     description: Check Out and Build Code
     steps:
-      - cached_checkout
       - fetch_maven_cache
       - run:
           name: Run the build
@@ -104,6 +103,7 @@ jobs:
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
+      - cached_checkout
       - build
       - store_maven_cache
 
@@ -163,7 +163,7 @@ jobs:
 
       - run:
           name: "Push to Main"
-          command: git push --no-verify
+          command: git push --no-verify origin main:main
 
   deploy:
     executor: build-executor
