@@ -159,6 +159,10 @@ jobs:
 
     steps:
       - shallow-clone
+      - run:
+          name: "Fetch main"
+          command: git fetch origin main
+
       - branch-management/merge-branch:
           committer_email: "cicd-system@opennms.com"
           committer_name: "CI/CD System"
