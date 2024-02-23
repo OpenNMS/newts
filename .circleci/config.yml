@@ -32,6 +32,16 @@ commands:
           paths:
             - ".git"
 
+  build:
+    description: Check Out and Build Code
+    steps:
+      - cached_checkout
+      - fetch_maven_cache
+      - run:
+          name: Run the build
+          no_output_timeout: 20m
+          command: mvn -DskipTests=true install
+
   generate_megapom:
     steps:
       - run:
@@ -94,12 +104,7 @@ jobs:
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
-      - cached_checkout
-      - fetch_maven_cache
-      - run:
-          name: Run the build
-          no_output_timeout: 20m
-          command: mvn -DskipTests=true install
+      - build
       - store_maven_cache
 
       - run:
@@ -126,6 +131,28 @@ jobs:
           root: .
           paths:
             - ./
+
+  merge:
+    executor: build-executor
+
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
+
+    steps:
+      - shallow-clone
+      - branch-management/merge-branch:
+          committer_email: "cicd-system@opennms.com"
+          committer_name: "CI/CD System"
+          from: release-3.x
+          to: main
+
+      # make sure the build passes after merge
+      - build
+
+      - run:
+          name: "Push to Main"
+          command: git push --no-verify origin main:main
 
   deploy:
     executor: build-executor
