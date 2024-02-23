@@ -144,19 +144,11 @@ jobs:
       - attach_workspace:
           at: .
 
-      - run:
-          name: "Configure Git Merging"
-          command: |
-            git config merge.renameLimit 999999
-            git config user.email "cicd-system@opennms.com"
-            git config user.name "CI/CD System"
-
-      - run:
-          name: "Check Out and Merge"
-          command: |
-            git checkout main
-            git pull
-            git merge origin/release-3.x
+      - branch-management/merge-branch:
+          committer_email: "cicd-system@opennms.com"
+          committer_name: "CI/CD System"
+          from: release-3.x
+          to: main
 
       # make sure the build passes after merge
       - build
