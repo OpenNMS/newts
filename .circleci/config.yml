@@ -178,6 +178,12 @@ workflows:
           filters:
             branches:
               only: /.*/
+      - merge:
+          requires:
+            - build
+          filters:
+            branches:
+              only: /^release-.*/
       - deploy:
           context: 
             - "OSSRH Principal"
