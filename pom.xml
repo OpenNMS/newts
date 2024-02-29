@@ -58,7 +58,7 @@
     <jacksonVersion>2.16.1</jacksonVersion>
     <jnrVersion>3.1.17</jnrVersion>
     <junitVersion>4.13.2</junitVersion>
-    <logbackVersion>1.2.13</logbackVersion>
+    <logbackVersion>1.5.1</logbackVersion>
     <metricsVersion>4.2.25</metricsVersion>
     <mockitoVersion>1.10.19</mockitoVersion>
     <nettyVersion>4.1.107.Final</nettyVersion>
