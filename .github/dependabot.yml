@@ -34,3 +34,16 @@ updates:
       include: "scope"
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "main"
+    reviewers:
+      - "rangerrick"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    schedule:
+      interval: "weekly"
