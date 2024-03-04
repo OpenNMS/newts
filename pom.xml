@@ -62,7 +62,7 @@
     <metricsVersion>4.2.25</metricsVersion>
     <mockitoVersion>5.11.0</mockitoVersion>
     <nettyVersion>4.1.107.Final</nettyVersion>
-    <slf4jVersion>1.7.36</slf4jVersion>
+    <slf4jVersion>2.0.12</slf4jVersion>
     <snappyJavaVersion>1.1.10.5</snappyJavaVersion>
     <testcontainersVersion>1.19.6</testcontainersVersion>
     <jexlVersion>3.3</jexlVersion>
