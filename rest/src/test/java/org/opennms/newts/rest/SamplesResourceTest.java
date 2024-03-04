@@ -18,8 +18,8 @@ package org.opennms.newts.rest;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +55,7 @@ public class SamplesResourceTest {
 
         assertThat(response.getStatus(), equalTo(Response.Status.CREATED.getStatusCode()));
 
-        verify(m_repository).insert(anyCollectionOf(Sample.class));
+        verify(m_repository).insert(anyCollection());
 
     }
 
