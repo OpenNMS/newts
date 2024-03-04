@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -23,8 +23,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Throwables;
-
 
 public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
@@ -46,7 +44,7 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
                     }
                 }
                 catch (InterruptedException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -55,7 +53,7 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
     }
 
     public BlockingThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>((int)(maximumPoolSize*1.5)));
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>((int)(maximumPoolSize*1.5)));
         this.setRejectedExecutionHandler(new BlockingExecutionHandler());
     }
 

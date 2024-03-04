@@ -2,7 +2,7 @@ package org.opennms.newts.graphite;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.opennms.newts.graphite.GraphiteHandler.parseSample;
 
 import org.junit.Test;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -43,7 +43,7 @@ abstract class Dispatcher {
     abstract void go() throws InterruptedException;
 
     void setupReport() {
-        ConsoleReporter reporter = ConsoleReporter.forRegistry(m_metricRegistry)
+        ConsoleReporter.forRegistry(m_metricRegistry)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();

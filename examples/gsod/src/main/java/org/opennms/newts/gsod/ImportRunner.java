@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -55,19 +55,6 @@ import org.opennms.newts.reporter.metrics.NewtsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rx.Observable;
-import rx.Observable.Operator;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.apache.http.ObservableHttp;
-import rx.apache.http.ObservableHttpResponse;
-import rx.exceptions.Exceptions;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.functions.Functions;
-import rx.schedulers.Schedulers;
-
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -80,7 +67,19 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import rx.Observable;
+import rx.Observable.Operator;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.apache.http.ObservableHttp;
+import rx.apache.http.ObservableHttpResponse;
+import rx.exceptions.Exceptions;
+import rx.functions.Func1;
+import rx.functions.Functions;
+import rx.schedulers.Schedulers;
 
+@SuppressWarnings("java:S106")
 public class ImportRunner {
     
     private int m_samplesPerBatch = 1000;
@@ -165,14 +164,7 @@ public class ImportRunner {
         MetricRegistry metrics = new MetricRegistry();
         
         final long start = System.currentTimeMillis();
-        metrics.register("elapsed-seconds", new Gauge<Double>() {
-
-            @Override
-            public Double getValue() {
-                return (System.currentTimeMillis() - start)/1000.0;
-            }
-            
-        });
+        metrics.register("elapsed-seconds", (Gauge<Double>) () -> (System.currentTimeMillis() - start)/1000.0);
         
         final ConsoleReporter reporter = ConsoleReporter.forRegistry(metrics)
                 .outputTo(System.err)
@@ -207,12 +199,12 @@ public class ImportRunner {
             .map(reportFile())
 
             // read all the files and convert them into lines
-            .mergeMap(lines())
+            .flatMap(lines())
             // excluding the header lines
             .filter(exclude("YEARMODA"))
             
             // turn each line into a list of samples
-            .mergeMap(samples())
+            .flatMap(samples())
             
             // adjust time on samples according to arguments
             .map(adjustTime())
@@ -255,15 +247,12 @@ public class ImportRunner {
                 System.err.println("Error importing!");
                 e.printStackTrace();
                 try {
-                    //latch.await();
                     Subscription s = subscription.get();
                     if (s != null) s.unsubscribe();
 
                 } catch (Exception ex) {
                     System.err.println("Failed to close httpClient!");
                     ex.printStackTrace();
-                } finally {
-                    //dumpThreads();
                 }
             }
 
@@ -277,26 +266,16 @@ public class ImportRunner {
         if (failed.get()) {
             s.unsubscribe();
         }
-        //latch.countDown();
         System.err.println("Return from Subscribe!");
         
         latch.await();
-        
-        //dumpThreads();
-        
-
     }
     
     private Func1<? super Sample, ? extends Sample> adjustTime() {
-        return new Func1<Sample, Sample>() {
-
-            @Override
-            public Sample call(Sample s) {
-                Timestamp oldTs = s.getTimestamp();
-                Timestamp newTs = Timestamp.fromEpochMillis(m_timeoffset + Math.round(oldTs.asMillis()/m_timescaleFactor));
-                return new Sample(newTs, s.getResource(), s.getName(), s.getType(), s.getValue());
-            }
-            
+        return s -> {
+            Timestamp oldTs = s.getTimestamp();
+            Timestamp newTs = Timestamp.fromEpochMillis(m_timeoffset + Math.round(oldTs.asMillis()/m_timescaleFactor));
+            return new Sample(newTs, s.getResource(), s.getName(), s.getType(), s.getValue());
         };
     }
 
@@ -317,17 +296,13 @@ public class ImportRunner {
         final Meter completions = metrics.meter("samples-completed");
         
 
-        Func1<List<Sample>, Boolean> insert = new Func1<List<Sample>, Boolean>() {
-
-            @Override
-            public Boolean call(List<Sample> s) {
-                int sz = s.size();
-                try (Context timerCtx = timer.time()) {
-                    repository.insert(s);
-                    return true;
-                } finally {
-                    completions.mark(sz);
-                }
+        Func1<List<Sample>, Boolean> insert = s -> {
+            int sz = s.size();
+            try (final Context timerCtx = timer.time()) {
+                repository.insert(s);
+                return true;
+            } finally {
+                completions.mark(sz);
             }
         };
         
@@ -372,41 +347,10 @@ public class ImportRunner {
                                                                    0L, TimeUnit.MILLISECONDS,
                                                                    workQueue);
         
-        metrics.register("active-threads", new Gauge<Integer>() {
-
-            @Override
-            public Integer getValue() {
-                return executor.getActiveCount();
-            }
-            
-        });
-        
-        metrics.register("pool-size", new Gauge<Integer>() {
-
-            @Override
-            public Integer getValue() {
-                return executor.getPoolSize();
-            }
-            
-        });
-        metrics.register("largest-pool-size", new Gauge<Integer>() {
-
-            @Override
-            public Integer getValue() {
-                return executor.getLargestPoolSize();
-            }
-            
-        });
-        
-        metrics.register("work-queue-size", new Gauge<Integer>() {
-
-            @Override
-            public Integer getValue() {
-                return workQueue.size();
-            }
-            
-        });
-        
+        metrics.register("active-threads", (Gauge<Integer>) executor::getActiveCount);
+        metrics.register("pool-size", (Gauge<Integer>) executor::getPoolSize);
+        metrics.register("largest-pool-size", (Gauge<Integer>) executor::getLargestPoolSize);
+        metrics.register("work-queue-size", (Gauge<Integer>) workQueue::size);
         
         return parMap(samples, executor, metrics, insert);
     }
@@ -460,17 +404,12 @@ public class ImportRunner {
                 
         })
         .observeOn(Schedulers.io())
-        .map(new Func1<ListenableFuture<Boolean>, Boolean>() {
-
-            @Override
-            public Boolean call(ListenableFuture<Boolean> f) {
-                try {
-                    return f.get();
-                } catch (Throwable e) {
-                    throw Exceptions.propagate(e);
-                }
+        .map(f -> {
+            try {
+                return f.get();
+            } catch (Throwable e) {
+                throw Exceptions.propagate(e);
             }
-            
         });
 
     }
@@ -494,7 +433,7 @@ public class ImportRunner {
                 .map(meter(metrics.meter("posts"), String.class))
 
                 // post the json to the REST server
-                .mergeMap(postJSON(m_restUrl, httpClient))
+                .flatMap(postJSON(m_restUrl, httpClient))
 
                 // meter the responses
                 .map(meter(metrics.meter("responses"), ObservableHttpResponse.class))
@@ -505,46 +444,31 @@ public class ImportRunner {
                 // make sure every request has a successful return code
                 .all(successful())
                 
-                .doOnCompleted(new Action0() {
-
-                    @Override
-                    public void call() {
-                        try {
-                            httpClient.close();
-                        } catch (IOException e) {
-                            System.err.println("Failed to close httpClient!");
-                            e.printStackTrace();
-                        }
+                .doOnCompleted(() -> {
+                    try {
+                        httpClient.close();
+                    } catch (IOException e) {
+                        System.err.println("Failed to close httpClient!");
+                        e.printStackTrace();
                     }
-                    
                 });
     }
 
     private static Func1<? super Path, ? extends Path> reportFile() {
-        return new Func1<Path, Path>() {
-
-            @Override
-            public Path call(Path file) {
-                System.err.println("Begin Processing: " + file);
-                return file;
-            }
-            
+        return file -> {
+            System.err.println("Begin Processing: " + file);
+            return file;
         };
     }
 
     public static Func1<String, Observable<Sample>> samples() {
         final LineParser parser = new LineParser();
-        return new Func1<String, Observable<Sample>>() {
-
-            @Override
-            public Observable<Sample> call(String line) {
-                try {
-                    return Observable.from(parser.parseLine(line));
-                } catch (ParseException e) {
-                    throw propagate(e);
-                }
+        return line -> {
+            try {
+                return Observable.from(parser.parseLine(line));
+            } catch (ParseException e) {
+                throw propagate(e);
             }
-
         };
     }
 
@@ -553,42 +477,33 @@ public class ImportRunner {
     }
 
     public static Func1<List<Sample>, String> toJSON() {
-        return new Func1<List<Sample>, String>() {
-            @Override
-            public String call(List<Sample> samples) {
-                JSONBuilder bldr = new JSONBuilder();
+        return samples -> {
+            JSONBuilder bldr = new JSONBuilder();
 
-                for(Sample sample : samples) {
-                    if (isNaN(sample)) continue;
-                    //System.err.println("Importing: " + sample);
-                    bldr.newObject();
-                    bldr.attr("timestamp", sample.getTimestamp().asMillis());
-                    bldr.attr("resource", sample.getResource().getId());
-                    bldr.attr("name", sample.getName());
-                    bldr.attr("type", sample.getType().name());
-                    if (sample.getType() == MetricType.GAUGE) {
-                        bldr.attr("value", sample.getValue().doubleValue());
-                    } else {
-                        bldr.attr("value", sample.getValue().longValue());
-                    }
+            for(Sample sample : samples) {
+                if (isNaN(sample)) continue;
+                bldr.newObject();
+                bldr.attr("timestamp", sample.getTimestamp().asMillis());
+                bldr.attr("resource", sample.getResource().getId());
+                bldr.attr("name", sample.getName());
+                bldr.attr("type", sample.getType().name());
+                if (sample.getType() == MetricType.GAUGE) {
+                    bldr.attr("value", sample.getValue().doubleValue());
+                } else {
+                    bldr.attr("value", sample.getValue().longValue());
                 }
-
-                return bldr.toString();
             }
+
+            return bldr.toString();
         };
     }
     
     private static Func1<ObservableHttpResponse, Boolean> successful() {
-        return new Func1<ObservableHttpResponse, Boolean>() {
-
-            @Override
-            public Boolean call(ObservableHttpResponse response) {
-                if (response.getResponse().getStatusLine().getStatusCode() >= 400) {
-                    throw new RuntimeException("Failed to post samples: " + response.getResponse().getStatusLine());
-                }
-                return true;
+        return response -> {
+            if (response.getResponse().getStatusLine().getStatusCode() >= 400) {
+                throw new RuntimeException("Failed to post samples: " + response.getResponse().getStatusLine());
             }
-            
+            return true;
         };
     }
 
@@ -596,27 +511,17 @@ public class ImportRunner {
 
         final URI baseURI = URI.create(baseURL);
 
-        return new Func1<String, Observable<ObservableHttpResponse>>() {
-            @Override
-            public Observable<ObservableHttpResponse> call(String json) {
-                try {
-                    return ObservableHttp.createRequest(HttpAsyncMethods.createPost(baseURI, json, ContentType.APPLICATION_JSON), httpClient).toObservable();
-                } catch (UnsupportedEncodingException e) {
-                    throw Exceptions.propagate(e);
-                }
+        return json -> {
+            try {
+                return ObservableHttp.createRequest(HttpAsyncMethods.createPost(baseURI, json, ContentType.APPLICATION_JSON), httpClient).toObservable();
+            } catch (UnsupportedEncodingException e) {
+                throw Exceptions.propagate(e);
             }
         };
     }
     
     public static Func1<String, Boolean> exclude(final String pattern) {
-        return new Func1<String, Boolean>() {
-
-            @Override
-            public Boolean call(String s) {
-                return !s.contains(pattern);
-            }
-            
-        };
+        return s -> !s.contains(pattern);
     }
     
     public static <T> Func1<T, T> meter(final Meter meter, Class<T> clazz) {
@@ -624,14 +529,9 @@ public class ImportRunner {
     }
     
     public static <T> Func1<T, T> meter(final Meter meter, final int count, Class<T> clazz) {
-        return new Func1<T, T>() {
-
-            @Override
-            public T call(T t) {
-                meter.mark(count);
-                return t;
-            }
-            
+        return t -> {
+            meter.mark(count);
+            return t;
         };
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -24,6 +24,8 @@ import javax.inject.Inject;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.OptionHandlerRegistry;
+import org.kohsuke.args4j.ParserProperties;
 import org.opennms.newts.api.Context;
 import org.opennms.newts.api.Resource;
 import org.opennms.newts.api.Results;
@@ -35,15 +37,15 @@ import com.google.common.base.Optional;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-
+@SuppressWarnings("java:S106")
 public class ExportRunner {
 
     static {
-        CmdLineParser.registerHandler(Resource.class, ResourceOptionHandler.class);
+        OptionHandlerRegistry.getRegistry().registerHandler(Resource.class, ResourceOptionHandler.class);
     }
 
     private final SampleRepository m_repository;
-    private final CmdLineParser m_parser = new CmdLineParser(this);
+    private final CmdLineParser m_parser = new CmdLineParser(this, ParserProperties.defaults().withUsageWidth(80));
 
     @Option(name = "-r", usage = "resource name to query (required)")
     private Resource m_resource;
@@ -71,9 +73,6 @@ public class ExportRunner {
     }
 
     private int go(String[] args) {
-
-        m_parser.setUsageWidth(80);
-
         try {
             m_parser.parseArgument(args);
         }
@@ -103,6 +102,7 @@ public class ExportRunner {
         return 0;
     }
 
+    @SuppressWarnings("java:S4738")
     private static Optional<Timestamp> timestamp(Long arg) {
         if (arg == null) return Optional.<Timestamp> absent();
         return Optional.of(new Timestamp(arg, TimeUnit.MILLISECONDS));

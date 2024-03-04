@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -18,16 +18,12 @@ package org.opennms.newts.persistence.cassandra;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 
 
@@ -40,14 +36,11 @@ public class ConcurrentResultWrapper implements Iterator<Row> {
     }
 
     private Iterator<Iterator<Row>> getIterators(Collection<CompletionStage<AsyncResultSet>> futures) {
-        return Iterators.transform(futures.iterator(), new Function<CompletionStage<AsyncResultSet>, Iterator<Row>>() {
-            @Override
-            public Iterator<Row> apply(CompletionStage<AsyncResultSet> input) {
-                try {
-                    return toBlockingIterator(input.toCompletableFuture().get());
-                } catch (ExecutionException|InterruptedException e) {
-                    throw Throwables.propagate(e);
-                }
+        return Iterators.transform(futures.iterator(), input -> {
+            try {
+                return toBlockingIterator(input.toCompletableFuture().get());
+            } catch (ExecutionException|InterruptedException e) {
+                throw new RuntimeException(e);
             }
         });
     }
