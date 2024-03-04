@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -53,7 +53,6 @@ import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -133,7 +132,7 @@ public class CassandraSearcher implements Searcher {
                         Resource resource = attrs.size() > 0 ? new Resource(id, Optional.of(attrs)) : new Resource(id);
                         searchResults.addResult(resource, metrics);
                     } catch (ExecutionException|InterruptedException e) {
-                        throw Throwables.propagate(e);
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -150,7 +149,7 @@ public class CassandraSearcher implements Searcher {
             ConsistencyLevel readConsistency = m_contextConfigurations.getReadConsistency(context);
             return getResourceAttributesFromResults(fetchResourceAttributes(context, resourceId, readConsistency));
         } catch (ExecutionException|InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -159,7 +158,7 @@ public class CassandraSearcher implements Searcher {
             ConsistencyLevel readConsistency = m_contextConfigurations.getReadConsistency(context);
             return getMetricNamesFromResults(fetchMetricNames(context, resourceId, readConsistency));
         } catch (ExecutionException|InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

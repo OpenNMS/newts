@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -66,10 +66,10 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
         checkArgument(resolution.isMultiple(interval), "resolution must be a multiple of interval");
 
         m_timestamps = new IntervalGenerator(start.stepFloor(m_resolution), end.stepCeiling(m_resolution), m_resolution);
-        m_intervalsPer = (double) resolution.divideBy(interval);
+        m_intervalsPer = resolution.divideBy(interval);
 
         m_working = m_input.hasNext() ? m_input.next() : null;
-        m_nextOut = m_timestamps.hasNext() ? new Row<Measurement>(m_timestamps.next(), m_resource) : null;
+        m_nextOut = m_timestamps.hasNext() ? new Row<>(m_timestamps.next(), m_resource) : null;
 
         // If the input stream contains any Samples earlier than what's relevant, iterate past them.
         if (m_nextOut != null) {
@@ -124,7 +124,7 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
             return m_nextOut;
         }
         finally {
-            m_nextOut = m_timestamps.hasNext() ? new Row<Measurement>(m_timestamps.next(), m_resource) : null;
+            m_nextOut = m_timestamps.hasNext() ? new Row<>(m_timestamps.next(), m_resource) : null;
         }
     }
 
@@ -160,6 +160,8 @@ class Aggregation implements Iterable<Row<Measurement>>, Iterator<Row<Measuremen
     }
 
     @Override
+    @SuppressWarnings("java:S4348")
+    // since the length is computed, it's not simple to make this re-iterable
     public Iterator<Row<Measurement>> iterator() {
         return this;
     }

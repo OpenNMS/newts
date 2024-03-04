@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, The OpenNMS Group
+ * Copyright 2015-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -173,7 +173,7 @@ public class HttpBasicAuthenticationFilter implements Filter {
                 decoded = new String(Base64.decodeBase64(encoded.getBytes("UTF-8")), "UTF-8");
             }
             catch (UnsupportedEncodingException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
 
             matcher = s_credsPattern.matcher(decoded);

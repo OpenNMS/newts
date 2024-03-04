@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, The OpenNMS Group
+ * Copyright 2015-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -29,7 +29,6 @@ import com.datastax.oss.driver.api.querybuilder.delete.Delete;
 import com.datastax.oss.driver.api.querybuilder.insert.RegularInsert;
 import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import org.opennms.newts.aggregate.IntervalGenerator;
@@ -311,7 +310,7 @@ public class CassandraSampleRepository implements SampleRepository {
                 try {
                     future.toCompletableFuture().get();
                 } catch (final InterruptedException | ExecutionException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         } else {
@@ -340,7 +339,7 @@ public class CassandraSampleRepository implements SampleRepository {
                     try {
                         future.toCompletableFuture().get();
                     } catch (final InterruptedException | ExecutionException e) {
-                        throw Throwables.propagate(e);
+                        throw new RuntimeException(e);
                     }
                 }
 

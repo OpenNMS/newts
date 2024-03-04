@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,15 +30,16 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.zip.GZIPInputStream;
 
 import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
+@SuppressWarnings("java:S4738")
 public class FileIterable {
     
     private FileIterable() {}
@@ -70,66 +70,7 @@ public class FileIterable {
 
     }
     
-    private static KeyedIterable<Path, Path> children(File dir, FileFilter filter) {
-        return new KeyedIterable<>(dir.toPath(), toPaths(dir.listFiles(filter)));
-    }
-
-    private static KeyedIterable<Path, Path> files(File dir) {
-        return children(dir, fileMatcher());
-    }
-    
-    private static KeyedIterable<Path, Path> subdirs(File dir) {
-        return children(dir, directoryMatcher());
-    }
-
-
-    private static FileFilter fileMatcher() {
-        return new FileFilter() {
-            
-            @Override
-            public boolean accept(File f) {
-                return f.isFile();
-            }
-        };
-    }
-    
-    private static FileFilter directoryMatcher() {
-        return new FileFilter() {
-            
-            @Override
-            public boolean accept(File f) {
-                return f.isDirectory();
-            }
-        };
-    }
-
-
-    public static Iterable<Path> toPaths(File[] files) {
-        return files == null ? Collections.<Path>emptyList() : toPaths(Arrays.asList(files));
-    }
-    
-    public static Iterable<Path> toPaths(Iterable<File> files) {
-        return Iterables.transform(files, new Function<File, Path>(){
-
-            @Override
-            public Path apply(File input) {
-                return input.toPath();
-            }
-            
-        });
-    }
-    
-    public static Iterable<File> toFiles(Iterable<Path> files) {
-        return Iterables.transform(files, new Function<Path, File>(){
-
-            @Override
-            public File apply(Path input) {
-                return input.toFile();
-            }
-            
-        });
-    }
-    
+    @SuppressWarnings("java:S1149")
     public static class GroupedPathIterator extends AbstractIterator<KeyedIterable<Path, Path>> {
         
         Stack<Iterator<Path>> m_dirStack;
@@ -162,6 +103,29 @@ public class FileIterable {
             return null;
         }
         
+        private static KeyedIterable<Path, Path> files(final File dir) {
+            return children(dir, File::isFile);
+        }
+        
+        private static KeyedIterable<Path, Path> subdirs(final File dir) {
+            return children(dir, File::isDirectory);
+        }
+
+        private static KeyedIterable<Path, Path> children(File dir, FileFilter filter) {
+            return new KeyedIterable<>(dir.toPath(), toPaths(dir.listFiles(filter)));
+        }
+
+        public static Iterable<Path> toPaths(File[] files) {
+            return files == null ? Collections.<Path>emptyList() : toPaths(Arrays.asList(files));
+        }
+        
+        public static Iterable<Path> toPaths(Iterable<File> files) {
+            return Iterables.transform(files, File::toPath);
+        }
+        
+        public static Iterable<File> toFiles(Iterable<Path> files) {
+            return Iterables.transform(files, Path::toFile);
+        }
     }
     
     public static FluentIterable<KeyedIterable<Path, Path>> groupFilesByDir(final Path root) {
@@ -191,7 +155,7 @@ public class FileIterable {
             try {
                 m_nextLine = m_in.readLine();
             } catch (IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             } finally {
                 if (m_nextLine == null) {
                     close();
@@ -205,7 +169,7 @@ public class FileIterable {
                     m_in.close();
                 }
             } catch(IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             } finally {
                 m_in = null;
             }
@@ -221,6 +185,7 @@ public class FileIterable {
         public String next() {
             String line = m_nextLine;
             fetchLine();
+            if (line == null) throw new NoSuchElementException();
             return line;
         }
 
@@ -239,7 +204,7 @@ public class FileIterable {
                 try {
                     return new LineIterator(new InputStreamReader(new FileInputStream(path.toFile()), StandardCharsets.UTF_8));
                 } catch (FileNotFoundException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         };
@@ -254,7 +219,7 @@ public class FileIterable {
                 try {
                     return new LineIterator(zippedFileReader(path, cs));
                 } catch (IOException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         };
@@ -266,24 +231,12 @@ public class FileIterable {
         return new InputStreamReader(gzipStream, cs);
     }
     
-    public static <F, T> Function<? super Iterable<F>, Iterable<T>> bind(final Function<? super F, Iterable<T>> f) {
-        return new Function<Iterable<F>, Iterable<T>>() {
-            @Override
-            public Iterable<T> apply(Iterable<F> input) {
-                return Iterables.concat(Iterables.transform(input, f));
-            }
-        };
+    public static <F, T> Function<Iterable<F>, Iterable<T>> bind(final Function<? super F, Iterable<T>> f) {
+        return input -> Iterables.concat(Iterables.transform(input, f));
     }
     
-    public static <F, T> Function<? super Iterable<F>, Iterable<T>> lift(final Function<F, T> f) {
-        return new Function<Iterable<F>, Iterable<T>>() {
-
-            @Override
-            public Iterable<T> apply(Iterable<F> input) {
-                return Iterables.transform(input, f);
-            }
-            
-        };
+    public static <F, T> Function<Iterable<F>, Iterable<T>> lift(final Function<F, T> f) {
+        return input -> Iterables.transform(input, f);
     }
     
 

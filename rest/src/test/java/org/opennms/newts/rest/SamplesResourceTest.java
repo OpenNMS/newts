@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -17,9 +17,9 @@ package org.opennms.newts.rest;
 
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.eq;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +55,7 @@ public class SamplesResourceTest {
 
         assertThat(response.getStatus(), equalTo(Response.Status.CREATED.getStatusCode()));
 
-        verify(m_repository).insert(anyCollectionOf(Sample.class));
+        verify(m_repository).insert(anyCollection());
 
     }
 
@@ -66,10 +66,10 @@ public class SamplesResourceTest {
 
         when(
                 m_repository.select(
-                        eq(Context.DEFAULT_CONTEXT),
-                        eq(new Resource("localhost")),
-                        eq(Optional.of(Timestamp.fromEpochSeconds(900000000))),
-                        eq(Optional.of(Timestamp.fromEpochSeconds(900003600))))
+                        Context.DEFAULT_CONTEXT,
+                        new Resource("localhost"),
+                        Optional.of(Timestamp.fromEpochSeconds(900000000)),
+                        Optional.of(Timestamp.fromEpochSeconds(900003600)))
         ).thenReturn(results);
 
         assertThat(

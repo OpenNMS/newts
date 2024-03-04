@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, The OpenNMS Group
+ * Copyright 2016-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,6 @@ import static com.codahale.metrics.MetricRegistry.name;
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker;
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.insertInto;
 import static com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal;
-import static com.datastax.oss.driver.api.querybuilder.select.Selector.ttl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -64,6 +62,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+@SuppressWarnings("java:S4738") // we only use Guava Optional internally, it isn't passed around
 public class CassandraIndexer implements Indexer {
     private static final Logger LOG = LoggerFactory.getLogger(CassandraIndexer.class);
 
@@ -142,9 +141,9 @@ public class CassandraIndexer implements Indexer {
             }
 
             // Order matters here; We want the cache updated only after a successful Cassandra write.
-            for (Context context : cacheQueue.keySet()) {
-                for (Map.Entry<Resource, ResourceMetadata> entry : cacheQueue.get(context).entrySet()) {
-                    m_cache.merge(context, entry.getKey(), entry.getValue());
+            for (final Entry<Context,Map<Resource,ResourceMetadata>> queueEntry : cacheQueue.entrySet()) {
+                for (final Map.Entry<Resource, ResourceMetadata> entry : queueEntry.getValue().entrySet()) {
+                    m_cache.merge(queueEntry.getKey(), entry.getKey(), entry.getValue());
                 }
             }
         } finally {
@@ -155,10 +154,11 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private List<Statement> toStatements(Set<StatementGenerator> generators) {
-        List<Statement> statementsToExecute = Lists.newArrayList();
+    @SuppressWarnings("rawtypes")
+    private List<Statement<?>> toStatements(Set<StatementGenerator> generators) {
+        List<Statement<?>> statementsToExecute = Lists.newArrayList();
 
-        Map<String, List<BatchableStatement>> statementsByKey = Maps.newHashMap();
+        Map<String, List<BatchableStatement<?>>> statementsByKey = Maps.newHashMap();
         for (StatementGenerator generator : generators) {
             BatchableStatement statement = generator.toStatement()
                     .setConsistencyLevel(m_contextConfigurations.getWriteConsistency(generator.getContext()));
@@ -170,7 +170,7 @@ public class CassandraIndexer implements Indexer {
             }
 
             // Group these by key
-            List<BatchableStatement> statementsForKey = statementsByKey.get(key);
+            List<BatchableStatement<?>> statementsForKey = statementsByKey.get(key);
             if (statementsForKey == null) {
                 statementsForKey = Lists.newArrayList();
                 statementsByKey.put(key, statementsForKey);
@@ -179,8 +179,8 @@ public class CassandraIndexer implements Indexer {
         }
 
         // Consolidate the grouped statements into batches
-        for (List<BatchableStatement> statementsForKey: statementsByKey.values()) {
-            for (List<BatchableStatement> partition : Lists.partition(statementsForKey, m_options.getMaxBatchSize())) {
+        for (List<BatchableStatement<?>> statementsForKey: statementsByKey.values()) {
+            for (List<BatchableStatement<?>> partition : Lists.partition(statementsForKey, m_options.getMaxBatchSize())) {
                 BatchStatementBuilder builder = BatchStatement.builder(DefaultBatchType.UNLOGGED);
                 for (BatchableStatement statement : partition) {
                     builder.addStatement(statement);
@@ -454,7 +454,7 @@ public class CassandraIndexer implements Indexer {
         }
     }
 
-    private static abstract class KeyValuePairInsert implements StatementGenerator {
+    private abstract static class KeyValuePairInsert implements StatementGenerator {
         protected final Context m_context;
         protected final String m_resourceId;
         protected final String m_field;

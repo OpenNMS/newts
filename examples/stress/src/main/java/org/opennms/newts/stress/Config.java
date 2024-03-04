@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, The OpenNMS Group
+ * Copyright 2014-2024, The OpenNMS Group
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -18,8 +18,8 @@ package org.opennms.newts.stress;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.OptionHandlerRegistry;
 import org.opennms.newts.api.Duration;
 import org.opennms.newts.api.Timestamp;
 
@@ -31,8 +31,8 @@ class Config {
     }
 
     static {
-        CmdLineParser.registerHandler(Timestamp.class, TimestampOptionHandler.class);
-        CmdLineParser.registerHandler(Duration.class, DurationOptionHandler.class);
+        OptionHandlerRegistry.getRegistry().registerHandler(Timestamp.class, TimestampOptionHandler.class);
+        OptionHandlerRegistry.getRegistry().registerHandler(Duration.class, DurationOptionHandler.class);
     }
 
     /** Number of seconds to keep Cassandra-stored samples. */
@@ -55,6 +55,7 @@ class Config {
     private int m_numMetrics = 1;
     private Command m_command;
 
+    @SuppressWarnings("deprecation")
     protected void checkArgument(boolean condition, String msg, Object... msgArgs) throws CmdLineException {
         if (!condition) {
             throw new CmdLineException(null, String.format(msg, msgArgs));
@@ -62,6 +63,7 @@ class Config {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Argument(required = true, metaVar = "<command>", index = 0, usage = "The operation to run.")
     void setCommandArgument(String command) throws CmdLineException {
         try {
