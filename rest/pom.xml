@@ -14,7 +14,7 @@
   <name>New Timeseries Datastore :: REST</name>
 
   <properties>
-    <dropwizardVersion>2.1.7</dropwizardVersion>
+    <dropwizardVersion>4.0.6</dropwizardVersion>
   </properties>
 
   <dependencies>
