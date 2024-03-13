@@ -118,4 +118,9 @@ public class TimestampDurationTest {
 
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidDuration() {
+	Duration.parse("100d 100w");
+    }
+
 }
