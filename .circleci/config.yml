@@ -10,10 +10,6 @@ parameters:
     description: the current version of the cache
     type: string
     default: "v4"
-  java_version:
-    description: the base java version
-    type: string
-    default: "11"
 
 orbs:
   branch-management: opennms/branch-management@2.3.0
@@ -40,8 +36,11 @@ commands:
     description: Set Up the Build Environment
     steps:
       - run:
-          name: Install (Or Upgrade) Java << pipeline.parameters.java_version >>
-          command: sudo apt update && sudo apt -y install openjdk-<< pipeline.parameters.java_version >>-jdk-headless
+          name: Install (Or Upgrade) Java
+          command: |
+              JAVA_VERSION="$(grep '<source>' pom.xml | sed -e 's,<[^>]*>,,g' -e 's, *,,g')"
+              sudo apt update
+              sudo apt -y install "openjdk-${JAVA_VERSION}-jdk-headless"
 
   build:
     description: Check Out and Build Code
@@ -51,6 +50,8 @@ commands:
           name: Run the build
           no_output_timeout: 20m
           command: |
+              JAVA_VERSION="$(grep '<source>' pom.xml | sed -e 's,<[^>]*>,,g' -e 's, *,,g')"
+              export JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64"
               mvn -DskipTests=true install
 
   generate_megapom:
@@ -84,9 +85,11 @@ commands:
       - run:
           name: Collect Maven Dependencies
           command: |
-             mvn dependency:resolve || true
-             mvn dependency:resolve-plugins || true
-             mvn dependency:go-offline || true
+              JAVA_VERSION="$(grep '<source>' pom.xml | sed -e 's,<[^>]*>,,g' -e 's, *,,g')"
+              export JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64"
+              mvn dependency:resolve || true
+              mvn dependency:resolve-plugins || true
+              mvn dependency:go-offline || true
 
   store_maven_cache:
     description: Save Maven Dependencies
@@ -111,7 +114,6 @@ jobs:
     resource_class: xlarge
 
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
@@ -123,7 +125,10 @@ jobs:
       - run:
           name: Run the tests
           no_output_timeout: 20m
-          command: mvn -DskipITs=false verify
+          command: |
+              JAVA_VERSION="$(grep '<source>' pom.xml | sed -e 's,<[^>]*>,,g' -e 's, *,,g')"
+              export JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64"
+              mvn -DskipITs=false verify
 
       - run:
           name: Save test results
@@ -149,7 +154,6 @@ jobs:
     executor: build-executor
 
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
       GIT_MERGE_AUTOEDIT: no
 
@@ -174,9 +178,6 @@ jobs:
   deploy:
     executor: build-executor
 
-    environment:
-      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
-
     steps:
       - attach_workspace:
           at: .
@@ -186,7 +187,10 @@ jobs:
       - pre-build
       - run:
           name: Deploy the artifacts
-          command: mvn -s .circleci.settings.xml -DskipTests deploy
+          command: |
+              JAVA_VERSION="$(grep '<source>' pom.xml | sed -e 's,<[^>]*>,,g' -e 's, *,,g')"
+              export JAVA_HOME="/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64"
+              mvn -s .circleci.settings.xml -DskipTests deploy
 
 workflows:
   build-deploy:
