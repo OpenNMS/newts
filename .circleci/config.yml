@@ -3,13 +3,17 @@ version: 2.1
 executors:
   build-executor:
     machine:
-      image: ubuntu-2004:current
+      image: ubuntu-2204:current
 
 parameters:
   cache_version:
     description: the current version of the cache
     type: string
-    default: v4
+    default: "v4"
+  java_version:
+    description: the base java version
+    type: string
+    default: "8"
 
 orbs:
   branch-management: opennms/branch-management@2.3.0
@@ -32,6 +36,13 @@ commands:
           paths:
             - ".git"
 
+  pre-build:
+    description: Set Up the Build Environment
+    steps:
+      - run:
+          name: Install (Or Upgrade) Java << pipeline.parameters.java_version >>
+          command: sudo apt update && sudo apt -y install openjdk-<< pipeline.parameters.java_version >>-jdk-headless
+
   build:
     description: Check Out and Build Code
     steps:
@@ -39,7 +50,8 @@ commands:
       - run:
           name: Run the build
           no_output_timeout: 20m
-          command: mvn -DskipTests=true install
+          command: |
+              mvn -DskipTests=true install
 
   generate_megapom:
     steps:
@@ -99,11 +111,12 @@ jobs:
     resource_class: xlarge
 
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
 
     steps:
       - cached_checkout
+      - pre-build
       - build
       - store_maven_cache
 
@@ -136,7 +149,7 @@ jobs:
     executor: build-executor
 
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
       MAVEN_OPTS: -Xmx4096m -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:-UseGCOverheadLimit
       GIT_MERGE_AUTOEDIT: no
 
@@ -151,6 +164,7 @@ jobs:
           to: main
 
       # make sure the build passes after merge
+      - pre-build
       - build
 
       - run:
@@ -161,7 +175,7 @@ jobs:
     executor: build-executor
 
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-<< pipeline.parameters.java_version >>-openjdk-amd64
 
     steps:
       - attach_workspace:
@@ -169,10 +183,10 @@ jobs:
 
       - fetch_maven_cache
 
+      - pre-build
       - run:
           name: Deploy the artifacts
-          command: |
-            mvn -s .circleci.settings.xml -DskipTests deploy
+          command: mvn -s .circleci.settings.xml -DskipTests deploy
 
 workflows:
   build-deploy:
