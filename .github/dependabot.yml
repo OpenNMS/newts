@@ -5,8 +5,7 @@ updates:
     directory: "/"
     target-branch: "release-3.x"
     reviewers:
-      - "rangerrick"
-      - "synqotik"
+      - "opennms/dependabot-reviewers-node"
     labels:
       - "dependencies"
     commit-message:
@@ -26,7 +25,7 @@ updates:
     directory: "/"
     target-branch: "release-3.x"
     reviewers:
-      - "rangerrick"
+      - "opennms/dependabot-reviewers-maven"
     labels:
       - "dependencies"
     commit-message:
@@ -39,7 +38,7 @@ updates:
     directory: "/"
     target-branch: "main"
     reviewers:
-      - "rangerrick"
+      - "opennms/dependabot-reviewers-maven"
     labels:
       - "dependencies"
     commit-message:
