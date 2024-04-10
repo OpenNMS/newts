@@ -5,7 +5,7 @@ updates:
     directory: "/"
     target-branch: "release-3.x"
     reviewers:
-      - "opennms/dependabot-reviewers-node"
+      - "OpenNMS/dependabot-reviewers-node"
     labels:
       - "dependencies"
     commit-message:
@@ -25,7 +25,7 @@ updates:
     directory: "/"
     target-branch: "release-3.x"
     reviewers:
-      - "opennms/dependabot-reviewers-maven"
+      - "OpenNMS/dependabot-reviewers-maven"
     labels:
       - "dependencies"
     commit-message:
@@ -38,7 +38,7 @@ updates:
     directory: "/"
     target-branch: "main"
     reviewers:
-      - "opennms/dependabot-reviewers-maven"
+      - "OpenNMS/dependabot-reviewers-maven"
     labels:
       - "dependencies"
     commit-message:
