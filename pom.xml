@@ -194,11 +194,11 @@
   <distributionManagement>
     <snapshotRepository>
       <id>newts-ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://central.sonatype.com/repository/maven-snapshots</url>
     </snapshotRepository>
     <repository>
       <id>newts-ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://central.sonatype.com/repository/maven-releases/</url>
     </repository>
   </distributionManagement>
   
@@ -220,7 +220,7 @@
         <extensions>true</extensions>
         <configuration>
           <serverId>newts-ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <nexusUrl>https://central.sonatype.com/</nexusUrl>
           <autoReleaseAfterClose>false</autoReleaseAfterClose>
         </configuration>
       </plugin>
