@@ -298,10 +298,10 @@ public class CassandraSampleRepository implements SampleRepository {
             for (Timestamp partition : new IntervalGenerator(start.stepFloor(resourceShard),
                     end.stepFloor(resourceShard),
                     resourceShard)) {
-                BoundStatement bindStatement = m_deleteStatement.bind();
-                bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
-                bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
-                bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
+                BoundStatement bindStatement = m_deleteStatement.bind()
+                        .setString(SchemaConstants.F_CONTEXT, context.getId())
+                        .setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds())
+                        .setString(SchemaConstants.F_RESOURCE, resource.getId());
 
                 futures.add(m_session.executeAsync(bindStatement));
             }
@@ -327,10 +327,10 @@ public class CassandraSampleRepository implements SampleRepository {
                 for (Timestamp partition : new IntervalGenerator(start.stepFloor(resourceShard),
                         end.stepFloor(resourceShard),
                         resourceShard)) {
-                    BoundStatement bindStatement = m_deleteStatement.bind();
-                    bindStatement.setString(SchemaConstants.F_CONTEXT, context.getId());
-                    bindStatement.setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds());
-                    bindStatement.setString(SchemaConstants.F_RESOURCE, resource.getId());
+                    BoundStatement bindStatement = m_deleteStatement.bind()
+                            .setString(SchemaConstants.F_CONTEXT, context.getId())
+                            .setInt(SchemaConstants.F_PARTITION, (int) partition.asSeconds())
+                            .setString(SchemaConstants.F_RESOURCE, resource.getId());
 
                     futures.add(m_session.executeAsync(bindStatement));
                 }
