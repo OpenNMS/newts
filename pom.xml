@@ -5,7 +5,7 @@
 
   <groupId>org.opennms.newts</groupId>
   <artifactId>newts-parent</artifactId>
-  <version>3.0.2-SNAPSHOT</version>
+  <version>3.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>http://newts.io</url>
   <name>Newts</name>
