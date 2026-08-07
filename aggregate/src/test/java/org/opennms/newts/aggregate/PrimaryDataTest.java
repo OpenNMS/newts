@@ -430,4 +430,9 @@ public class PrimaryDataTest {
         assertRowsEqual(expected, primaryData);
 
     }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemove() {
+	new PrimaryData(new Resource("localhost"), Timestamp.fromEpochSeconds(0), Timestamp.fromEpochSeconds(1000), new ResultDescriptor(), new SampleRowsBuilder(new Resource("localhost"), MetricType.GAUGE).row(0).element("m0", 0).row(100).element("m0", 1).build()).remove();
+    }
 }

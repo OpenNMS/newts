@@ -152,4 +152,13 @@ public class ComputeTest {
             compute.next().getElement("sum");
         }
     }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemove() {
+	Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost")).row(300).element("in", 2).element("out", 2).row(600).element("in", 6).element("out", 4).build();
+	ResultDescriptor rDescriptor = new ResultDescriptor().datasource("in", AVERAGE).datasource("out", AVERAGE).calculate("total", PLUS, "in", "out");
+	Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost")).row(300).element("in", 2).element("out", 2).element("total", 4).row(600).element("in", 6).element("out", 4).element("total", 10).build();
+	Compute compute = new Compute(rDescriptor, testData);
+	compute.remove();
+}
 }

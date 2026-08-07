@@ -53,4 +53,14 @@ public class ExportTest {
 
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemove() {
+	Iterator<Row<Measurement>> testData = new MeasurementRowsBuilder(new Resource("localhost")).row(1).element("m0", 1).element("m1", 2).element("m2", 3).row(300).element("m0", 1).element("m1", 2).element("m2", 3).row(600).element("m0", 1).element("m1", 2).element("m2", 3).build();
+	ResultDescriptor rDescriptor = new ResultDescriptor().datasource("m1", null).export("m1");
+	Iterator<Row<Measurement>> expected = new MeasurementRowsBuilder(new Resource("localhost")).row(1).element("m1", 2).row(300).element("m1", 2).row(600).element("m1", 2).build();
+	assertRowsEqual(expected, new Export(rDescriptor.getExports(), testData));
+	Iterator<Row<Measurement>> it = new Export(rDescriptor.getExports(), testData);
+	it.remove();
+    }
+
 }

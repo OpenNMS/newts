@@ -237,6 +237,12 @@ public class RateTest {
         }
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemove() {
+	Iterator<Results.Row<Sample>> input = new Rate(new Results<Sample>().iterator(), getMetrics(2)).iterator();
+	input.remove();
+    }
+
     private Set<String> getMetrics(int number) {
         return Sets.newHashSet(Arrays.copyOf(m_metrics, number));
     }
